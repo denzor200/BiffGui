@@ -1,13 +1,13 @@
 #ifndef ACTORSLIST_H
 #define ACTORSLIST_H
 
-#include <vector>
+#include <set>
 #include <memory>
 #include <ActorName.h>
 
 class ActorsList
 {
-    typedef std::vector<ActorName> NativeType;
+    typedef std::set<ActorName> NativeType;
     NativeType m_Native;
 public:
 
