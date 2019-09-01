@@ -36,21 +36,15 @@ signals:
 
 };
 
-class MultiListWidget
+class MultiListPassiveWidget
     : public HoverableComboBox
 {
     Q_OBJECT
 
-    Q_PROPERTY(QStringList checkedItems READ checkedItems WRITE setCheckedItems)
-
 public:
-    MultiListWidget(QWidget *parent = nullptr);
-    virtual ~MultiListWidget();
+    MultiListPassiveWidget(QWidget *parent = nullptr);
+    virtual ~MultiListPassiveWidget();
 
-    QStringList checkedItems() const;
-
-    // Задавать статус "Checked" программно можно только через эти вызовы
-    // Иначе рассинхронов с mCheckedItems не избежать!
     void setCheckedItems(const QStringList &items);
     void setCheckedItems(const std::vector<int>& ids);
 
@@ -58,17 +52,11 @@ protected:
     virtual void paintEvent(QPaintEvent *event);
 
 private:
-    QStringList mCheckedItems;
-
-    void collectCheckedItems();
-
     QString mDisplayText;
     const QRect mDisplayRectDelta;
 
 private slots:
     void slotModelRowsInserted(const QModelIndex &parent, int start, int end);
-    void slotModelRowsRemoved(const QModelIndex &parent, int start, int end);
-    void slotModelItemChanged(QStandardItem *item);
 
 };
 

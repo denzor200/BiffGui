@@ -4,33 +4,23 @@
 #include <QStylePainter>
 #include <QStandardItem>
 
-MultiListWidget::MultiListWidget(QWidget *parent)
+MultiListPassiveWidget::MultiListPassiveWidget(QWidget *parent)
     : HoverableComboBox(parent), mDisplayRectDelta(4, 1, -25, 0)
 {
     setStyleSheet("QComboBox { combobox-popup: 1px }");
-
     connect(model(), SIGNAL(rowsInserted(QModelIndex, int, int)), this, SLOT(slotModelRowsInserted(QModelIndex,int,int)));
-    connect(model(), SIGNAL(rowsRemoved(QModelIndex, int, int)), this, SLOT(slotModelRowsRemoved(QModelIndex,int,int)));
 
-    QStandardItemModel *standartModel = qobject_cast<QStandardItemModel*>(model());
-
-    connect(standartModel, SIGNAL(itemChanged(QStandardItem*)), this, SLOT(slotModelItemChanged(QStandardItem*)));
 }
 
-MultiListWidget::~MultiListWidget()
+MultiListPassiveWidget::~MultiListPassiveWidget()
 {
 }
 
-QStringList MultiListWidget::checkedItems() const
-{
-    return mCheckedItems;
-}
-
-void MultiListWidget::setCheckedItems(const QStringList &items)
+void MultiListPassiveWidget::setCheckedItems(const QStringList &items)
 {
     QStandardItemModel *standartModel = qobject_cast<QStandardItemModel*>(model());
 
-    disconnect(standartModel, SIGNAL(itemChanged(QStandardItem*)), this, SLOT(slotModelItemChanged(QStandardItem*)));
+    // disconnect(standartModel, SIGNAL(itemChanged(QStandardItem*)), this, SLOT(slotModelItemChanged(QStandardItem*)));
 
     for (int i = 0; i < items.count(); ++i)
     {
@@ -42,28 +32,24 @@ void MultiListWidget::setCheckedItems(const QStringList &items)
         }
     }
 
-    connect(standartModel, SIGNAL(itemChanged(QStandardItem*)), this, SLOT(slotModelItemChanged(QStandardItem*)));
-
-    collectCheckedItems();
+    // connect(standartModel, SIGNAL(itemChanged(QStandardItem*)), this, SLOT(slotModelItemChanged(QStandardItem*)));
 }
 
-void MultiListWidget::setCheckedItems(const std::vector<int>& ids)
+void MultiListPassiveWidget::setCheckedItems(const std::vector<int>& ids)
 {
     QStandardItemModel *standartModel = qobject_cast<QStandardItemModel*>(model());
 
-    disconnect(standartModel, SIGNAL(itemChanged(QStandardItem*)), this, SLOT(slotModelItemChanged(QStandardItem*)));
+    // disconnect(standartModel, SIGNAL(itemChanged(QStandardItem*)), this, SLOT(slotModelItemChanged(QStandardItem*)));
     for (int id : ids)
     {
         // TODO: как быть, если индекс не корректен..
         // Пока снаружи гарантируется, что он всегда корректен
         standartModel->item(id)->setData(Qt::Checked, Qt::CheckStateRole);
     }
-    connect(standartModel, SIGNAL(itemChanged(QStandardItem*)), this, SLOT(slotModelItemChanged(QStandardItem*)));
-
-    collectCheckedItems();
+    // connect(standartModel, SIGNAL(itemChanged(QStandardItem*)), this, SLOT(slotModelItemChanged(QStandardItem*)));
 }
 
-void MultiListWidget::paintEvent(QPaintEvent *event)
+void MultiListPassiveWidget::paintEvent(QPaintEvent *event)
 {
     (void)event;
 
@@ -83,34 +69,13 @@ void MultiListWidget::paintEvent(QPaintEvent *event)
     painter.drawText(textRect, Qt::AlignVCenter, mDisplayText);*/
 }
 
-void MultiListWidget::collectCheckedItems()
-{
-    QStandardItemModel *standartModel = qobject_cast<QStandardItemModel*>(model());
-
-    mCheckedItems.clear();
-
-    for (int i = 0; i < count(); ++i)
-    {
-        QStandardItem *currentItem = standartModel->item(i);
-
-        Qt::CheckState checkState = static_cast<Qt::CheckState>(currentItem->data(Qt::CheckStateRole).toInt());
-
-        if (checkState == Qt::Checked)
-        {
-            mCheckedItems.push_back(currentItem->text());
-        }
-    }
-
-    repaint();
-}
-
-void MultiListWidget::slotModelRowsInserted(const QModelIndex &parent, int start, int end)
+void MultiListPassiveWidget::slotModelRowsInserted(const QModelIndex &parent, int start, int end)
 {
     (void)parent;
 
     QStandardItemModel *standartModel = qobject_cast<QStandardItemModel*>(model());
 
-    disconnect(standartModel, SIGNAL(itemChanged(QStandardItem*)), this, SLOT(slotModelItemChanged(QStandardItem*)));
+    // disconnect(standartModel, SIGNAL(itemChanged(QStandardItem*)), this, SLOT(slotModelItemChanged(QStandardItem*)));
 
     for (int i = start; i <= end; ++i)
     {
@@ -118,21 +83,5 @@ void MultiListWidget::slotModelRowsInserted(const QModelIndex &parent, int start
         standartModel->item(i)->setData(Qt::Unchecked, Qt::CheckStateRole);
     }
 
-    connect(standartModel, SIGNAL(itemChanged(QStandardItem*)), this, SLOT(slotModelItemChanged(QStandardItem*)));
-}
-
-void MultiListWidget::slotModelRowsRemoved(const QModelIndex &parent, int start, int end)
-{
-    (void)parent;
-    (void)start;
-    (void)end;
-
-    collectCheckedItems();
-}
-
-void MultiListWidget::slotModelItemChanged(QStandardItem *item)
-{
-    (void)item;
-
-    collectCheckedItems();
+    // connect(standartModel, SIGNAL(itemChanged(QStandardItem*)), this, SLOT(slotModelItemChanged(QStandardItem*)));
 }

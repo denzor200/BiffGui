@@ -3,7 +3,7 @@
 
 #include <QLineEdit>
 
-class MultiListWidget;
+class MultiListPassiveWidget;
 
 class LineEdit : public QLineEdit
 {
@@ -12,7 +12,7 @@ class LineEdit : public QLineEdit
 public:
     LineEdit(QWidget *parent = nullptr);
 
-    MultiListWidget* GetList() {return m_List;}
+    MultiListPassiveWidget* GetList() {return m_List;}
 
 protected:
     void resizeEvent(QResizeEvent *);
@@ -23,7 +23,7 @@ private slots:
     void slotCurrentIndexChanged(const QString&);
 
 private:
-    MultiListWidget *m_List;
+    MultiListPassiveWidget *m_List;
 };
 
 #endif // LIENEDIT_H

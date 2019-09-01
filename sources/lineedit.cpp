@@ -14,7 +14,7 @@
 LineEdit::LineEdit(QWidget *parent)
     : QLineEdit(parent)
 {
-    m_List = new MultiListWidget(this);
+    m_List = new MultiListPassiveWidget(this);
     m_List->setCursor(Qt::ArrowCursor);
     m_List->setMaxVisibleItems(10);
 
