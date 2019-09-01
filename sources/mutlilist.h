@@ -56,7 +56,6 @@ public:
 
 protected:
     virtual void paintEvent(QPaintEvent *event);
-    virtual void resizeEvent(QResizeEvent *event);
 
 private:
     QStringList mCheckedItems;
@@ -65,8 +64,6 @@ private:
 
     QString mDisplayText;
     const QRect mDisplayRectDelta;
-
-    void updateDisplayText();
 
 private slots:
     void slotModelRowsInserted(const QModelIndex &parent, int start, int end);

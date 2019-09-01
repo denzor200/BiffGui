@@ -1,12 +1,3 @@
-/****************************************************************************
-**
-** Copyright (c) 2007 Trolltech ASA <info@trolltech.com>
-**
-** Use, modification and distribution is allowed without limitation,
-** warranty, liability or support of any kind.
-**
-****************************************************************************/
-
 #ifndef LINEEDIT_H
 #define LINEEDIT_H
 
@@ -29,6 +20,7 @@ protected:
 private slots:
     void slotListOpened();
     void slotEditingFinished();
+    void slotCurrentIndexChanged(const QString&);
 
 private:
     MultiListWidget *m_List;

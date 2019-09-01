@@ -1,12 +1,3 @@
-/****************************************************************************
-**
-** Copyright (c) 2007 Trolltech ASA <info@trolltech.com>
-**
-** Use, modification and distribution is allowed without limitation,
-** warranty, liability or support of any kind.
-**
-****************************************************************************/
-
 #include "lineedit.h"
 #include <QToolButton>
 #include <QStyle>
@@ -33,6 +24,7 @@ LineEdit::LineEdit(QWidget *parent)
     m_List->view()->setMinimumWidth(EXPANDED_VIEW_MIN_WIDTH);
 
     connect(m_List, SIGNAL(preopened()), this, SLOT(slotListOpened()));
+    connect(m_List, SIGNAL(currentIndexChanged(QString)), this, SLOT(slotCurrentIndexChanged(QString)));
     connect(this, SIGNAL(editingFinished( )), this, SLOT(slotEditingFinished( )));
 
 
@@ -103,5 +95,9 @@ void LineEdit::slotEditingFinished()
     }
 }
 
+void LineEdit::slotCurrentIndexChanged(const QString& Value)
+{
+   qDebug() << "slotCurrentIndexChanged(" << Value<< ")";
+}
 
 

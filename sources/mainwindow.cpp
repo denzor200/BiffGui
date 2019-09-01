@@ -86,27 +86,17 @@ void MainWindow::on_toolButton_clicked()
 {
     int r = ui->tableWidget->rowCount();
     ui->tableWidget->insertRow(ui->tableWidget->rowCount());
-
     ui->tableWidget->setRowHeight(r, ui->tableWidget->rowHeight(r)+5);
 
+    ui->tableWidget->setCellWidget(r, 0, new QLineEdit);
+    ui->tableWidget->setCellWidget(r, 1, new LineEdit);
     {
-        ui->tableWidget->setCellWidget(r, 0, new QLineEdit);
-    }
-
-    {
-        ui->tableWidget->setCellWidget(r, 1, new LineEdit);
-
-    }
-
-    {
-
         QWidget * w = new QWidget();
         QHBoxLayout *l = new QHBoxLayout();
         l->setAlignment( Qt::AlignCenter );
         l->addWidget( new QCheckBox );
         w->setLayout( l );
         ui->tableWidget->setCellWidget(r, 2, w);
-
     }
 
 }
@@ -184,6 +174,15 @@ void MainWindow::on_action_close_triggered()
 {
     auto actors = ActorsList::Inctance().lock();
     assert(actors);
+
+    for (int i=0;i<ui->tableWidget->rowCount();++i)
+    {
+        auto widget = ui->tableWidget->cellWidget(i, 1);
+        auto textWidget = (LineEdit*)widget;
+        assert(textWidget);
+        textWidget->setText("");
+    }
+
     actors->Native().clear();
 }
 

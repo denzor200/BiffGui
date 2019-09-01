@@ -83,13 +83,6 @@ void MultiListWidget::paintEvent(QPaintEvent *event)
     painter.drawText(textRect, Qt::AlignVCenter, mDisplayText);*/
 }
 
-void MultiListWidget::resizeEvent(QResizeEvent *event)
-{
-    (void)event;
-
-    updateDisplayText();
-}
-
 void MultiListWidget::collectCheckedItems()
 {
     QStandardItemModel *standartModel = qobject_cast<QStandardItemModel*>(model());
@@ -108,29 +101,7 @@ void MultiListWidget::collectCheckedItems()
         }
     }
 
-    updateDisplayText();
-
     repaint();
-}
-
-void MultiListWidget::updateDisplayText()
-{
-    /*QRect textRect = rect().adjusted(mDisplayRectDelta.left(), mDisplayRectDelta.top(),
-                                     mDisplayRectDelta.right(), mDisplayRectDelta.bottom());
-
-    QFontMetrics fontMetrics(font());*/
-
-    //mDisplayText = mCheckedItems.join(", ");
-
-    /*if (fontMetrics.size(Qt::TextSingleLine, mDisplayText).width() > textRect.width())
-    {
-        while (mDisplayText != "" && fontMetrics.size(Qt::TextSingleLine, mDisplayText + "...").width() > textRect.width())
-        {
-            mDisplayText.remove(mDisplayText.length() - 1, 1);
-        }
-
-        mDisplayText += "...";
-    }*/
 }
 
 void MultiListWidget::slotModelRowsInserted(const QModelIndex &parent, int start, int end)
