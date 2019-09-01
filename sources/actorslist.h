@@ -3,11 +3,11 @@
 
 #include <vector>
 #include <memory>
-#include <QString>
+#include <ActorName.h>
 
 class ActorsList
 {
-    typedef std::vector<QString> NativeType;
+    typedef std::vector<ActorName> NativeType;
     NativeType m_Native;
 public:
 

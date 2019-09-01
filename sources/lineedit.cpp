@@ -12,7 +12,9 @@
 #include <QStyle>
 
 #include <QMenu>
+#include <QDebug>
 
+#include "actorslist.h"
 #include "mutlilist.h"
 
 #define EXPAND_BUTTON_WIDTH 25
@@ -30,6 +32,7 @@ LineEdit::LineEdit(QWidget *parent)
     //determinge the maximum width required to display all names in full
     m_List->view()->setMinimumWidth(EXPANDED_VIEW_MIN_WIDTH);
 
+    connect(m_List, SIGNAL(preopened()), this, SLOT(slotListOpened()));
 
 
     int frameWidth = style()->pixelMetric(QStyle::PM_DefaultFrameWidth);
@@ -45,6 +48,17 @@ void LineEdit::resizeEvent(QResizeEvent *)
     int frameWidth = style()->pixelMetric(QStyle::PM_DefaultFrameWidth);
     m_List->move(rect().right() - frameWidth - EXPAND_BUTTON_WIDTH,
                       (rect().bottom() + 1 - sz.height())/2);
+}
+
+void LineEdit::slotListOpened()
+{
+    auto actors = ActorsList::Inctance().lock();
+    assert(actors);
+    m_List->clear();
+    for (const auto& Value : actors->Native())
+    {
+        m_List->addItem(Value.Get());
+    }
 }
 
 

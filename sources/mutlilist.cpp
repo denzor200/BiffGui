@@ -5,7 +5,7 @@
 #include <QStandardItem>
 
 MultiListWidget::MultiListWidget(QWidget *parent)
-    : QComboBox(parent), mDisplayRectDelta(4, 1, -25, 0)
+    : HoverableComboBox(parent), mDisplayRectDelta(4, 1, -25, 0)
 {
     setStyleSheet("QComboBox { combobox-popup: 1px }");
 

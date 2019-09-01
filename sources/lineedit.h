@@ -26,6 +26,9 @@ public:
 protected:
     void resizeEvent(QResizeEvent *);
 
+private slots:
+    void slotListOpened();
+
 private:
     MultiListWidget *m_List;
 };

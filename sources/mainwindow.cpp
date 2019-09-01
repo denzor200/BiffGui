@@ -118,11 +118,16 @@ void MainWindow::on_action_open_triggered()
     assert(actors);
 
     QString fileName = QFileDialog::getOpenFileName(this,
-        tr("Открыть список актеров"), "/", tr("Text files (*.txt)"));
+        tr("Открыть список персонажей"), "/", tr("Text files (*.txt)"));
 
     QFile file(fileName);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+    {
+        std::stringstream ss;
+        ss << "Не удалось открыть файл '" << fileName.toUtf8().data() << "' на чтение";
+        QMessageBox::critical(this, "Ошибка", ss.str().c_str());
         return;
+    }
 
     QTextStream in(&file);
     in.setCodec("UTF-8"); // change the file codec to UTF-8.
@@ -131,19 +136,51 @@ void MainWindow::on_action_open_triggered()
     while (!in.atEnd()) {
         QString line = in.readLine();
         // Processing line..
-        actors->Native().push_back(line);
+        if (line.indexOf(';') != -1)
+        {
+            std::stringstream ss;
+            ss <<  "Наличие символа ';' в имени персонажа недопустимо. Имя '" << line.toUtf8().data() << "' будет проигнорировано.";
+            QMessageBox::warning(this, "Предупреждение", ss.str().c_str());
+            continue;
+        }
+        actors->Native().push_back(ActorName(line));
     }
 
 }
 
 void MainWindow::on_action_save_triggered()
 {
+    auto actors = ActorsList::Inctance().lock();
+    assert(actors);
 
+    QString fileName = QFileDialog::getSaveFileName(this,
+        tr("Сохранить список персонажей"), "/", tr("Text files (*.txt)"));
+
+    QFile fileOut(fileName);
+    if (!fileOut.open(QIODevice::WriteOnly | QIODevice::Text))
+    {
+        std::stringstream ss;
+        ss << "Не удалось открыть файл '" << fileName.toUtf8().data() << "' на запись";
+        QMessageBox::critical(this, "Ошибка", ss.str().c_str());
+        return;
+    }
+
+    QTextStream streamFileOut(&fileOut);
+    streamFileOut.setCodec("UTF-8");
+    for (const auto& Value : actors->Native())
+    {
+        streamFileOut << Value.Get() << endl;
+    }
+    streamFileOut.flush();
+
+    fileOut.close();
 }
 
 void MainWindow::on_action_close_triggered()
 {
-
+    auto actors = ActorsList::Inctance().lock();
+    assert(actors);
+    actors->Native().clear();
 }
 
 

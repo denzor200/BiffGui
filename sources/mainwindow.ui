@@ -223,7 +223,10 @@
   </widget>
   <action name="action_open">
    <property name="text">
-    <string>Открыть список актеров</string>
+    <string>Открыть список персонажей</string>
+   </property>
+   <property name="toolTip">
+    <string>Открыть список персонажей</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+O</string>
@@ -231,7 +234,10 @@
   </action>
   <action name="action_save">
    <property name="text">
-    <string>Сохранить список актеров</string>
+    <string>Сохранить список персонажей</string>
+   </property>
+   <property name="toolTip">
+    <string>Сохранить список персонажей</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+S</string>
@@ -239,7 +245,10 @@
   </action>
   <action name="action_close">
    <property name="text">
-    <string>Закрыть список актеров</string>
+    <string>Закрыть список персонажей</string>
+   </property>
+   <property name="toolTip">
+    <string>Закрыть список персонажей</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+W</string>
