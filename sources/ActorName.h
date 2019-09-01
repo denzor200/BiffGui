@@ -5,6 +5,14 @@
 
 #include <QString>
 
+class ActorNameStringEmpty : public std::exception
+{
+public:
+    ActorNameStringEmpty() : std::exception("ActorName can't be an empty string")
+    {
+    }
+};
+
 class ActorName
 {
     QString m_Name;
@@ -20,8 +28,6 @@ public:
     bool operator>=(const ActorName& Other) const;
 
     const QString& Get() const { return m_Name; }
-    bool Empty() const { return (m_Name.size() == 0); }
-    void Clear() { m_Name.clear(); }
 
 };
 

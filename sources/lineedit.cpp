@@ -33,6 +33,7 @@ LineEdit::LineEdit(QWidget *parent)
     m_List->view()->setMinimumWidth(EXPANDED_VIEW_MIN_WIDTH);
 
     connect(m_List, SIGNAL(preopened()), this, SLOT(slotListOpened()));
+    connect(this, SIGNAL(editingFinished( )), this, SLOT(slotEditingFinished( )));
 
 
     int frameWidth = style()->pixelMetric(QStyle::PM_DefaultFrameWidth);
@@ -58,6 +59,23 @@ void LineEdit::slotListOpened()
     for (const auto& Value : actors->Native())
     {
         m_List->addItem(Value.Get());
+    }
+}
+
+void LineEdit::slotEditingFinished()
+{
+    auto actors = ActorsList::Inctance().lock();
+    assert(actors);
+    // Refreshing actors list..
+    const QString& text = this->text();
+    auto splited = text.split(';');
+    for (const auto& value : splited)
+    {
+        try {
+            actors->Native().insert(ActorName(value));
+        } catch (const ActorNameStringEmpty&)
+        {
+        }
     }
 }
 

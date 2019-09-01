@@ -3,6 +3,8 @@
 ActorName::ActorName(const QString& Name)
     : m_Name(Name.trimmed())
 {
+    if (m_Name.size()==0)
+        throw ActorNameStringEmpty();
 }
 
 // 1. trim(проходит на более ранней стадии)

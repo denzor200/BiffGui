@@ -143,7 +143,11 @@ void MainWindow::on_action_open_triggered()
             QMessageBox::warning(this, "Предупреждение", ss.str().c_str());
             continue;
         }
-        actors->Native().insert(ActorName(line));
+        try {
+            actors->Native().insert(ActorName(line));
+        } catch (const ActorNameStringEmpty&)
+        {
+        }
     }
 
 }

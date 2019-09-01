@@ -28,6 +28,7 @@ protected:
 
 private slots:
     void slotListOpened();
+    void slotEditingFinished();
 
 private:
     MultiListWidget *m_List;
