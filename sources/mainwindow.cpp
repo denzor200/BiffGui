@@ -1,3 +1,4 @@
+#include "actorslist.h"
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
@@ -9,8 +10,11 @@
 #include <QToolButton>
 #include "lineedit.h"
 
+#include <QFileDialog>
 #include <algorithm>
 #include <sstream>
+#include <fstream>
+#include <QDebug>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -25,16 +29,6 @@ MainWindow::MainWindow(QWidget *parent) :
 MainWindow::~MainWindow()
 {
     delete ui;
-}
-
-void MainWindow::on_toolButtonCreate_clicked()
-{
-
-}
-
-void MainWindow::on_toolButtonDestroy_clicked()
-{
-
 }
 
 void MainWindow::on_tableWidget_clicked(const QModelIndex &index)
@@ -96,29 +90,8 @@ void MainWindow::on_toolButton_clicked()
     ui->tableWidget->setRowHeight(r, ui->tableWidget->rowHeight(r)+5);
 
     {
-
-        auto l = new QLineEdit;
-        //m_hider.hide(l);
-        ui->tableWidget->setCellWidget(r, 0, l);
-
+        ui->tableWidget->setCellWidget(r, 0, new QLineEdit);
     }
-
-    /*{
-        auto LE = new QLineEdit;
-        auto B = new QToolButton;
-
-
-        QWidget * w = new QWidget();
-        QHBoxLayout *l = new QHBoxLayout();
-        l->setAlignment( Qt::AlignRight );
-        l->addWidget( LE );
-        l->addWidget( B );
-        w->setLayout( l );
-
-        ui->tableWidget->setCellWidget(r, 1, w);
-
-    }*/
-
 
     {
         ui->tableWidget->setCellWidget(r, 1, new LineEdit);
@@ -138,16 +111,41 @@ void MainWindow::on_toolButton_clicked()
 
 }
 
-void MainWindow::on_OpenActorsList_clicked()
-{
 
+void MainWindow::on_action_open_triggered()
+{
+    auto actors = ActorsList::Inctance().lock();
+    assert(actors);
+
+    QString fileName = QFileDialog::getOpenFileName(this,
+        tr("Открыть список актеров"), "/", tr("Text files (*.txt)"));
+
+    QFile file(fileName);
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+        return;
+
+    QTextStream in(&file);
+    in.setCodec("UTF-8"); // change the file codec to UTF-8.
+    actors->Native().clear();
+
+    while (!in.atEnd()) {
+        QString line = in.readLine();
+        // Processing line..
+        actors->Native().push_back(line);
+    }
 
 }
-void MainWindow::on_SaveActorsList_clicked()
+
+void MainWindow::on_action_save_triggered()
 {
 
+}
+
+void MainWindow::on_action_close_triggered()
+{
 
 }
+
 
 void MainWindow::on_actionAbout_Qt_triggered()
 {

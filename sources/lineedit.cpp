@@ -21,29 +21,29 @@
 LineEdit::LineEdit(QWidget *parent)
     : QLineEdit(parent)
 {
-    clearButton = new MultiListWidget(this);
-    clearButton->setCursor(Qt::ArrowCursor);
-    clearButton->setMaxVisibleItems(10);
+    m_List = new MultiListWidget(this);
+    m_List->setCursor(Qt::ArrowCursor);
+    m_List->setMaxVisibleItems(10);
 
-    clearButton->setMaximumWidth(EXPAND_BUTTON_WIDTH);
-    //clearButton->view()->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
+    m_List->setMaximumWidth(EXPAND_BUTTON_WIDTH);
+    //m_List->view()->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
     //determinge the maximum width required to display all names in full
-    clearButton->view()->setMinimumWidth(EXPANDED_VIEW_MIN_WIDTH);
+    m_List->view()->setMinimumWidth(EXPANDED_VIEW_MIN_WIDTH);
 
 
 
     int frameWidth = style()->pixelMetric(QStyle::PM_DefaultFrameWidth);
-    setStyleSheet(QString("QLineEdit { padding-right: %1px; } ").arg(clearButton->sizeHint().width() + frameWidth + 1));
+    setStyleSheet(QString("QLineEdit { padding-right: %1px; } ").arg(m_List->sizeHint().width() + frameWidth + 1));
     QSize msz = minimumSizeHint();
-    setMinimumSize(qMax(msz.width(), clearButton->sizeHint().height() + frameWidth * 2 + 2),
-                   qMax(msz.height(), clearButton->sizeHint().height() + frameWidth * 2 + 2));
+    setMinimumSize(qMax(msz.width(), m_List->sizeHint().height() + frameWidth * 2 + 2),
+                   qMax(msz.height(), m_List->sizeHint().height() + frameWidth * 2 + 2));
 }
 
 void LineEdit::resizeEvent(QResizeEvent *)
 {
-    QSize sz = clearButton->sizeHint();
+    QSize sz = m_List->sizeHint();
     int frameWidth = style()->pixelMetric(QStyle::PM_DefaultFrameWidth);
-    clearButton->move(rect().right() - frameWidth - EXPAND_BUTTON_WIDTH,
+    m_List->move(rect().right() - frameWidth - EXPAND_BUTTON_WIDTH,
                       (rect().bottom() + 1 - sz.height())/2);
 }
 

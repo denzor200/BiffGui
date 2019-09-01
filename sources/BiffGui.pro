@@ -25,12 +25,14 @@ DEFINES += QT_DEPRECATED_WARNINGS
 CONFIG += c++11
 
 SOURCES += \
+        actorslist.cpp \
         lineedit.cpp \
         main.cpp \
         mainwindow.cpp \
         mutlilist.cpp
 
 HEADERS += \
+        actorslist.h \
         lineedit.h \
         mainwindow.h \
         mutlilist.h

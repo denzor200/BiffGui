@@ -21,11 +21,13 @@ class LineEdit : public QLineEdit
 public:
     LineEdit(QWidget *parent = nullptr);
 
+    MultiListWidget* GetList() {return m_List;}
+
 protected:
     void resizeEvent(QResizeEvent *);
 
 private:
-    MultiListWidget *clearButton;
+    MultiListWidget *m_List;
 };
 
 #endif // LIENEDIT_H

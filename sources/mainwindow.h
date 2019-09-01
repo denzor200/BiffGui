@@ -41,21 +41,17 @@ public:
     ~MainWindow();
 
 private slots:
-    void on_toolButtonCreate_clicked();
-
-    void on_toolButtonDestroy_clicked();
-
     void on_tableWidget_clicked(const QModelIndex &index);
 
     void on_toolButton_clicked();
 
     void on_toolButton_2_clicked();
 
-    void on_OpenActorsList_clicked();
-    void on_SaveActorsList_clicked();
+    void on_action_open_triggered();
+    void on_action_save_triggered();
+    void on_action_close_triggered();
 
     void on_actionAbout_Qt_triggered();
-
     void on_action_exit_triggered();
 
 private:
