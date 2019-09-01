@@ -53,13 +53,37 @@ void LineEdit::resizeEvent(QResizeEvent *)
 
 void LineEdit::slotListOpened()
 {
+
+    // Parsing text to set..
+    std::set<ActorName> CheckedSet;
+    const QString& text = this->text();
+    auto splited = text.split(';');
+    for (const auto& value : splited)
+    {
+        try {
+            CheckedSet.insert(ActorName(value));
+        } catch (const ActorNameStringEmpty&)
+        {
+        }
+    }
+
+    // Refreshing combo list..
     auto actors = ActorsList::Inctance().lock();
     assert(actors);
+
+    std::vector<int> CheckedIds;
+    CheckedIds.reserve(actors->Native().size());
+
     m_List->clear();
     for (const auto& Value : actors->Native())
     {
         m_List->addItem(Value.Get());
+        const auto It = CheckedSet.find(Value);
+        if (It!=CheckedSet.end())
+            CheckedIds.push_back(m_List->count()-1);
     }
+
+    m_List->setCheckedItems(CheckedIds);
 }
 
 void LineEdit::slotEditingFinished()

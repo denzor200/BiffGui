@@ -48,7 +48,11 @@ public:
     virtual ~MultiListWidget();
 
     QStringList checkedItems() const;
+
+    // Задавать статус "Checked" программно можно только через эти вызовы
+    // Иначе рассинхронов с mCheckedItems не избежать!
     void setCheckedItems(const QStringList &items);
+    void setCheckedItems(const std::vector<int>& ids);
 
 protected:
     virtual void paintEvent(QPaintEvent *event);

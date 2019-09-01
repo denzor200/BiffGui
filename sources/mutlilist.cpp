@@ -47,6 +47,22 @@ void MultiListWidget::setCheckedItems(const QStringList &items)
     collectCheckedItems();
 }
 
+void MultiListWidget::setCheckedItems(const std::vector<int>& ids)
+{
+    QStandardItemModel *standartModel = qobject_cast<QStandardItemModel*>(model());
+
+    disconnect(standartModel, SIGNAL(itemChanged(QStandardItem*)), this, SLOT(slotModelItemChanged(QStandardItem*)));
+    for (int id : ids)
+    {
+        // TODO: как быть, если индекс не корректен..
+        // Пока снаружи гарантируется, что он всегда корректен
+        standartModel->item(id)->setData(Qt::Checked, Qt::CheckStateRole);
+    }
+    connect(standartModel, SIGNAL(itemChanged(QStandardItem*)), this, SLOT(slotModelItemChanged(QStandardItem*)));
+
+    collectCheckedItems();
+}
+
 void MultiListWidget::paintEvent(QPaintEvent *event)
 {
     (void)event;
