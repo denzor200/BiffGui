@@ -4,6 +4,8 @@
 #include <QLineEdit>
 
 class MultiListPassiveWidget;
+class QStandardItem;
+class ActorName;
 
 class LineEdit : public QLineEdit
 {
@@ -14,13 +16,16 @@ public:
 
     MultiListPassiveWidget* GetList() {return m_List;}
 
+    void CheckActor(const ActorName& name);
+    void UncheckActor(const ActorName& name);
+
 protected:
     void resizeEvent(QResizeEvent *);
 
 private slots:
     void slotListOpened();
     void slotEditingFinished();
-    void slotCurrentIndexChanged(const QString&);
+    void slotCurrentIndexChanged(QStandardItem*);
 
 private:
     MultiListPassiveWidget *m_List;

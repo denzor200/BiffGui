@@ -4,6 +4,7 @@
 
 #include <QMenu>
 #include <QDebug>
+#include <QStandardItem>
 
 #include "actorslist.h"
 #include "mutlilist.h"
@@ -23,8 +24,10 @@ LineEdit::LineEdit(QWidget *parent)
     //determinge the maximum width required to display all names in full
     m_List->view()->setMinimumWidth(EXPANDED_VIEW_MIN_WIDTH);
 
+    QStandardItemModel *standartModel = qobject_cast<QStandardItemModel*>(m_List->model());
+
     connect(m_List, SIGNAL(preopened()), this, SLOT(slotListOpened()));
-    connect(m_List, SIGNAL(currentIndexChanged(QString)), this, SLOT(slotCurrentIndexChanged(QString)));
+    connect(standartModel, SIGNAL(itemChanged(QStandardItem*)), this, SLOT(slotCurrentIndexChanged(QStandardItem*)));
     connect(this, SIGNAL(editingFinished( )), this, SLOT(slotEditingFinished( )));
 
 
@@ -95,9 +98,56 @@ void LineEdit::slotEditingFinished()
     }
 }
 
-void LineEdit::slotCurrentIndexChanged(const QString& Value)
+void LineEdit::CheckActor(const ActorName& name)
 {
-   qDebug() << "slotCurrentIndexChanged(" << Value<< ")";
+    //qDebug() << "CheckActor(" << name.Get() << ")";
+    QString newText = "";
+    const QString& text = this->text();
+    auto splited = text.split(';');
+    for (const auto& value : splited)
+    {
+        try {
+            auto objValue = ActorName(value);
+            if (objValue==name)
+                return; // all right
+            newText += objValue.Get() + "; ";
+        } catch (const ActorNameStringEmpty&)
+        {
+        }
+    }
+    newText += name.Get();
+    this->setText(newText);
+}
+void LineEdit::UncheckActor(const ActorName& name)
+{
+    //qDebug() << "UncheckActor(" << name.Get() << ")";
+    QString newText = "";
+    const QString& text = this->text();
+    auto splited = text.split(';');
+    for (const auto& value : splited)
+    {
+        try {
+            auto objValue = ActorName(value);
+            if (objValue==name)
+                continue;
+            newText += objValue.Get() + "; ";
+        } catch (const ActorNameStringEmpty&)
+        {
+        }
+    }
+    this->setText(newText);
+}
+
+void LineEdit::slotCurrentIndexChanged(QStandardItem* item)
+{
+    Qt::CheckState checkState = static_cast<Qt::CheckState>(item->data(Qt::CheckStateRole).toInt());
+
+    if (checkState == Qt::Checked)
+        CheckActor(ActorName(item->text()));
+    else {
+        UncheckActor(ActorName(item->text()));
+    }
+
 }
 
 
