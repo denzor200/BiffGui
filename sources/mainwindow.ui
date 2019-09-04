@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>Biff Tannen</string>
   </property>
   <property name="layoutDirection">
    <enum>Qt::RightToLeft</enum>
@@ -154,16 +154,6 @@
       </item>
      </layout>
     </item>
-    <item>
-     <widget class="QDialogButtonBox" name="buttonBox">
-      <property name="layoutDirection">
-       <enum>Qt::LeftToRight</enum>
-      </property>
-      <property name="standardButtons">
-       <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
-      </property>
-     </widget>
-    </item>
    </layout>
   </widget>
   <widget class="QMenuBar" name="menuBar">
@@ -182,7 +172,19 @@
     <addaction name="action_open"/>
     <addaction name="action_save"/>
     <addaction name="action_close"/>
+    <addaction name="separator"/>
+    <addaction name="action_open_table"/>
+    <addaction name="action_save_table"/>
+    <addaction name="action_close_table"/>
+    <addaction name="separator"/>
+    <addaction name="action_open_persons"/>
+    <addaction name="action_save_persons"/>
+    <addaction name="action_close_persons"/>
+    <addaction name="separator"/>
+    <addaction name="action_close_all"/>
+    <addaction name="separator"/>
     <addaction name="action_exit"/>
+    <addaction name="separator"/>
    </widget>
    <widget class="QMenu" name="menu_help">
     <property name="title">
@@ -190,7 +192,14 @@
     </property>
     <addaction name="actionAbout_Qt"/>
    </widget>
+   <widget class="QMenu" name="menu">
+    <property name="title">
+     <string>Опции</string>
+    </property>
+    <addaction name="action_settings"/>
+   </widget>
    <addaction name="menu_file"/>
+   <addaction name="menu"/>
    <addaction name="menu_help"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
@@ -221,37 +230,20 @@
    </attribute>
    <addaction name="separator"/>
   </widget>
-  <action name="action_open">
+  <action name="action_open_persons">
    <property name="text">
-    <string>Открыть список персонажей</string>
+    <string>Загрузить список персонажей</string>
    </property>
    <property name="toolTip">
     <string>Открыть список персонажей</string>
    </property>
-   <property name="shortcut">
-    <string>Ctrl+O</string>
-   </property>
   </action>
-  <action name="action_save">
-   <property name="text">
-    <string>Сохранить список персонажей</string>
-   </property>
-   <property name="toolTip">
-    <string>Сохранить список персонажей</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+S</string>
-   </property>
-  </action>
-  <action name="action_close">
+  <action name="action_close_persons">
    <property name="text">
     <string>Закрыть список персонажей</string>
    </property>
    <property name="toolTip">
     <string>Закрыть список персонажей</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+W</string>
    </property>
   </action>
   <action name="action_exit">
@@ -268,6 +260,51 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+Q</string>
+   </property>
+  </action>
+  <action name="action_open">
+   <property name="text">
+    <string>Открыть субтитру</string>
+   </property>
+  </action>
+  <action name="action_settings">
+   <property name="text">
+    <string>Настройки</string>
+   </property>
+  </action>
+  <action name="action_save">
+   <property name="text">
+    <string>Сохранить субтитру</string>
+   </property>
+  </action>
+  <action name="action_save_persons">
+   <property name="text">
+    <string>Сохранить список персонажей</string>
+   </property>
+  </action>
+  <action name="action_close">
+   <property name="text">
+    <string>Закрыть субтитру</string>
+   </property>
+  </action>
+  <action name="action_close_all">
+   <property name="text">
+    <string>Закрыть все</string>
+   </property>
+  </action>
+  <action name="action_open_table">
+   <property name="text">
+    <string>Открыть таблицу</string>
+   </property>
+  </action>
+  <action name="action_save_table">
+   <property name="text">
+    <string>Сохранить таблицу</string>
+   </property>
+  </action>
+  <action name="action_close_table">
+   <property name="text">
+    <string>Закрыть таблицу</string>
    </property>
   </action>
  </widget>

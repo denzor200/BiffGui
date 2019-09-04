@@ -54,6 +54,18 @@ private slots:
     void on_actionAbout_Qt_triggered();
     void on_action_exit_triggered();
 
+    void on_action_settings_triggered();
+
+    void on_action_open_persons_triggered();
+    void on_action_save_persons_triggered();
+    void on_action_close_persons_triggered();
+
+    void on_action_close_all_triggered();
+
+    void on_action_open_table_triggered();
+    void on_action_save_table_triggered();
+    void on_action_close_table_triggered();
+
 private:
     Ui::MainWindow *ui;
 };

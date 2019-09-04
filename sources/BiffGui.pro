@@ -30,18 +30,20 @@ SOURCES += \
         lineedit.cpp \
         main.cpp \
         mainwindow.cpp \
-        mutlilist.cpp
+        mutlilist.cpp \
+        settings.cpp
 
 HEADERS += \
         ActorName.h \
         actorslist.h \
         lineedit.h \
         mainwindow.h \
-        mutlilist.h
+        mutlilist.h \
+        settings.h
 
 FORMS += \
-        dialog.ui \
-        mainwindow.ui
+        mainwindow.ui \
+        settings.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

@@ -16,6 +16,8 @@
 #include <fstream>
 #include <QDebug>
 
+#include "Settings.h"
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -144,6 +146,7 @@ void MainWindow::on_action_open_triggered()
 
 void MainWindow::on_action_save_triggered()
 {
+    // TODO: сохранять весь текст только в UTF-8 with bom
     auto actors = ActorsList::Inctance().lock();
     assert(actors);
 
@@ -195,4 +198,45 @@ void MainWindow::on_actionAbout_Qt_triggered()
 void MainWindow::on_action_exit_triggered()
 {
     QApplication::quit();
+}
+
+void MainWindow::on_action_settings_triggered()
+{
+    Settings w(this);
+    w.exec();
+}
+
+void MainWindow::on_action_open_persons_triggered()
+{
+
+}
+
+void MainWindow::on_action_save_persons_triggered()
+{
+
+}
+
+void MainWindow::on_action_close_persons_triggered()
+{
+
+}
+
+void MainWindow::on_action_close_all_triggered()
+{
+
+}
+
+void MainWindow::on_action_open_table_triggered()
+{
+
+}
+
+void MainWindow::on_action_save_table_triggered()
+{
+
+}
+
+void MainWindow::on_action_close_table_triggered()
+{
+
 }
