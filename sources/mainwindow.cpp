@@ -112,33 +112,36 @@ void MainWindow::on_action_open_triggered()
     QString fileName = QFileDialog::getOpenFileName(this,
         tr("Открыть список персонажей"), "/", tr("Text files (*.txt)"));
 
-    QFile file(fileName);
-    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+    if (fileName!="")
     {
-        std::stringstream ss;
-        ss << "Не удалось открыть файл '" << fileName.toUtf8().data() << "' на чтение";
-        QMessageBox::critical(this, "Ошибка", ss.str().c_str());
-        return;
-    }
-
-    QTextStream in(&file);
-    in.setCodec("UTF-8"); // change the file codec to UTF-8.
-    actors->Native().clear();
-
-    while (!in.atEnd()) {
-        QString line = in.readLine();
-        // Processing line..
-        if (line.indexOf(';') != -1)
+        QFile file(fileName);
+        if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
         {
             std::stringstream ss;
-            ss <<  "Наличие символа ';' в имени персонажа недопустимо. Имя '" << line.toUtf8().data() << "' будет проигнорировано.";
-            QMessageBox::warning(this, "Предупреждение", ss.str().c_str());
-            continue;
+            ss << "Не удалось открыть файл '" << fileName.toUtf8().data() << "' на чтение";
+            QMessageBox::critical(this, "Ошибка", ss.str().c_str());
+            return;
         }
-        try {
-            actors->Native().insert(ActorName(line));
-        } catch (const ActorNameStringEmpty&)
-        {
+
+        QTextStream in(&file);
+        in.setCodec("UTF-8"); // change the file codec to UTF-8.
+        actors->Native().clear();
+
+        while (!in.atEnd()) {
+            QString line = in.readLine();
+            // Processing line..
+            if (line.indexOf(';') != -1)
+            {
+                std::stringstream ss;
+                ss <<  "Наличие символа ';' в имени персонажа недопустимо. Имя '" << line.toUtf8().data() << "' будет проигнорировано.";
+                QMessageBox::warning(this, "Предупреждение", ss.str().c_str());
+                continue;
+            }
+            try {
+                actors->Native().insert(ActorName(line));
+            } catch (const ActorNameStringEmpty&)
+            {
+            }
         }
     }
 
@@ -153,24 +156,29 @@ void MainWindow::on_action_save_triggered()
     QString fileName = QFileDialog::getSaveFileName(this,
         tr("Сохранить список персонажей"), "/", tr("Text files (*.txt)"));
 
-    QFile fileOut(fileName);
-    if (!fileOut.open(QIODevice::WriteOnly | QIODevice::Text))
+    if (fileName!="")
     {
-        std::stringstream ss;
-        ss << "Не удалось открыть файл '" << fileName.toUtf8().data() << "' на запись";
-        QMessageBox::critical(this, "Ошибка", ss.str().c_str());
-        return;
-    }
+        QFile fileOut(fileName);
+        if (!fileOut.open(QIODevice::WriteOnly | QIODevice::Text))
+        {
+            std::stringstream ss;
+            ss << "Не удалось открыть файл '" << fileName.toUtf8().data() << "' на запись";
+            QMessageBox::critical(this, "Ошибка", ss.str().c_str());
+            return;
+        }
 
-    QTextStream streamFileOut(&fileOut);
-    streamFileOut.setCodec("UTF-8");
-    for (const auto& Value : actors->Native())
-    {
-        streamFileOut << Value.Get() << endl;
-    }
-    streamFileOut.flush();
+        // Все текстовые файлы мы сохраняем только в UTF-8 with BOM
+        QTextStream streamFileOut(&fileOut);
+        streamFileOut.setCodec("UTF-8");
+        streamFileOut.setGenerateByteOrderMark(true);
+        for (const auto& Value : actors->Native())
+        {
+            streamFileOut << Value.Get() << endl;
+        }
+        streamFileOut.flush();
 
-    fileOut.close();
+        fileOut.close();
+    }
 }
 
 void MainWindow::on_action_close_triggered()
@@ -237,6 +245,11 @@ void MainWindow::on_action_save_table_triggered()
 }
 
 void MainWindow::on_action_close_table_triggered()
+{
+
+}
+
+void MainWindow::on_action_generate_doc_triggered()
 {
 
 }
