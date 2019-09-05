@@ -66,6 +66,14 @@ private slots:
     void on_action_save_table_triggered();
     void on_action_close_table_triggered();
 
+    void on_action_generate_doc_triggered();
+
+    void on_action_save_individual_triggered();
+
+    void on_action_make_shared_flag_triggered();
+
+    void on_action_make_individual_flag_triggered();
+
 private:
     Ui::MainWindow *ui;
 };

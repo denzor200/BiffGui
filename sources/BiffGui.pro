@@ -42,6 +42,7 @@ HEADERS += \
         settings.h
 
 FORMS += \
+        generating.ui \
         mainwindow.ui \
         settings.ui
 

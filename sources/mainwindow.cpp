@@ -253,3 +253,18 @@ void MainWindow::on_action_generate_doc_triggered()
 {
 
 }
+
+void MainWindow::on_action_save_individual_triggered()
+{
+
+}
+
+void MainWindow::on_action_make_shared_flag_triggered()
+{
+
+}
+
+void MainWindow::on_action_make_individual_flag_triggered()
+{
+
+}
