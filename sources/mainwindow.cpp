@@ -272,7 +272,17 @@ void MainWindow::on_action_make_individual_flag_triggered()
 
 void MainWindow::on_pushButton_MakeDoc_clicked()
 {
-    // TODO: добавить диалоговое окно выбора директории
-    Generating w(this);
-    w.exec();
+    QString InFile, OutDir;
+
+    // TODO: Сделать нормальную выборку InFile
+    // TODO: Реализовать запоминание выходной директории
+    InFile = "D:\\repos\\subtitles\\Debug\\Subtitry4.ass";
+    OutDir = QFileDialog::getExistingDirectory(this, "Создать монтажные листы", "/");
+
+    if (OutDir!="")
+    {
+        Generating w(this);
+        w.StartProcess(InFile, OutDir);
+        w.exec();
+    }
 }

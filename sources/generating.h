@@ -14,6 +14,9 @@ class Generating : public QDialog
 public:
     explicit Generating(QWidget *parent = nullptr);
     ~Generating();
+
+    void StartProcess(const QString& InFile, const QString& OutDir);
+
 private slots:
     void slotDataOnStdout();
     void slotFinished(int, QProcess::ExitStatus);

@@ -18,14 +18,25 @@ Generating::Generating(QWidget *parent) :
                     SIGNAL(finished(int, QProcess::ExitStatus)),
                     SLOT(slotFinished(int, QProcess::ExitStatus))
                    );
-    // TODO: make normal command line
-    m_Process->start("D:\\repos\\subtitles\\Debug\\converter D:\\repos\\subtitles\\Debug\\Subtitry4.ass -make_docx");
 }
 
 Generating::~Generating()
 {
     delete m_Process;
     delete ui;
+}
+
+void Generating::StartProcess(const QString &InFile, const QString &OutDir)
+{
+    // TODO: make normal command line
+    // TODO: потестить на путях с пробелами и кириллицей
+    QStringList Arguments;
+    Arguments.reserve(4);
+    Arguments.push_back("-make_docx");
+    Arguments.push_back(InFile);
+    Arguments.push_back("D:\\repos\\subtitles\\Debug\\actors.cfg");
+    Arguments.push_back(OutDir);
+    m_Process->start("D:\\repos\\subtitles\\Debug\\converter", Arguments);
 }
 
 void Generating::slotDataOnStdout()
