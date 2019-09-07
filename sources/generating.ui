@@ -26,29 +26,19 @@
       <number>0</number>
      </property>
      <item>
-      <widget class="QPlainTextEdit" name="plainTextEdit_2">
+      <widget class="QPlainTextEdit" name="plainTextEdit_Log">
        <property name="readOnly">
         <bool>true</bool>
        </property>
        <property name="plainText">
-        <string>Test text
-Test text
-Test text
-Test text
-Test text
-Test text
-Test text
-Test text
-Test text
-
-</string>
+        <string/>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="label">
+      <widget class="QLabel" name="label_Status">
        <property name="text">
-        <string>TextLabel</string>
+        <string>Создание монтажных листов..</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignCenter</set>
@@ -68,7 +58,7 @@ Test text
      <item>
       <layout class="QHBoxLayout" name="horizontalLayout">
        <item>
-        <widget class="QPushButton" name="pushButton">
+        <widget class="QPushButton" name="pushButton_OK">
          <property name="enabled">
           <bool>false</bool>
          </property>
@@ -78,7 +68,7 @@ Test text
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="pushButton_2">
+        <widget class="QPushButton" name="pushButton_Cancel">
          <property name="text">
           <string>Отмена</string>
          </property>
@@ -91,7 +81,7 @@ Test text
    <item>
     <layout class="QVBoxLayout" name="verticalLayout" stretch="0">
      <item>
-      <widget class="QPlainTextEdit" name="plainTextEdit">
+      <widget class="QPlainTextEdit" name="plainTextEdit_Stages">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
          <horstretch>0</horstretch>
@@ -102,17 +92,7 @@ Test text
         <bool>true</bool>
        </property>
        <property name="plainText">
-        <string>Test text
-Test text
-Test text
-Test text
-Test text
-Test text
-Test text
-Test text
-Test text
-
-</string>
+        <string/>
        </property>
        <property name="centerOnScroll">
         <bool>false</bool>

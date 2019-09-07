@@ -17,6 +17,7 @@
 #include <QDebug>
 
 #include "Settings.h"
+#include "generating.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -267,4 +268,11 @@ void MainWindow::on_action_make_shared_flag_triggered()
 void MainWindow::on_action_make_individual_flag_triggered()
 {
 
+}
+
+void MainWindow::on_pushButton_MakeDoc_clicked()
+{
+    // TODO: добавить диалоговое окно выбора директории
+    Generating w(this);
+    w.exec();
 }

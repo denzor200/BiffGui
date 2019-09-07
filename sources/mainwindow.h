@@ -74,6 +74,8 @@ private slots:
 
     void on_action_make_individual_flag_triggered();
 
+    void on_pushButton_MakeDoc_clicked();
+
 private:
     Ui::MainWindow *ui;
 };

@@ -27,6 +27,7 @@ CONFIG += c++11
 SOURCES += \
         ActorName.cpp \
         actorslist.cpp \
+        generating.cpp \
         lineedit.cpp \
         main.cpp \
         mainwindow.cpp \
@@ -36,6 +37,7 @@ SOURCES += \
 HEADERS += \
         ActorName.h \
         actorslist.h \
+        generating.h \
         lineedit.h \
         mainwindow.h \
         mutlilist.h \
