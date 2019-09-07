@@ -41,12 +41,6 @@ public:
     ~MainWindow();
 
 private slots:
-    void on_tableWidget_clicked(const QModelIndex &index);
-
-    void on_toolButton_clicked();
-
-    void on_toolButton_2_clicked();
-
     void on_action_open_triggered();
     void on_action_save_triggered();
     void on_action_close_triggered();
@@ -75,6 +69,12 @@ private slots:
     void on_action_make_individual_flag_triggered();
 
     void on_pushButton_MakeDoc_clicked();
+
+    void on_toolButton_Insert_clicked();
+
+    void on_toolButton_Delete_clicked();
+
+    void on_toolButton_Reverse_clicked();
 
 private:
     Ui::MainWindow *ui;

@@ -37,77 +37,6 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::on_tableWidget_clicked(const QModelIndex &index)
-{
-
-}
-
-void MainWindow::on_toolButton_2_clicked()
-{
-    // preparing..
-    QItemSelection selection( ui->tableWidget->selectionModel()->selection() );
-
-    QList<int> rows;
-    QSet<int> rows_set; // rows_set only for checking
-    foreach( const QModelIndex & value, selection.indexes() ) {
-        int id = value.row();
-        if (rows_set.find(id)==rows_set.end())
-        {
-            rows.append( id );
-            rows_set.insert(id);
-        }
-    }
-
-    std::sort( rows.begin(), rows.end() );
-
-    // checking for zero size
-    if (rows.size()==0)
-    {
-        return ;
-    }
-
-    // confirmation from user..
-    std::stringstream ss;
-    ss << "Вы действительно хотите удалить выделенные строки в таблице? (" << rows.size() << " шт.)";
-    auto reply = QMessageBox::question(this, "Подтверждение действия", ss.str().c_str(),
-                                    QMessageBox::Yes|QMessageBox::No);
-    if (reply!=QMessageBox::Yes)
-    {
-        return ;
-    }
-
-    // just doing..
-    // strictly in reverse order!!
-    int prev = -1;
-    for( int i = rows.count() - 1; i >= 0; i -= 1 ) {
-       int current = rows[i];
-       if( current != prev ) {
-          ui->tableWidget->removeRow( current);
-          prev = current;
-       }
-    }
-}
-
-void MainWindow::on_toolButton_clicked()
-{
-    int r = ui->tableWidget->rowCount();
-    ui->tableWidget->insertRow(ui->tableWidget->rowCount());
-    ui->tableWidget->setRowHeight(r, ui->tableWidget->rowHeight(r)+5);
-
-    ui->tableWidget->setCellWidget(r, 0, new QLineEdit);
-    ui->tableWidget->setCellWidget(r, 1, new LineEdit);
-    {
-        QWidget * w = new QWidget();
-        QHBoxLayout *l = new QHBoxLayout();
-        l->setAlignment( Qt::AlignCenter );
-        l->addWidget( new QCheckBox );
-        w->setLayout( l );
-        ui->tableWidget->setCellWidget(r, 2, w);
-    }
-
-}
-
-
 void MainWindow::on_action_open_triggered()
 {
     auto actors = ActorsList::Inctance().lock();
@@ -306,4 +235,74 @@ void MainWindow::on_pushButton_MakeDoc_clicked()
         w.StartProcess(InFile, OutDir);
         w.exec();
     }
+}
+
+void MainWindow::on_toolButton_Insert_clicked()
+{
+    int r = ui->tableWidget->rowCount();
+    ui->tableWidget->insertRow(ui->tableWidget->rowCount());
+    ui->tableWidget->setRowHeight(r, ui->tableWidget->rowHeight(r)+5);
+
+    ui->tableWidget->setCellWidget(r, 0, new QLineEdit);
+    ui->tableWidget->setCellWidget(r, 1, new LineEdit);
+    {
+        QWidget * w = new QWidget();
+        QHBoxLayout *l = new QHBoxLayout();
+        l->setAlignment( Qt::AlignCenter );
+        l->addWidget( new QCheckBox );
+        w->setLayout( l );
+        ui->tableWidget->setCellWidget(r, 2, w);
+    }
+
+}
+
+void MainWindow::on_toolButton_Delete_clicked()
+{
+    // preparing..
+    QItemSelection selection( ui->tableWidget->selectionModel()->selection() );
+
+    QList<int> rows;
+    QSet<int> rows_set; // rows_set only for checking
+    foreach( const QModelIndex & value, selection.indexes() ) {
+        int id = value.row();
+        if (rows_set.find(id)==rows_set.end())
+        {
+            rows.append( id );
+            rows_set.insert(id);
+        }
+    }
+
+    std::sort( rows.begin(), rows.end() );
+
+    // checking for zero size
+    if (rows.size()==0)
+    {
+        return ;
+    }
+
+    // confirmation from user..
+    std::stringstream ss;
+    ss << "Вы действительно хотите удалить выделенные строки в таблице? (" << rows.size() << " шт.)";
+    auto reply = QMessageBox::question(this, "Подтверждение действия", ss.str().c_str(),
+                                    QMessageBox::Yes|QMessageBox::No);
+    if (reply!=QMessageBox::Yes)
+    {
+        return ;
+    }
+
+    // just doing..
+    // strictly in reverse order!!
+    int prev = -1;
+    for( int i = rows.count() - 1; i >= 0; i -= 1 ) {
+       int current = rows[i];
+       if( current != prev ) {
+          ui->tableWidget->removeRow( current);
+          prev = current;
+       }
+    }
+}
+
+void MainWindow::on_toolButton_Reverse_clicked()
+{
+
 }
