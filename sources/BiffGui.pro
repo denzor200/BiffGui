@@ -37,6 +37,7 @@ SOURCES += \
 HEADERS += \
         ActorName.h \
         actorslist.h \
+        directoriesregistry.h \
         generating.h \
         lineedit.h \
         mainwindow.h \

@@ -8,6 +8,7 @@
 #include <QCheckBox>
 #include <QLineEdit>
 #include <QToolButton>
+#include <QSettings>
 #include "lineedit.h"
 
 #include <QFileDialog>
@@ -18,6 +19,8 @@
 
 #include "Settings.h"
 #include "generating.h"
+
+#include "DirectoriesRegistry.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -110,11 +113,18 @@ void MainWindow::on_action_open_triggered()
     auto actors = ActorsList::Inctance().lock();
     assert(actors);
 
+    QSettings Settings;
     QString fileName = QFileDialog::getOpenFileName(this,
-        tr("Открыть список персонажей"), "/", tr("Text files (*.txt)"));
+        tr("Открыть список персонажей"),
+        Settings.value(DirectoriesRegistry::PERSONS_INDIR).toString(),
+        tr("Text files (*.txt)"));
 
     if (fileName!="")
     {
+        QDir CurrentDir;
+        Settings.setValue(DirectoriesRegistry::PERSONS_INDIR,
+                    CurrentDir.absoluteFilePath(fileName));
+
         QFile file(fileName);
         if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
         {
@@ -154,11 +164,18 @@ void MainWindow::on_action_save_triggered()
     auto actors = ActorsList::Inctance().lock();
     assert(actors);
 
+    QSettings Settings;
     QString fileName = QFileDialog::getSaveFileName(this,
-        tr("Сохранить список персонажей"), "/", tr("Text files (*.txt)"));
+        tr("Сохранить список персонажей"),
+        Settings.value(DirectoriesRegistry::PERSONS_OUTDIR).toString(),
+        tr("Text files (*.txt)"));
 
     if (fileName!="")
     {
+        QDir CurrentDir;
+        Settings.setValue(DirectoriesRegistry::PERSONS_OUTDIR,
+                    CurrentDir.absoluteFilePath(fileName));
+
         QFile fileOut(fileName);
         if (!fileOut.open(QIODevice::WriteOnly | QIODevice::Text))
         {
@@ -275,12 +292,16 @@ void MainWindow::on_pushButton_MakeDoc_clicked()
     QString InFile, OutDir;
 
     // TODO: Сделать нормальную выборку InFile
-    // TODO: Реализовать запоминание выходной директории
     InFile = "D:\\repos\\subtitles\\Debug\\Subtitry4.ass";
-    OutDir = QFileDialog::getExistingDirectory(this, "Создать монтажные листы", "/");
+    QSettings Settings;
+    OutDir = QFileDialog::getExistingDirectory(this, "Создать монтажные листы", Settings.value(DirectoriesRegistry::DOC_OUTDIR).toString());
 
     if (OutDir!="")
     {
+        QDir CurrentDir;
+        Settings.setValue(DirectoriesRegistry::DOC_OUTDIR,
+            CurrentDir.absoluteFilePath(OutDir));
+
         Generating w(this);
         w.StartProcess(InFile, OutDir);
         w.exec();
