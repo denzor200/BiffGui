@@ -6,14 +6,14 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>545</width>
-    <height>505</height>
+    <width>662</width>
+    <height>502</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Настройки</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout">
+  <layout class="QVBoxLayout" name="verticalLayout_16">
    <item>
     <widget class="QScrollArea" name="scrollArea">
      <property name="widgetResizable">
@@ -23,76 +23,127 @@
       <property name="geometry">
        <rect>
         <x>0</x>
-        <y>-271</y>
-        <width>508</width>
-        <height>725</height>
+        <y>0</y>
+        <width>625</width>
+        <height>726</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_2">
        <item>
-        <widget class="QGroupBox" name="groupBox">
+        <widget class="QGroupBox" name="groupBox_ASS">
          <property name="title">
           <string>ASS</string>
          </property>
-         <layout class="QFormLayout" name="formLayout_2">
-          <item row="0" column="1">
-           <widget class="QLineEdit" name="lineEdit_11"/>
+         <layout class="QHBoxLayout" name="horizontalLayout_3">
+          <item>
+           <layout class="QVBoxLayout" name="verticalLayout_4">
+            <item>
+             <widget class="QLabel" name="label_ColumnStart">
+              <property name="text">
+               <string>Колонка &quot;Start&quot;</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_ColumnEnd">
+              <property name="text">
+               <string>Колонка &quot;End&quot;</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_ColumnName">
+              <property name="text">
+               <string>Колонка &quot;Name&quot;</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_ColumnText">
+              <property name="text">
+               <string>Колонка &quot;Text&quot;</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </item>
-          <item row="1" column="1">
-           <widget class="QLineEdit" name="lineEdit_8"/>
-          </item>
-          <item row="2" column="1">
-           <widget class="QLineEdit" name="lineEdit_10"/>
-          </item>
-          <item row="3" column="1">
-           <widget class="QLineEdit" name="lineEdit_9"/>
-          </item>
-          <item row="0" column="0">
-           <widget class="QLabel" name="label_13">
-            <property name="text">
-             <string>Колонка &quot;Start&quot;</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="label_12">
-            <property name="text">
-             <string>Колонка &quot;End&quot;</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="0">
-           <widget class="QLabel" name="label_11">
-            <property name="text">
-             <string>Колонка &quot;Name&quot;</string>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="0">
-           <widget class="QLabel" name="label_10">
-            <property name="text">
-             <string>Колонка &quot;Text&quot;</string>
-            </property>
-           </widget>
+          <item>
+           <layout class="QVBoxLayout" name="verticalLayout_5">
+            <item>
+             <widget class="QLineEdit" name="lineEdit_ColumnStart">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="lineEdit_ColumnEnd">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="lineEdit_ColumnName">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="lineEdit_ColumnText">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </item>
          </layout>
         </widget>
        </item>
        <item>
-        <widget class="QGroupBox" name="groupBox_2">
+        <widget class="QGroupBox" name="groupBox_SRT">
          <property name="title">
           <string>SRT</string>
          </property>
-         <layout class="QFormLayout" name="formLayout">
-          <item row="0" column="0">
-           <widget class="QLabel" name="label_14">
+         <layout class="QHBoxLayout" name="horizontalLayout_4">
+          <item>
+           <widget class="QLabel" name="label_Distribution">
             <property name="text">
              <string>Метод распределения времени в комплексных фразах</string>
             </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+            </property>
            </widget>
           </item>
-          <item row="0" column="1">
-           <widget class="QComboBox" name="comboBox">
+          <item>
+           <widget class="QComboBox" name="comboBox_Distribution">
             <item>
              <property name="text">
               <string>Uniform</string>
@@ -109,102 +160,137 @@
         </widget>
        </item>
        <item>
-        <widget class="QGroupBox" name="groupBox_4">
+        <widget class="QGroupBox" name="groupBox_Timing">
          <property name="title">
           <string>Тайминг</string>
          </property>
-         <layout class="QFormLayout" name="formLayout_3">
-          <item row="0" column="0">
-           <widget class="QLabel" name="label">
-            <property name="text">
-             <string>Верхний порог округления (мс.)</string>
-            </property>
-           </widget>
+         <property name="flat">
+          <bool>false</bool>
+         </property>
+         <property name="checkable">
+          <bool>false</bool>
+         </property>
+         <layout class="QHBoxLayout" name="horizontalLayout_2">
+          <item>
+           <layout class="QVBoxLayout" name="verticalLayout">
+            <item>
+             <widget class="QLabel" name="label_RoundValue">
+              <property name="text">
+               <string>Верхний порог округления (мс.)</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="horizontalSpacer_DisableIntervals">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_SmallInterval">
+              <property name="text">
+               <string>Маленький интервал (мс.)</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_NormalInterval">
+              <property name="text">
+               <string>Обычный интервал (мс.)</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_BigInterval">
+              <property name="text">
+               <string>Большой интервал (мс.)</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_VeryBigInterval">
+              <property name="text">
+               <string>Очень большой интервал (мс.)</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_VeryVeryBigInterval">
+              <property name="text">
+               <string>Слишком большой интервал (мс.)</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </item>
-          <item row="0" column="1">
-           <widget class="QSpinBox" name="spinBox"/>
-          </item>
-          <item row="1" column="0">
-           <spacer name="horizontalSpacer_3">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>40</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-          <item row="1" column="1">
-           <widget class="QCheckBox" name="checkBox_4">
-            <property name="text">
-             <string>Отключить интервалы</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="0">
-           <widget class="QLabel" name="label_2">
-            <property name="text">
-             <string>Маленький интервал (мс.)</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="1">
-           <widget class="QLineEdit" name="lineEdit_5"/>
-          </item>
-          <item row="3" column="0">
-           <widget class="QLabel" name="label_5">
-            <property name="text">
-             <string>Обычный интервал (мс.)</string>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="1">
-           <widget class="QLineEdit" name="lineEdit_2"/>
-          </item>
-          <item row="4" column="0">
-           <widget class="QLabel" name="label_4">
-            <property name="text">
-             <string>Большой интервал (мс.)</string>
-            </property>
-           </widget>
-          </item>
-          <item row="4" column="1">
-           <widget class="QLineEdit" name="lineEdit"/>
-          </item>
-          <item row="5" column="0">
-           <widget class="QLabel" name="label_3">
-            <property name="text">
-             <string>Очень большой интервал (мс.)</string>
-            </property>
-           </widget>
-          </item>
-          <item row="5" column="1">
-           <widget class="QLineEdit" name="lineEdit_3"/>
-          </item>
-          <item row="6" column="0">
-           <widget class="QLabel" name="label_15">
-            <property name="text">
-             <string>Слишком большой интервал (мс.)</string>
-            </property>
-           </widget>
-          </item>
-          <item row="6" column="1">
-           <widget class="QLineEdit" name="lineEdit_4"/>
+          <item>
+           <layout class="QVBoxLayout" name="verticalLayout_3">
+            <item>
+             <widget class="QSpinBox" name="spinBox_RoundValue"/>
+            </item>
+            <item>
+             <widget class="QCheckBox" name="checkBox_DisableIntervals">
+              <property name="text">
+               <string>Отключить интервалы</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="lineEdit_SmallInterval"/>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="lineEdit_NormalInterval"/>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="lineEdit_BigInterval"/>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="lineEdit_VeryBigInterval"/>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="lineEdit_VeryVeryBigInterval"/>
+            </item>
+           </layout>
           </item>
          </layout>
         </widget>
        </item>
        <item>
-        <widget class="QGroupBox" name="groupBox_3">
+        <widget class="QGroupBox" name="groupBox_DocumentStyle">
          <property name="title">
           <string>Стиль документа</string>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_9">
           <item>
            <widget class="QToolBox" name="toolBox">
+            <property name="autoFillBackground">
+             <bool>false</bool>
+            </property>
             <property name="currentIndex">
              <number>2</number>
             </property>
@@ -213,33 +299,51 @@
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>470</width>
+               <width>587</width>
                <height>69</height>
               </rect>
              </property>
              <attribute name="label">
               <string>Главное</string>
              </attribute>
-             <layout class="QFormLayout" name="formLayout_7">
-              <item row="0" column="0">
-               <widget class="QLabel" name="label_19">
-                <property name="text">
-                 <string>Шрифт</string>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="1">
-               <widget class="QLineEdit" name="lineEdit_13"/>
-              </item>
-              <item row="1" column="0">
-               <widget class="QLabel" name="label_18">
-                <property name="text">
-                 <string>Размер</string>
-                </property>
-               </widget>
-              </item>
-              <item row="1" column="1">
-               <widget class="QDoubleSpinBox" name="doubleSpinBox_4"/>
+             <layout class="QVBoxLayout" name="verticalLayout_8">
+              <item>
+               <layout class="QHBoxLayout" name="horizontalLayout_5">
+                <item>
+                 <layout class="QVBoxLayout" name="verticalLayout_6">
+                  <item>
+                   <widget class="QLabel" name="label_Font">
+                    <property name="text">
+                     <string>Шрифт</string>
+                    </property>
+                    <property name="alignment">
+                     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QLabel" name="label_Size">
+                    <property name="text">
+                     <string>Размер</string>
+                    </property>
+                    <property name="alignment">
+                     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </item>
+                <item>
+                 <layout class="QVBoxLayout" name="verticalLayout_7">
+                  <item>
+                   <widget class="QLineEdit" name="lineEdit_Font"/>
+                  </item>
+                  <item>
+                   <widget class="QDoubleSpinBox" name="doubleSpinBox_Size"/>
+                  </item>
+                 </layout>
+                </item>
+               </layout>
               </item>
              </layout>
             </widget>
@@ -248,33 +352,51 @@
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>470</width>
+               <width>587</width>
                <height>69</height>
               </rect>
              </property>
              <attribute name="label">
               <string>Нумерация</string>
              </attribute>
-             <layout class="QFormLayout" name="formLayout_8">
-              <item row="0" column="0">
-               <widget class="QLabel" name="label_21">
-                <property name="text">
-                 <string>Шрифт</string>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="1">
-               <widget class="QLineEdit" name="lineEdit_14"/>
-              </item>
-              <item row="1" column="0">
-               <widget class="QLabel" name="label_20">
-                <property name="text">
-                 <string>Размер</string>
-                </property>
-               </widget>
-              </item>
-              <item row="1" column="1">
-               <widget class="QDoubleSpinBox" name="doubleSpinBox_5"/>
+             <layout class="QVBoxLayout" name="verticalLayout_12">
+              <item>
+               <layout class="QHBoxLayout" name="horizontalLayout_6">
+                <item>
+                 <layout class="QVBoxLayout" name="verticalLayout_10">
+                  <item>
+                   <widget class="QLabel" name="label_Font_2">
+                    <property name="text">
+                     <string>Шрифт</string>
+                    </property>
+                    <property name="alignment">
+                     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QLabel" name="label_Size_2">
+                    <property name="text">
+                     <string>Размер</string>
+                    </property>
+                    <property name="alignment">
+                     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </item>
+                <item>
+                 <layout class="QVBoxLayout" name="verticalLayout_11">
+                  <item>
+                   <widget class="QLineEdit" name="lineEdit_Font_2"/>
+                  </item>
+                  <item>
+                   <widget class="QDoubleSpinBox" name="doubleSpinBox_Size_2"/>
+                  </item>
+                 </layout>
+                </item>
+               </layout>
               </item>
              </layout>
             </widget>
@@ -283,33 +405,51 @@
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>470</width>
+               <width>587</width>
                <height>69</height>
               </rect>
              </property>
              <attribute name="label">
               <string>Выделенные фразы в индивидуальном документе</string>
              </attribute>
-             <layout class="QFormLayout" name="formLayout_9">
-              <item row="0" column="0">
-               <widget class="QLabel" name="label_16">
-                <property name="text">
-                 <string>Шрифт</string>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="1">
-               <widget class="QLineEdit" name="lineEdit_12"/>
-              </item>
-              <item row="1" column="0">
-               <widget class="QLabel" name="label_17">
-                <property name="text">
-                 <string>Размер</string>
-                </property>
-               </widget>
-              </item>
-              <item row="1" column="1">
-               <widget class="QDoubleSpinBox" name="doubleSpinBox_3"/>
+             <layout class="QVBoxLayout" name="verticalLayout_15">
+              <item>
+               <layout class="QHBoxLayout" name="horizontalLayout_7">
+                <item>
+                 <layout class="QVBoxLayout" name="verticalLayout_13">
+                  <item>
+                   <widget class="QLabel" name="label_Font_3">
+                    <property name="text">
+                     <string>Шрифт</string>
+                    </property>
+                    <property name="alignment">
+                     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QLabel" name="label_Size_3">
+                    <property name="text">
+                     <string>Размер</string>
+                    </property>
+                    <property name="alignment">
+                     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </item>
+                <item>
+                 <layout class="QVBoxLayout" name="verticalLayout_14">
+                  <item>
+                   <widget class="QLineEdit" name="lineEdit_Font_3"/>
+                  </item>
+                  <item>
+                   <widget class="QDoubleSpinBox" name="doubleSpinBox_Size_3"/>
+                  </item>
+                 </layout>
+                </item>
+               </layout>
               </item>
              </layout>
             </widget>
@@ -318,7 +458,7 @@
           <item>
            <layout class="QFormLayout" name="formLayout_6">
             <item row="0" column="0">
-             <spacer name="horizontalSpacer">
+             <spacer name="horizontalSpacer_DisableTags">
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
               </property>
@@ -331,14 +471,14 @@
              </spacer>
             </item>
             <item row="0" column="1">
-             <widget class="QCheckBox" name="checkBox">
+             <widget class="QCheckBox" name="checkBox_DisableTags">
               <property name="text">
                <string>Отключить тэги</string>
               </property>
              </widget>
             </item>
             <item row="1" column="0">
-             <spacer name="horizontalSpacer_5">
+             <spacer name="horizontalSpacer_DisableCounter">
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
               </property>
@@ -351,7 +491,7 @@
              </spacer>
             </item>
             <item row="1" column="1">
-             <widget class="QCheckBox" name="checkBox_2">
+             <widget class="QCheckBox" name="checkBox_DisableCounter">
               <property name="text">
                <string>Отключить подсчет строк</string>
               </property>
@@ -363,13 +503,13 @@
         </widget>
        </item>
        <item>
-        <widget class="QGroupBox" name="groupBox_7">
+        <widget class="QGroupBox" name="groupBox_Additional">
          <property name="title">
           <string>Дополнительно</string>
          </property>
          <layout class="QFormLayout" name="formLayout_4">
           <item row="0" column="0">
-           <spacer name="horizontalSpacer_2">
+           <spacer name="horizontalSpacer_ExtSound">
             <property name="orientation">
              <enum>Qt::Horizontal</enum>
             </property>
@@ -382,7 +522,7 @@
            </spacer>
           </item>
           <item row="0" column="1">
-           <widget class="QCheckBox" name="checkBox_3">
+           <widget class="QCheckBox" name="checkBox_ExtSound">
             <property name="text">
              <string>Включить расширенную звуковую тему</string>
             </property>
@@ -398,7 +538,7 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
-      <widget class="QPushButton" name="pushButton">
+      <widget class="QPushButton" name="pushButton_SetDefault">
        <property name="text">
         <string>Вернуть значения по умолчанию</string>
        </property>
@@ -418,21 +558,30 @@
       </spacer>
      </item>
      <item>
-      <widget class="QPushButton" name="pushButton_2">
+      <widget class="QPushButton" name="pushButton_OK">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
        <property name="text">
         <string>ОК</string>
+       </property>
+       <property name="checkable">
+        <bool>false</bool>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="pushButton_3">
+      <widget class="QPushButton" name="pushButton_Cancel">
        <property name="text">
         <string>Отмена</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="pushButton_4">
+      <widget class="QPushButton" name="pushButton_Apply">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
        <property name="text">
         <string>Применить</string>
        </property>
