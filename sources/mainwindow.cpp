@@ -246,6 +246,7 @@ void MainWindow::on_toolButton_Insert_clicked()
         auto multiWidget = new QxtCheckComboBox;
         auto toolButton = new QToolButton;
         toolButton->setText("+");
+        multiWidget->setSeparator(", ");
 
         QWidget * w = new QWidget();
         QHBoxLayout *l = new QHBoxLayout();
