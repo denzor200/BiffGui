@@ -6,36 +6,11 @@
 
 namespace Ui {
 class MainWindow;
-class Hider;
 }
-
-class Hider : public QObject
-{
-    Q_OBJECT
-public:
-    Hider(QObject * parent = nullptr) : QObject(parent) {}
-    bool eventFilter(QObject *, QEvent * ev) {
-        return ev->type() == QEvent::Paint;
-    }
-    void hide(QWidget * w) {
-        w->installEventFilter(this);
-        w->update();
-    }
-    void unhide(QWidget * w) {
-        w->removeEventFilter(this);
-        w->update();
-    }
-    Q_SLOT void hideWidget()
-    {
-        QObject * s = sender();
-        if (s->isWidgetType()) { hide(qobject_cast<QWidget*>(s)); }
-    }
-};
 
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
-    Hider m_hider;
 public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
