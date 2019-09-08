@@ -9,7 +9,7 @@
 #include <QLineEdit>
 #include <QToolButton>
 #include <QSettings>
-#include "lineedit.h"
+#include "multilist.h"
 
 #include <QFileDialog>
 #include <algorithm>
@@ -29,7 +29,6 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     ui->tableWidget->verticalHeader()->setSectionResizeMode (QHeaderView::Fixed);
     ui->tableWidget->horizontalHeader()->setSectionResizeMode (QHeaderView::Stretch);
-    ui->tableWidget->setStyleSheet("QLineEdit { border: none }");
 }
 
 MainWindow::~MainWindow()
@@ -136,9 +135,9 @@ void MainWindow::on_action_close_triggered()
     for (int i=0;i<ui->tableWidget->rowCount();++i)
     {
         auto widget = ui->tableWidget->cellWidget(i, 1);
-        auto textWidget = (LineEdit*)widget;
-        assert(textWidget);
-        textWidget->setText("");
+        auto multiWidget = (MultiListWidget*)widget;
+        assert(multiWidget);
+        multiWidget->clear();
     }
 
     actors->Native().clear();
@@ -243,8 +242,20 @@ void MainWindow::on_toolButton_Insert_clicked()
     ui->tableWidget->insertRow(ui->tableWidget->rowCount());
     ui->tableWidget->setRowHeight(r, ui->tableWidget->rowHeight(r)+5);
 
-    ui->tableWidget->setCellWidget(r, 0, new QLineEdit);
-    ui->tableWidget->setCellWidget(r, 1, new LineEdit);
+    {
+        auto multiWidget = new MultiListWidget;
+        auto toolButton = new QToolButton;
+        multiWidget->addItems(QStringList() << "One" << "Two" << "Three" << "Four");
+        toolButton->setText("+");
+
+        QWidget * w = new QWidget();
+        QHBoxLayout *l = new QHBoxLayout();
+        //l->setAlignment( Qt::AlignCenter );
+        l->addWidget( multiWidget );
+        l->addWidget( toolButton );
+        w->setLayout( l );
+        ui->tableWidget->setCellWidget(r, 1, w);
+    }
     {
         QWidget * w = new QWidget();
         QHBoxLayout *l = new QHBoxLayout();

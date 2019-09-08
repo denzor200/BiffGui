@@ -28,10 +28,9 @@ SOURCES += \
         ActorName.cpp \
         actorslist.cpp \
         generating.cpp \
-        lineedit.cpp \
         main.cpp \
         mainwindow.cpp \
-        mutlilist.cpp \
+        multilist.cpp \
         settings.cpp
 
 HEADERS += \
@@ -39,9 +38,8 @@ HEADERS += \
         actorslist.h \
         directoriesregistry.h \
         generating.h \
-        lineedit.h \
         mainwindow.h \
-        mutlilist.h \
+        multilist.h \
         settings.h
 
 FORMS += \
