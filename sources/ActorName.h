@@ -1,9 +1,7 @@
 ﻿#pragma once
 
-// TODO: добавь расчет хэша.
-// Чтобы unordered_set мог понимать эти объекты
-
 #include <QString>
+#include <QHash>
 
 class ActorNameStringEmpty : public std::exception
 {
@@ -31,3 +29,7 @@ public:
 
 };
 
+inline uint qHash(const ActorName &key, uint seed)
+{
+    return qHash(key.Get().toUpper(), seed);
+}
