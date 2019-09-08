@@ -9,7 +9,7 @@
 #include <QLineEdit>
 #include <QToolButton>
 #include <QSettings>
-#include "multilist.h"
+#include "libqxt\gui\qxtcheckcombobox.h"
 
 #include <QFileDialog>
 #include <algorithm>
@@ -132,13 +132,13 @@ void MainWindow::on_action_close_triggered()
     auto actors = ActorsList::Inctance().lock();
     assert(actors);
 
-    for (int i=0;i<ui->tableWidget->rowCount();++i)
+    /*for (int i=0;i<ui->tableWidget->rowCount();++i)
     {
         auto widget = ui->tableWidget->cellWidget(i, 1);
         auto multiWidget = (MultiListWidget*)widget;
         assert(multiWidget);
         multiWidget->clear();
-    }
+    }*/
 
     actors->Native().clear();
 }
@@ -243,9 +243,8 @@ void MainWindow::on_toolButton_Insert_clicked()
     ui->tableWidget->setRowHeight(r, ui->tableWidget->rowHeight(r)+5);
 
     {
-        auto multiWidget = new MultiListWidget;
+        auto multiWidget = new QxtCheckComboBox;
         auto toolButton = new QToolButton;
-        multiWidget->addItems(QStringList() << "One" << "Two" << "Three" << "Four");
         toolButton->setText("+");
 
         QWidget * w = new QWidget();

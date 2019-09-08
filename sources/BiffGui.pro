@@ -28,9 +28,10 @@ SOURCES += \
         ActorName.cpp \
         actorslist.cpp \
         generating.cpp \
+        libqxt/core/qxtglobal.cpp \
+        libqxt/gui/qxtcheckcombobox.cpp \
         main.cpp \
         mainwindow.cpp \
-        multilist.cpp \
         settings.cpp
 
 HEADERS += \
@@ -38,14 +39,20 @@ HEADERS += \
         actorslist.h \
         directoriesregistry.h \
         generating.h \
+        libqxt/core/qxtglobal.h \
+        libqxt/core/qxtnamespace.h \
+        libqxt/gui/qxtcheckcombobox.h \
+        libqxt/gui/qxtcheckcombobox_p.h \
         mainwindow.h \
-        multilist.h \
         settings.h
 
 FORMS += \
         generating.ui \
         mainwindow.ui \
         settings.ui
+
+DEFINES += BUILD_QXT QXT_STATIC
+INCLUDEPATH += libqxt\core
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
