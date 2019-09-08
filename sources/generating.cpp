@@ -22,7 +22,6 @@ Generating::Generating(QWidget *parent) :
 
 Generating::~Generating()
 {
-    delete m_Process;
     delete ui;
 }
 
