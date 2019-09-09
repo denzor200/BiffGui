@@ -13,6 +13,12 @@ class Settings : public QDialog
 public:
     explicit Settings(QWidget *parent = nullptr);
     ~Settings();
+private slots:
+    void on_toolButton_stackedWidgetPrev_clicked();
+    void on_toolButton_stackedWidgetNext_clicked();
+
+    void on_checkBox_DisableIntervals_stateChanged(int arg1);
+
 private:
     Ui::Settings* ui;
 };
