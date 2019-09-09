@@ -5,7 +5,7 @@
 
 Generating::Generating(QWidget *parent) :
     QDialog(parent),
-    ui(new Ui::Dialog)
+    ui(new Ui::Generating)
 {
     ui->setupUi(this);
 

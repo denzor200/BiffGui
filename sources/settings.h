@@ -4,7 +4,7 @@
 #include <QDialog>
 
 namespace Ui {
-    class Dialog;
+    class Settings;
 }
 
 class Settings : public QDialog
@@ -14,7 +14,7 @@ public:
     explicit Settings(QWidget *parent = nullptr);
     ~Settings();
 private:
-    Ui::Dialog* ui;
+    Ui::Settings* ui;
 };
 
 #endif // SETTINGS_H

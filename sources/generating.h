@@ -5,7 +5,7 @@
 #include <QProcess>
 
 namespace Ui {
-    class Dialog;
+    class Generating;
 }
 
 class Generating : public QDialog
@@ -24,7 +24,7 @@ private slots:
     void on_pushButton_Cancel_clicked();
 
 private:
-    Ui::Dialog* ui;
+    Ui::Generating* ui;
     QProcess* m_Process;
 };
 
