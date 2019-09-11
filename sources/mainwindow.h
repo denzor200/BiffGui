@@ -4,6 +4,8 @@
 #include <QMainWindow>
 #include <QEvent>
 
+#include "MainTableModel.h"
+
 namespace Ui {
 class MainWindow;
 }
@@ -52,7 +54,9 @@ private slots:
     void on_toolButton_Reverse_clicked();
 
 private:
-    Ui::MainWindow *ui;
+    Ui::MainWindow* ui;
+    MainTableModel*             m_Model;
+    MainTableModel_Reversed*    m_ModelReversed;
 };
 
 #endif // MAINWINDOW_H

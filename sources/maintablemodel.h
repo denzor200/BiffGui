@@ -3,8 +3,9 @@
 
 #include <QSet>
 #include <ActorName.h>
+#include <QAbstractTableModel>
 
-class MainTableModel
+class MainTableModelRegistry
 {
     struct Actor;
     struct Person;
@@ -22,7 +23,7 @@ class MainTableModel
         bool deny = false;
     };
 public:
-    MainTableModel() = default;
+    MainTableModelRegistry() = default;
 
     bool AddPerson(const ActorName& person);
     bool AddActor(const ActorName& actor);
@@ -42,6 +43,34 @@ public:
 private:
     QHash<ActorName,Actor> m_Actors;
     QHash<ActorName,Person> m_Persons;
+};
+
+class MainTableModel : public QAbstractTableModel
+{
+    Q_OBJECT
+public:
+    MainTableModel(QObject* parent = nullptr);
+
+    int rowCount( const QModelIndex& parent = QModelIndex()) const override;
+    int columnCount( const QModelIndex& parent = QModelIndex()) const override;
+    QVariant data( const QModelIndex& index, int role = Qt::DisplayRole) const override;
+
+    QVariant headerData( int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
+
+};
+
+class MainTableModel_Reversed : public QAbstractTableModel
+{
+    Q_OBJECT
+public:
+    MainTableModel_Reversed(QObject* parent = nullptr);
+
+    int rowCount( const QModelIndex& parent = QModelIndex()) const override;
+    int columnCount( const QModelIndex& parent = QModelIndex()) const override;
+    QVariant data( const QModelIndex& index, int role = Qt::DisplayRole) const override;
+
+    QVariant headerData( int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
+
 };
 
 #endif // MAINTABLEMODEL_H

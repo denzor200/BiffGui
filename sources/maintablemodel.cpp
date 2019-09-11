@@ -1,6 +1,6 @@
 #include "maintablemodel.h"
 
-bool MainTableModel::AddPerson(const ActorName& person)
+bool MainTableModelRegistry::AddPerson(const ActorName& person)
 {
     if (m_Persons.find(person) == m_Persons.end())
     {
@@ -12,7 +12,7 @@ bool MainTableModel::AddPerson(const ActorName& person)
     return false;
 }
 
-bool MainTableModel::AddActor(const ActorName& actor)
+bool MainTableModelRegistry::AddActor(const ActorName& actor)
 {
     if (m_Actors.find(actor) == m_Actors.end())
     {
@@ -24,7 +24,7 @@ bool MainTableModel::AddActor(const ActorName& actor)
     return false;
 }
 
-bool MainTableModel::RenamePerson(const ActorName& oldName, const ActorName& newName)
+bool MainTableModelRegistry::RenamePerson(const ActorName& oldName, const ActorName& newName)
 {
     auto it = m_Persons.find(oldName);
     if (it != m_Persons.end())
@@ -41,7 +41,7 @@ bool MainTableModel::RenamePerson(const ActorName& oldName, const ActorName& new
     return false;
 }
 
-bool MainTableModel::RenameActor(const ActorName& oldName, const ActorName& newName)
+bool MainTableModelRegistry::RenameActor(const ActorName& oldName, const ActorName& newName)
 {
     auto it = m_Actors.find(oldName);
     if (it != m_Actors.end())
@@ -57,12 +57,12 @@ bool MainTableModel::RenameActor(const ActorName& oldName, const ActorName& newN
     return false;
 }
 
-bool MainTableModel::Person_ChangeStateActor(const ActorName& person, const ActorName& actor, bool State)
+bool MainTableModelRegistry::Person_ChangeStateActor(const ActorName& person, const ActorName& actor, bool State)
 {
     return Actor_ChangeStatePerson(actor, person, State);
 }
 
-bool MainTableModel::Actor_ChangeStatePerson(const ActorName& actor, const ActorName& person, bool State)
+bool MainTableModelRegistry::Actor_ChangeStatePerson(const ActorName& actor, const ActorName& person, bool State)
 {
     auto actorIt = m_Actors.find(actor);
     auto personIt = m_Persons.find(person);
@@ -120,7 +120,7 @@ bool MainTableModel::Actor_ChangeStatePerson(const ActorName& actor, const Actor
     return false;
 }
 
-bool MainTableModel::RemovePerson(const ActorName& person) noexcept
+bool MainTableModelRegistry::RemovePerson(const ActorName& person) noexcept
 {
     auto findedIt = m_Persons.find(person);
     if (findedIt != m_Persons.end())
@@ -157,7 +157,7 @@ bool MainTableModel::RemovePerson(const ActorName& person) noexcept
     return false;
 }
 
-bool MainTableModel::RemoveActor(const ActorName& actor) noexcept
+bool MainTableModelRegistry::RemoveActor(const ActorName& actor) noexcept
 {
     auto findedIt = m_Actors.find(actor);
     if (findedIt != m_Actors.end())
@@ -194,7 +194,7 @@ bool MainTableModel::RemoveActor(const ActorName& actor) noexcept
     return false;
 }
 
-void MainTableModel::ClearAllPersons() noexcept
+void MainTableModelRegistry::ClearAllPersons() noexcept
 {
     // Снимаем все возможные ссылки на персонажей
     for (Actor& Value : m_Actors)
@@ -205,7 +205,7 @@ void MainTableModel::ClearAllPersons() noexcept
     m_Persons.clear();
 }
 
-void MainTableModel::ClearAllActors() noexcept
+void MainTableModelRegistry::ClearAllActors() noexcept
 {
     // Снимаем все возможные ссылки на актеров
     for (Person& Value : m_Persons)
@@ -216,3 +216,93 @@ void MainTableModel::ClearAllActors() noexcept
     m_Actors.clear();
 }
 
+
+MainTableModel::MainTableModel(QObject *parent) :
+    QAbstractTableModel(parent)
+{
+
+}
+
+int MainTableModel::rowCount(const QModelIndex &parent) const
+{
+    // TODO: implement this
+    return 0;
+}
+
+int MainTableModel::columnCount(const QModelIndex &parent) const
+{
+    return 3;
+}
+
+QVariant MainTableModel::data(const QModelIndex &index, int role) const
+{
+    return QVariant();
+}
+
+QVariant MainTableModel::headerData(int section, Qt::Orientation orientation, int role) const
+{
+    if( role != Qt::DisplayRole ) {
+            return QVariant();
+        }
+
+        if( orientation == Qt::Vertical ) {
+            return section;
+        }
+
+        switch( section ) {
+        case 0:
+            return QString::fromUtf8( "Актер" );
+        case 1:
+            return QString::fromUtf8( "Персонажи" );
+        case 2:
+            return QString::fromUtf8( "Исключить" );
+        }
+
+        return QVariant();
+}
+
+
+
+MainTableModel_Reversed::MainTableModel_Reversed(QObject *parent) :
+    QAbstractTableModel(parent)
+{
+
+}
+
+int MainTableModel_Reversed::rowCount(const QModelIndex &parent) const
+{
+    // TODO: implement this
+    return 0;
+}
+
+int MainTableModel_Reversed::columnCount(const QModelIndex &parent) const
+{
+    return 3;
+}
+
+QVariant MainTableModel_Reversed::data(const QModelIndex &index, int role) const
+{
+    return QVariant();
+}
+
+QVariant MainTableModel_Reversed::headerData(int section, Qt::Orientation orientation, int role) const
+{
+    if( role != Qt::DisplayRole ) {
+            return QVariant();
+        }
+
+        if( orientation == Qt::Vertical ) {
+            return section;
+        }
+
+        switch( section ) {
+        case 0:
+            return QString::fromUtf8( "Персонаж" );
+        case 1:
+            return QString::fromUtf8( "Актеры" );
+        case 2:
+            return QString::fromUtf8( "Исключить" );
+        }
+
+        return QVariant();
+}

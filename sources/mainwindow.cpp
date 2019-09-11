@@ -27,8 +27,16 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    ui->tableWidget->verticalHeader()->setSectionResizeMode (QHeaderView::Fixed);
-    ui->tableWidget->horizontalHeader()->setSectionResizeMode (QHeaderView::Stretch);
+    m_Model = new MainTableModel(this);
+    m_ModelReversed = new MainTableModel_Reversed(this);
+
+    ui->tableView->verticalHeader()->setSectionResizeMode (QHeaderView::Fixed);
+    ui->tableView->horizontalHeader()->setSectionResizeMode (QHeaderView::Stretch);
+    ui->tableView_Reversed->verticalHeader()->setSectionResizeMode (QHeaderView::Fixed);
+    ui->tableView_Reversed->horizontalHeader()->setSectionResizeMode (QHeaderView::Stretch);
+
+    ui->tableView->setModel(m_Model);
+    ui->tableView_Reversed->setModel(m_ModelReversed);
 }
 
 MainWindow::~MainWindow()
@@ -238,7 +246,7 @@ void MainWindow::on_pushButton_MakeDoc_clicked()
 
 void MainWindow::on_toolButton_Insert_clicked()
 {
-    int r = ui->tableWidget->rowCount();
+    /*int r = ui->tableWidget->rowCount();
     ui->tableWidget->insertRow(ui->tableWidget->rowCount());
     ui->tableWidget->setRowHeight(r, ui->tableWidget->rowHeight(r)+5);
 
@@ -263,14 +271,14 @@ void MainWindow::on_toolButton_Insert_clicked()
         l->addWidget( new QCheckBox );
         w->setLayout( l );
         ui->tableWidget->setCellWidget(r, 2, w);
-    }
+    }*/
 
 }
 
 void MainWindow::on_toolButton_Delete_clicked()
 {
     // preparing..
-    QItemSelection selection( ui->tableWidget->selectionModel()->selection() );
+    /*QItemSelection selection( ui->tableWidget->selectionModel()->selection() );
 
     QList<int> rows;
     QSet<int> rows_set; // rows_set only for checking
@@ -310,7 +318,7 @@ void MainWindow::on_toolButton_Delete_clicked()
           ui->tableWidget->removeRow( current);
           prev = current;
        }
-    }
+    }*/
 }
 
 void MainWindow::on_toolButton_Reverse_clicked()
