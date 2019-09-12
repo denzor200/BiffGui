@@ -27,16 +27,15 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    m_Model = new MainTableModel(this);
-    m_ModelReversed = new MainTableModel_Reversed(this);
+    m_ModelsMgr = new MainTableModelsManager(this);
 
     ui->tableView->verticalHeader()->setSectionResizeMode (QHeaderView::Fixed);
     ui->tableView->horizontalHeader()->setSectionResizeMode (QHeaderView::Stretch);
     ui->tableView_Reversed->verticalHeader()->setSectionResizeMode (QHeaderView::Fixed);
     ui->tableView_Reversed->horizontalHeader()->setSectionResizeMode (QHeaderView::Stretch);
 
-    ui->tableView->setModel(m_Model);
-    ui->tableView_Reversed->setModel(m_ModelReversed);
+    ui->tableView->setModel(m_ModelsMgr->GetModel());
+    ui->tableView_Reversed->setModel(m_ModelsMgr->GetModelReversed());
 }
 
 MainWindow::~MainWindow()

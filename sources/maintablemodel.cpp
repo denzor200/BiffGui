@@ -1,4 +1,6 @@
 #include "maintablemodel.h"
+#include <algorithm>
+#include <limits>
 
 bool MainTableModelRegistry::AddPerson(const ActorName& person)
 {
@@ -216,27 +218,49 @@ void MainTableModelRegistry::ClearAllActors() noexcept
     m_Actors.clear();
 }
 
-
-MainTableModel::MainTableModel(QObject *parent) :
-    QAbstractTableModel(parent)
+// Актер как ключ
+MainTableModel::MainTableModel( QObject *parent) :
+    QAbstractTableModel(parent),
+    m_Mngr(qobject_cast<MainTableModelsManager*>(parent))
 {
-
+    Q_ASSERT(m_Mngr);
 }
 
 int MainTableModel::rowCount(const QModelIndex &parent) const
 {
-    // TODO: implement this
-    return 0;
+    Q_UNUSED(parent);
+    return m_Mngr->GetRegistry()->getActorsCount();
 }
 
 int MainTableModel::columnCount(const QModelIndex &parent) const
 {
+    Q_UNUSED(parent);
     return 3;
 }
 
 QVariant MainTableModel::data(const QModelIndex &index, int role) const
 {
+    if(!index.isValid() ||
+      m_Mngr->GetRegistry()->getActorsCount() <= index.row() ||
+      ( role != Qt::DisplayRole /*&& role != Qt::EditRole*/ )
+        ) {
+            return QVariant();
+        }
+
+    switch (index.column())
+    {
+    case 0:
+
+        break;
+    case 1:
+
+        break;
+    case 2:
+
+        break;
+    }
     return QVariant();
+    //return m_persons[ index.row() ][ Column( index.column() ) ];
 }
 
 QVariant MainTableModel::headerData(int section, Qt::Orientation orientation, int role) const
@@ -262,26 +286,30 @@ QVariant MainTableModel::headerData(int section, Qt::Orientation orientation, in
 }
 
 
-
+// Персонаж как ключ
 MainTableModel_Reversed::MainTableModel_Reversed(QObject *parent) :
-    QAbstractTableModel(parent)
+    QAbstractTableModel(parent),
+    m_Mngr(qobject_cast<MainTableModelsManager*>(parent))
 {
-
+    Q_ASSERT(m_Mngr);
 }
 
 int MainTableModel_Reversed::rowCount(const QModelIndex &parent) const
 {
-    // TODO: implement this
-    return 0;
+    Q_UNUSED(parent);
+    return m_Mngr->GetRegistry()->getPersonsCount();
 }
 
 int MainTableModel_Reversed::columnCount(const QModelIndex &parent) const
 {
+    Q_UNUSED(parent);
     return 3;
 }
 
 QVariant MainTableModel_Reversed::data(const QModelIndex &index, int role) const
 {
+    Q_UNUSED(index);
+    Q_UNUSED(role);
     return QVariant();
 }
 
@@ -305,4 +333,11 @@ QVariant MainTableModel_Reversed::headerData(int section, Qt::Orientation orient
         }
 
         return QVariant();
+}
+
+MainTableModelsManager::MainTableModelsManager(QObject *parent) :
+    QObject(parent)
+{
+    m_Model = new MainTableModel(this);
+    m_ModelReversed = new MainTableModel_Reversed(this);
 }
