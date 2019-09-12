@@ -160,60 +160,60 @@ bool MainTableModelRegistry::Actor_ChangeRelation(size_t actorID, const ActorNam
     return false;
 }
 
-ActorName MainTableModelRegistry::PersonGetName(size_t ID) const
+QString MainTableModelRegistry::PersonGetName(size_t ID) const
 {
     if (ID < m_Persons_ByID.size())
     {
         PersonsList::iterator findedItValue = m_Persons_ByID[ID];
         Q_ASSERT(findedItValue != m_Persons.end());
 
-        return findedItValue->name;
+        return findedItValue->name.Get();
     }
     throw MainTableModelRegistry_InvalidPersonID();
 }
 
-ActorName MainTableModelRegistry::ActorGetName(size_t ID) const
+QString MainTableModelRegistry::ActorGetName(size_t ID) const
 {
     if (ID < m_Actors_ByID.size())
     {
         ActorsList::iterator findedItValue = m_Actors_ByID[ID];
         Q_ASSERT(findedItValue != m_Actors.end());
 
-        return findedItValue->name;
+        return findedItValue->name.Get();
     }
     throw MainTableModelRegistry_InvalidActorID();
 }
 
-std::vector<ActorName> MainTableModelRegistry::PersonGetActors(size_t ID) const
+QList<QString> MainTableModelRegistry::PersonGetActors(size_t ID) const
 {
     if (ID < m_Persons_ByID.size())
     {
         PersonsList::iterator findedItValue = m_Persons_ByID[ID];
         Q_ASSERT(findedItValue != m_Persons.end());
 
-        std::vector<ActorName> Actors;
+        QList<QString> Actors;
         Actors.reserve(findedItValue->actors.size());
         for (ActorsList::iterator it : findedItValue->actors)
         {
-           Actors.push_back(it->name);
+           Actors.push_back(it->name.Get());
         }
         return Actors;
     }
     throw MainTableModelRegistry_InvalidPersonID();
 }
 
-std::vector<ActorName> MainTableModelRegistry::ActorGetPersons(size_t ID) const
+QList<QString> MainTableModelRegistry::ActorGetPersons(size_t ID) const
 {
     if (ID < m_Actors_ByID.size())
     {
         ActorsList::iterator findedItValue = m_Actors_ByID[ID];
         Q_ASSERT(findedItValue != m_Actors.end());
 
-        std::vector<ActorName> Persons;
+        QList<QString> Persons;
         Persons.reserve(findedItValue->persons.size());
         for (PersonsList::iterator it : findedItValue->persons)
         {
-           Persons.push_back(it->name);
+           Persons.push_back(it->name.Get());
         }
         return Persons;
     }
@@ -357,20 +357,30 @@ QVariant MainTableModel::data(const QModelIndex &index, int role) const
             return QVariant();
         }
 
-    switch (index.column())
+    try {
+        switch (index.column())
+        {
+        case 0:
+            return m_Mngr->GetRegistry()->ActorGetName(index.row());
+        case 1:
+        {
+            // TODO: refact it
+            QString ret;
+            auto v=m_Mngr->GetRegistry()->ActorGetPersons(index.row());
+            for (auto t:v)
+            {
+                ret += t + ", ";
+            }
+            return ret;
+        }
+        case 2:
+            return m_Mngr->GetRegistry()->ActorIsDenied(index.row());
+        }
+    }
+    catch (const MainTableModelRegistry_InvalidActorID&)
     {
-    case 0:
-
-        break;
-    case 1:
-
-        break;
-    case 2:
-
-        break;
     }
     return QVariant();
-    //return m_persons[ index.row() ][ Column( index.column() ) ];
 }
 
 QVariant MainTableModel::headerData(int section, Qt::Orientation orientation, int role) const
@@ -418,8 +428,36 @@ int MainTableModel_Reversed::columnCount(const QModelIndex &parent) const
 
 QVariant MainTableModel_Reversed::data(const QModelIndex &index, int role) const
 {
-    Q_UNUSED(index);
-    Q_UNUSED(role);
+    if(!index.isValid() ||
+      m_Mngr->GetRegistry()->getPersonsCount() <= index.row() ||
+      ( role != Qt::DisplayRole /*&& role != Qt::EditRole*/ )
+        ) {
+            return QVariant();
+        }
+
+    try {
+        switch (index.column())
+        {
+        case 0:
+            return m_Mngr->GetRegistry()->PersonGetName(index.row());
+        case 1:
+        {
+            // TODO: refact it
+            QString ret;
+            auto v=m_Mngr->GetRegistry()->PersonGetActors(index.row());
+            for (auto t:v)
+            {
+                ret += t + ", ";
+            }
+            return ret;
+        }
+        case 2:
+            return m_Mngr->GetRegistry()->PersonIsDenied(index.row());
+        }
+    }
+    catch (const MainTableModelRegistry_InvalidPersonID&)
+    {
+    }
     return QVariant();
 }
 
@@ -450,4 +488,19 @@ MainTableModelsManager::MainTableModelsManager(QObject *parent) :
 {
     m_Model = new MainTableModel(this);
     m_ModelReversed = new MainTableModel_Reversed(this);
+
+   // Testing..
+   m_Registry.AddActor(ActorName("Черсков"));
+   m_Registry.AddActor(ActorName("Корш"));
+
+   m_Registry.AddPerson(ActorName("Персонаж 1"));
+   m_Registry.AddPerson(ActorName("Персонаж 2"));
+   m_Registry.AddPerson(ActorName("Персонаж 3"));
+   m_Registry.AddPerson(ActorName("Персонаж 4"));
+
+   m_Registry.Actor_ChangeRelation(0, ActorName("Персонаж 1"), true);
+   m_Registry.Actor_ChangeRelation(0, ActorName("Персонаж 2"), true);
+
+   m_Registry.Actor_ChangeRelation(1, ActorName("Персонаж 2"), true);
+   m_Registry.Actor_ChangeRelation(1, ActorName("Персонаж 3"), true);
 }

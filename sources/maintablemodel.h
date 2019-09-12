@@ -56,11 +56,11 @@ public:
     bool Person_ChangeRelation(size_t personID, const ActorName& actor, bool State);
     bool Actor_ChangeRelation(size_t actorID, const ActorName& person, bool State);
 
-    ActorName PersonGetName(size_t ID) const;
-    ActorName ActorGetName(size_t ID) const;
+    QString PersonGetName(size_t ID) const;
+    QString ActorGetName(size_t ID) const;
 
-    std::vector<ActorName> PersonGetActors(size_t ID) const;
-    std::vector<ActorName> ActorGetPersons(size_t ID) const;
+    QList<QString> PersonGetActors(size_t ID) const;
+    QList<QString> ActorGetPersons(size_t ID) const;
 
     bool PersonIsDenied(size_t ID) const;
     bool ActorIsDenied(size_t ID) const;
@@ -71,6 +71,7 @@ public:
     void ClearAllPersons() noexcept;
     void ClearAllActors() noexcept;
 
+    // TODO: тут должен возвращаться int
     size_t getPersonsCount() const noexcept { return m_Persons_ByID.size(); }
     size_t getActorsCount() const noexcept { return m_Actors_ByID.size(); }
 
