@@ -4,11 +4,24 @@
 
 bool MainTableModelRegistry::AddPerson(const ActorName& person)
 {
-    if (m_Persons.find(person) == m_Persons.end())
+    if (m_Persons_ByName.find(person) == m_Persons_ByName.end())
     {
         Person NewObj;
         NewObj.name = person;
-        m_Persons[person] = NewObj;
+        m_Persons.push_front(std::move(NewObj));
+        try {
+            m_Persons_ByID.push_back(m_Persons.begin());
+        } catch (...) {
+            m_Persons.pop_front();
+            throw ;
+        }
+        try {
+            m_Persons_ByName[person] = m_Persons.begin();
+        } catch (...) {
+            m_Persons_ByID.pop_back();
+            m_Persons.pop_front();
+            throw;
+        }
         return true;
     }
     return false;
@@ -16,181 +29,274 @@ bool MainTableModelRegistry::AddPerson(const ActorName& person)
 
 bool MainTableModelRegistry::AddActor(const ActorName& actor)
 {
-    if (m_Actors.find(actor) == m_Actors.end())
+    if (m_Actors_ByName.find(actor) == m_Actors_ByName.end())
     {
         Actor NewObj;
         NewObj.name = actor;
-        m_Actors[actor] = NewObj;
+        m_Actors.push_front(std::move(NewObj));
+        try {
+            m_Actors_ByID.push_back(m_Actors.begin());
+        } catch (...) {
+            m_Actors.pop_front();
+            throw ;
+        }
+        try {
+            m_Actors_ByName[actor] = m_Actors.begin();
+        } catch (...) {
+            m_Actors_ByID.pop_back();
+            m_Actors.pop_front();
+            throw;
+        }
         return true;
     }
     return false;
 }
 
-bool MainTableModelRegistry::RenamePerson(const ActorName& oldName, const ActorName& newName)
+bool MainTableModelRegistry::RenamePerson(size_t ID, const ActorName& newName)
 {
-    auto it = m_Persons.find(oldName);
-    if (it != m_Persons.end())
+    if (ID < m_Persons_ByID.size())
     {
-        Person NewObj = *it;
-        NewObj.name = newName;
-        m_Persons[newName] = NewObj;
-        // TODO: нужен ли этот рефреш итератора после вставки??
-        it = m_Persons.find(oldName);
+        auto it = m_Persons_ByID[ID];
         Q_ASSERT(it != m_Persons.end());
-        m_Persons.erase(it);
-        return true;
+
+        ActorName OldName = it->name;
+        auto inserted = m_Persons_ByName.insert({newName, it});
+        if (inserted.second)
+        {
+            try {
+                it->name = newName;
+            } catch (...) {
+                m_Persons_ByName.erase(inserted.first);
+                throw;
+            }
+            m_Persons_ByName.erase(OldName);
+            return true;
+        }
     }
     return false;
 }
 
-bool MainTableModelRegistry::RenameActor(const ActorName& oldName, const ActorName& newName)
+bool MainTableModelRegistry::RenameActor(size_t ID, const ActorName& newName)
 {
-    auto it = m_Actors.find(oldName);
-    if (it != m_Actors.end())
+    if (ID < m_Actors_ByID.size())
     {
-        Actor NewObj = *it;
-        NewObj.name = newName;
-        m_Actors[newName] = NewObj;
-        it = m_Actors.find(oldName);
+        auto it = m_Actors_ByID[ID];
         Q_ASSERT(it != m_Actors.end());
-        m_Actors.erase(it);
+
+        ActorName OldName = it->name;
+        auto inserted = m_Actors_ByName.insert({newName, it});
+        if (inserted.second)
+        {
+            try {
+                it->name = newName;
+            } catch (...) {
+                m_Actors_ByName.erase(inserted.first);
+                throw;
+            }
+            m_Actors_ByName.erase(OldName);
+            return true;
+        }
+    }
+    return false;
+}
+
+
+// internal method
+bool MainTableModelRegistry::Person_ChangeRelation(PersonsList::iterator personIt, ActorsList::iterator actorIt, bool State)
+{
+    return Actor_ChangeRelation(actorIt, personIt, State);
+}
+
+// internal method
+bool MainTableModelRegistry::Actor_ChangeRelation(ActorsList::iterator actorIt, PersonsList::iterator personIt, bool State)
+{
+
+    if (State)
+    {
+        std::vector<PersonsList::iterator> TempActorPersons = actorIt->persons;
+        std::vector<ActorsList::iterator> TempPersonActors = personIt->actors;
+        if (std::find(TempActorPersons.begin(),TempActorPersons.end(), personIt)==TempActorPersons.end())
+            TempActorPersons.push_back(personIt);
+        if (std::find(TempPersonActors.begin(),TempPersonActors.end(), actorIt)==TempPersonActors.end())
+            TempPersonActors.push_back(actorIt);
+        std::swap(actorIt->persons, TempActorPersons);
+        std::swap(personIt->actors, TempPersonActors);
+    }
+    else {
+        // TODO: можно ли вызывать std::remove на std::set??
+        actorIt->persons.erase(
+                    std::remove(actorIt->persons.begin(), actorIt->persons.end(), personIt),
+                    actorIt->persons.end());
+        personIt->actors.erase(
+                    std::remove(personIt->actors.begin(), personIt->actors.end(), actorIt),
+                    personIt->actors.end());
+    }
+    return true;
+}
+
+
+bool MainTableModelRegistry::Person_ChangeRelation(size_t personID, const ActorName& actor, bool State)
+{
+    auto actorIt = m_Actors_ByName.find(actor);
+    if (actorIt != m_Actors_ByName.end() && personID < m_Persons_ByID.size())
+    {
+        PersonsList::iterator personIt = m_Persons_ByID[personID];
+        Q_ASSERT(personIt != m_Persons.end());
+
+        return Person_ChangeRelation(personIt, actorIt->second, State);
+    }
+    return false;
+}
+bool MainTableModelRegistry::Actor_ChangeRelation(size_t actorID, const ActorName& person, bool State)
+{
+    auto personIt = m_Persons_ByName.find(person);
+    if (personIt != m_Persons_ByName.end() && actorID < m_Actors_ByID.size())
+    {
+        ActorsList::iterator actorIt = m_Actors_ByID[actorID];
+        Q_ASSERT(actorIt != m_Actors.end());
+
+        return Actor_ChangeRelation(actorIt, personIt->second, State);
+    }
+    return false;
+}
+
+ActorName MainTableModelRegistry::PersonGetName(size_t ID) const
+{
+    if (ID < m_Persons_ByID.size())
+    {
+        PersonsList::iterator findedItValue = m_Persons_ByID[ID];
+        Q_ASSERT(findedItValue != m_Persons.end());
+
+        return findedItValue->name;
+    }
+    throw MainTableModelRegistry_InvalidPersonID();
+}
+
+ActorName MainTableModelRegistry::ActorGetName(size_t ID) const
+{
+    if (ID < m_Actors_ByID.size())
+    {
+        ActorsList::iterator findedItValue = m_Actors_ByID[ID];
+        Q_ASSERT(findedItValue != m_Actors.end());
+
+        return findedItValue->name;
+    }
+    throw MainTableModelRegistry_InvalidActorID();
+}
+
+std::vector<ActorName> MainTableModelRegistry::PersonGetActors(size_t ID) const
+{
+    if (ID < m_Persons_ByID.size())
+    {
+        PersonsList::iterator findedItValue = m_Persons_ByID[ID];
+        Q_ASSERT(findedItValue != m_Persons.end());
+
+        std::vector<ActorName> Actors;
+        Actors.reserve(findedItValue->actors.size());
+        for (ActorsList::iterator it : findedItValue->actors)
+        {
+           Actors.push_back(it->name);
+        }
+        return Actors;
+    }
+    throw MainTableModelRegistry_InvalidPersonID();
+}
+
+std::vector<ActorName> MainTableModelRegistry::ActorGetPersons(size_t ID) const
+{
+    if (ID < m_Actors_ByID.size())
+    {
+        ActorsList::iterator findedItValue = m_Actors_ByID[ID];
+        Q_ASSERT(findedItValue != m_Actors.end());
+
+        std::vector<ActorName> Persons;
+        Persons.reserve(findedItValue->persons.size());
+        for (PersonsList::iterator it : findedItValue->persons)
+        {
+           Persons.push_back(it->name);
+        }
+        return Persons;
+    }
+    throw MainTableModelRegistry_InvalidActorID();
+}
+
+bool MainTableModelRegistry::PersonIsDenied(size_t ID) const
+{
+    if (ID < m_Persons_ByID.size())
+    {
+        PersonsList::iterator findedItValue = m_Persons_ByID[ID];
+        Q_ASSERT(findedItValue != m_Persons.end());
+
+        return findedItValue->deny;
+    }
+    throw MainTableModelRegistry_InvalidPersonID();
+}
+
+bool MainTableModelRegistry::ActorIsDenied(size_t ID) const
+{
+    if (ID < m_Actors_ByID.size())
+    {
+        ActorsList::iterator findedItValue = m_Actors_ByID[ID];
+        Q_ASSERT(findedItValue != m_Actors.end());
+
+        return findedItValue->deny;
+    }
+    throw MainTableModelRegistry_InvalidActorID();
+}
+
+bool MainTableModelRegistry::RemovePerson(size_t ID) noexcept
+{
+    if (ID < m_Persons_ByID.size())
+    {
+        PersonsList::iterator findedItValue = m_Persons_ByID[ID];
+        Q_ASSERT(findedItValue != m_Persons.end());
+
+        // Снимаем все ссылки на конкретный элемент
+        // Нет смысла перебирать все значения из m_Persons, достаточно перебрать только свои
+        for (ActorsList::iterator Value : findedItValue->actors)
+        {
+            Q_ASSERT(Value != m_Actors.end());
+            // TODO: можно ли вызывать std::remove на std::set??
+            Value->persons.erase(
+                        std::remove(Value->persons.begin(), Value->persons.end(), findedItValue),
+                        Value->persons.end());
+        }
+
+        // Удаляем непосредственно из хранилищ
+        m_Persons_ByID.erase(
+                    std::remove(m_Persons_ByID.begin(), m_Persons_ByID.end(), findedItValue),
+                    m_Persons_ByID.end());
+        m_Persons_ByName.erase(findedItValue->name);
+        m_Persons.erase(findedItValue);
         return true;
     }
     return false;
 }
 
-bool MainTableModelRegistry::Person_ChangeStateActor(const ActorName& person, const ActorName& actor, bool State)
+bool MainTableModelRegistry::RemoveActor(size_t ID) noexcept
 {
-    return Actor_ChangeStatePerson(actor, person, State);
-}
-
-bool MainTableModelRegistry::Actor_ChangeStatePerson(const ActorName& actor, const ActorName& person, bool State)
-{
-    auto actorIt = m_Actors.find(actor);
-    auto personIt = m_Persons.find(person);
-    if (actorIt != m_Actors.end() && personIt != m_Persons.end())
+    if (ID < m_Actors_ByID.size())
     {
-        Actor& refActor = *actorIt;
-        Person& refPerson = *personIt;
-        Actor* ptrActor = &refActor;
-        Person* ptrPerson = &refPerson;
-        // Говоря обобщенным языком..
-        // Тут происходит или создание взаимной связи
-        // или ее удаление
-        if (State)
+        ActorsList::iterator findedItValue = m_Actors_ByID[ID];
+        Q_ASSERT(findedItValue != m_Actors.end());
+
+        // Снимаем все ссылки на конкретный элемент
+        // Нет смысла перебирать все значения из m_Persons, достаточно перебрать только свои
+        for (PersonsList::iterator Value : findedItValue->persons)
         {
-            QSet<Person*> TempActorPersons = refActor.persons;
-            QSet<Actor*> TempPersonActors = refPerson.actors;
-            TempActorPersons.insert(&refPerson);
-            TempPersonActors.insert(&refActor);
-            // TODO: убедись, что std::swap не создает лишнего копирования в комбинации с QSet
-            std::swap(refActor.persons, TempActorPersons);
-            std::swap(refPerson.actors, TempPersonActors);
-        }
-        else {
-            {
-                auto it = refActor.persons.begin();
-                while (it != refActor.persons.end())
-                {
-                    Person* PersonValue = *it;
-                    if (PersonValue == ptrPerson)
-                    {
-                        it = refActor.persons.erase(it);
-                    }
-                    else {
-                        ++it;
-                    }
-                }
-            }
-            {
-                auto it = refPerson.actors.begin();
-                while (it != refPerson.actors.end())
-                {
-                    Actor* ActorValue = *it;
-                    if (ActorValue == ptrActor)
-                    {
-                        it = refPerson.actors.erase(it);
-                    }
-                    else {
-                        ++it;
-                    }
-                }
-            }
-        }
-        return true;
-    }
-    return false;
-}
-
-bool MainTableModelRegistry::RemovePerson(const ActorName& person) noexcept
-{
-    auto findedIt = m_Persons.find(person);
-    if (findedIt != m_Persons.end())
-    {
-        Person& rFindedIt = *findedIt;
-        Person* pFindedIt = &rFindedIt;
-
-        // Снимаем все ссылки (checked)
-        for (Actor* Value : pFindedIt->actors)
-        {
-            // Можно было-бы перебрать все значения из m_Actors..
-            // Но зачем?
-            // Имеет смысл перебирать только свои
-
-            Q_ASSERT(Value);
-            auto loopedIt = Value->persons.begin();
-            while (loopedIt != Value->persons.end())
-            {
-                Person* PersonValue = *loopedIt;
-                if (PersonValue==pFindedIt)
-                {
-                    loopedIt = Value->persons.erase(loopedIt);
-                }
-                else {
-                    ++loopedIt;
-                }
-            }
+            Q_ASSERT(Value != m_Persons.end());
+            // TODO: можно ли вызывать std::remove на std::set??
+            Value->actors.erase(
+                        std::remove(Value->actors.begin(), Value->actors.end(), findedItValue),
+                        Value->actors.end());
         }
 
-        // Удаляем непосредственно из хранилища
-        m_Persons.erase(findedIt);
-        return true;
-    }
-    return false;
-}
-
-bool MainTableModelRegistry::RemoveActor(const ActorName& actor) noexcept
-{
-    auto findedIt = m_Actors.find(actor);
-    if (findedIt != m_Actors.end())
-    {
-        Actor& rFindedIt = *findedIt;
-        Actor* pFindedIt = &rFindedIt;
-
-        // Снимаем все ссылки (checked)
-        for (Person* Value : pFindedIt->persons)
-        {
-            // Можно было-бы перебрать все значения из m_Persons..
-            // Но зачем?
-            // Имеет смысл перебирать только свои
-
-            Q_ASSERT(Value);
-            auto loopedIt = Value->actors.begin();
-            while (loopedIt != Value->actors.end())
-            {
-                Actor* ActorValue = *loopedIt;
-                if (ActorValue==pFindedIt)
-                {
-                    loopedIt = Value->actors.erase(loopedIt);
-                }
-                else {
-                    ++loopedIt;
-                }
-            }
-        }
-
-        // Удаляем непосредственно из хранилища
-        m_Actors.erase(findedIt);
+        // Удаляем непосредственно из хранилищ
+        m_Actors_ByID.erase(
+                    std::remove(m_Actors_ByID.begin(), m_Actors_ByID.end(), findedItValue),
+                    m_Actors_ByID.end());
+        m_Actors_ByName.erase(findedItValue->name);
+        m_Actors.erase(findedItValue);
         return true;
     }
     return false;
@@ -203,7 +309,9 @@ void MainTableModelRegistry::ClearAllPersons() noexcept
     {
         Value.persons.clear();
     }
-    // Очищаем хранилище
+    // Очищаем все хранилища
+    m_Persons_ByID.clear();
+    m_Persons_ByName.clear();
     m_Persons.clear();
 }
 
@@ -214,7 +322,9 @@ void MainTableModelRegistry::ClearAllActors() noexcept
     {
         Value.actors.clear();
     }
-    // Очищаем хранилище
+    // Очищаем все хранилища
+    m_Actors_ByID.clear();
+    m_Actors_ByName.clear();
     m_Actors.clear();
 }
 

@@ -29,7 +29,18 @@ public:
 
 };
 
-inline uint qHash(const ActorName &key, uint seed)
+inline uint qHash(const ActorName &key, uint seed = 0)
 {
     return qHash(key.Get().toUpper(), seed);
+}
+
+namespace std {
+template<>
+class hash<ActorName> {
+public:
+    size_t operator()(const ActorName &key) const
+    {
+        return static_cast<size_t>(qHash(key));
+    }
+};
 }
