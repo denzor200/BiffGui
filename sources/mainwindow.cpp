@@ -245,6 +245,8 @@ void MainWindow::on_pushButton_MakeDoc_clicked()
 
 void MainWindow::on_toolButton_Insert_clicked()
 {
+    m_ModelsMgr->ActorsInsertRow();
+
     /*int r = ui->tableWidget->rowCount();
     ui->tableWidget->insertRow(ui->tableWidget->rowCount());
     ui->tableWidget->setRowHeight(r, ui->tableWidget->rowHeight(r)+5);

@@ -578,3 +578,21 @@ MainTableModelsManager::MainTableModelsManager(QObject *parent) :
    m_Registry.Actor_ChangeRelation(1, ActorName("Персонаж 2"), true);
    m_Registry.Actor_ChangeRelation(1, ActorName("Персонаж 3"), true);
 }
+
+bool MainTableModelsManager::PersonsInsertRow()
+{
+    int row = m_Registry.getPersonsCount();
+    m_ModelReversed->beginInsertRows( QModelIndex(), row, row );
+    bool Status = m_Registry.ReserveNewPersonIndex();
+    m_ModelReversed->endInsertRows();
+    return Status;
+}
+
+bool MainTableModelsManager::ActorsInsertRow()
+{
+    int row = m_Registry.getActorsCount();
+    m_Model->beginInsertRows( QModelIndex(), row, row );
+    bool Status = m_Registry.ReserveNewActorIndex();
+    m_Model->endInsertRows();
+    return Status;
+}

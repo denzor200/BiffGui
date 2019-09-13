@@ -117,6 +117,9 @@ public:
     MainTableModel_Reversed*            GetModelReversed()          { return m_ModelReversed; }
     const MainTableModel_Reversed*      GetModelReversed() const    { return m_ModelReversed; }
 
+    bool PersonsInsertRow();
+    bool ActorsInsertRow();
+
 protected:
     friend class MainTableModel;
     friend class MainTableModel_Reversed;
@@ -143,6 +146,7 @@ public:
     QVariant headerData( int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
 
 private:
+    friend class MainTableModelsManager;
     MainTableModelsManager* m_Mngr;
 };
 
@@ -159,6 +163,7 @@ public:
     QVariant headerData( int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
 
 private:
+    friend class MainTableModelsManager;
     MainTableModelsManager* m_Mngr;
 };
 
