@@ -583,16 +583,22 @@ bool MainTableModelsManager::PersonsInsertRow()
 {
     int row = m_Registry.getPersonsCount();
     m_ModelReversed->beginInsertRows( QModelIndex(), row, row );
-    bool Status = m_Registry.ReserveNewPersonIndex();
-    m_ModelReversed->endInsertRows();
-    return Status;
+    if (m_Registry.ReserveNewPersonIndex())
+    {
+        m_ModelReversed->endInsertRows();
+        return true;
+    }
+    return false;
 }
 
 bool MainTableModelsManager::ActorsInsertRow()
 {
     int row = m_Registry.getActorsCount();
     m_Model->beginInsertRows( QModelIndex(), row, row );
-    bool Status = m_Registry.ReserveNewActorIndex();
-    m_Model->endInsertRows();
-    return Status;
+    if (m_Registry.ReserveNewActorIndex())
+    {
+        m_Model->endInsertRows();
+        return true;
+    }
+    return false;
 }
