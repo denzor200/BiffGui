@@ -45,35 +45,42 @@ class MainTableModelRegistry
         bool deny = false;
     };
 public:
-    MainTableModelRegistry() = default;
+    MainTableModelRegistry() :
+        NULL_ACTOR(m_Actors.end()),
+        NULL_PERSON(m_Persons.end())
+    {
+    }
 
-    bool AddPerson(const ActorName& person);
-    bool AddActor(const ActorName& actor);
+    bool ReserveNewPersonIndex();
+    bool ReserveNewActorIndex();
 
-    bool RenamePerson(size_t ID, const ActorName& newName);
-    bool RenameActor(size_t ID, const ActorName& newName);
+    bool AddPerson(const ActorName& person, int ID = -1);
+    bool AddActor(const ActorName& actor, int ID = -1);
 
-    bool Person_ChangeRelation(size_t personID, const ActorName& actor, bool State);
-    bool Actor_ChangeRelation(size_t actorID, const ActorName& person, bool State);
+    bool RenamePerson(int ID, const ActorName& newName);
+    bool RenameActor(int ID, const ActorName& newName);
 
-    QString PersonGetName(size_t ID) const;
-    QString ActorGetName(size_t ID) const;
+    bool Person_ChangeRelation(int personID, const ActorName& actor, bool State);
+    bool Actor_ChangeRelation(int actorID, const ActorName& person, bool State);
 
-    QList<QString> PersonGetActors(size_t ID) const;
-    QList<QString> ActorGetPersons(size_t ID) const;
+    QString PersonGetName(int ID) const;
+    QString ActorGetName(int ID) const;
 
-    bool PersonIsDenied(size_t ID) const;
-    bool ActorIsDenied(size_t ID) const;
+    QList<QString> PersonGetActors(int ID) const;
+    QList<QString> ActorGetPersons(int ID) const;
 
-    bool RemovePerson(size_t ID) noexcept;
-    bool RemoveActor(size_t ID) noexcept;
+    bool PersonIsDenied(int ID) const;
+    bool ActorIsDenied(int ID) const;
+
+    bool RemovePerson(int ID) noexcept;
+    bool RemoveActor(int ID) noexcept;
 
     void ClearAllPersons() noexcept;
     void ClearAllActors() noexcept;
 
-    // TODO: тут должен возвращаться int
-    size_t getPersonsCount() const noexcept { return m_Persons_ByID.size(); }
-    size_t getActorsCount() const noexcept { return m_Actors_ByID.size(); }
+    // TODO: fix warning
+    int getPersonsCount() const noexcept { return m_Persons_ByID.size(); }
+    int getActorsCount() const noexcept { return m_Actors_ByID.size(); }
 
 private:
     bool Person_ChangeRelation(PersonsList::iterator personIt, ActorsList::iterator actorIt, bool State);
@@ -90,6 +97,9 @@ private:
 
     std::unordered_map<ActorName,ActorsList::iterator> m_Actors_ByName;
     std::unordered_map<ActorName,PersonsList::iterator> m_Persons_ByName;
+
+    const ActorsList::iterator NULL_ACTOR;
+    const PersonsList::iterator NULL_PERSON;
 };
 
 class MainTableModel;
