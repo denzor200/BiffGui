@@ -21,6 +21,7 @@
 #include "generating.h"
 
 #include "DirectoriesRegistry.h"
+#include "maintabledelegates.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -31,8 +32,10 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->tableView->verticalHeader()->setSectionResizeMode (QHeaderView::Fixed);
     ui->tableView->horizontalHeader()->setSectionResizeMode (QHeaderView::Stretch);
+    ui->tableView->setItemDelegateForColumn(2,new CChoiceDenyStatusDelegate(this) );
     ui->tableView_Reversed->verticalHeader()->setSectionResizeMode (QHeaderView::Fixed);
     ui->tableView_Reversed->horizontalHeader()->setSectionResizeMode (QHeaderView::Stretch);
+    ui->tableView_Reversed->setItemDelegateForColumn(2,new CChoiceDenyStatusDelegate(this) );
 
     ui->tableView->setModel(m_ModelsMgr->GetModel());
     ui->tableView_Reversed->setModel(m_ModelsMgr->GetModelReversed());

@@ -31,6 +31,7 @@ SOURCES += \
         libqxt/core/qxtglobal.cpp \
         libqxt/gui/qxtcheckcombobox.cpp \
         main.cpp \
+        maintabledelegates.cpp \
         maintablemodel.cpp \
         mainwindow.cpp \
         settings.cpp
@@ -44,6 +45,7 @@ HEADERS += \
         libqxt/core/qxtnamespace.h \
         libqxt/gui/qxtcheckcombobox.h \
         libqxt/gui/qxtcheckcombobox_p.h \
+        maintabledelegates.h \
         maintablemodel.h \
         mainwindow.h \
         settings.h
