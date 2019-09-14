@@ -63,6 +63,9 @@ public:
     bool RenamePerson(int ID, const ActorName& newName);
     bool RenameActor(int ID, const ActorName& newName);
 
+    bool ChangeDenyPerson(int ID, bool State);
+    bool ChangeDenyActor(int ID, bool State);
+
     bool Person_ChangeRelation(int personID, const ActorName& actor, bool State);
     bool Actor_ChangeRelation(int actorID, const ActorName& person, bool State);
 
@@ -88,6 +91,44 @@ private:
     bool Person_ChangeRelation(PersonsList::iterator personIt, ActorsList::iterator actorIt, bool State);
     bool Actor_ChangeRelation(ActorsList::iterator actorIt, PersonsList::iterator personIt, bool State);
 
+    template <typename RET_T, typename EX_T, typename IT_T, typename FUNC_T>
+    RET_T BaseGetter(
+            const std::vector<IT_T>& Storage,
+            int ID,
+            IT_T NULL_IT,
+            const FUNC_T& Func) const;
+
+
+    template <typename IT_T, typename FUNC_T>
+    bool BaseSetter(
+            std::vector<IT_T>& Storage,
+            int ID,
+            IT_T NULL_IT,
+            const FUNC_T& Func);
+
+
+    template <typename RET_T, typename FUNC_T>
+    RET_T ActorsBaseGetter(
+            int ID,
+            const FUNC_T& Func) const;
+
+    template <typename RET_T, typename FUNC_T>
+    RET_T PersonsBaseGetter(
+            int ID,
+            const FUNC_T& Func) const;
+
+
+    template <typename FUNC_T>
+    bool ActorsBaseSetter(
+            int ID,
+            const FUNC_T& Func);
+
+    template <typename FUNC_T>
+    bool PersonsBaseSetter(
+            int ID,
+            const FUNC_T& Func);
+
+
 private:
     // main storage
     ActorsList m_Actors;
@@ -103,6 +144,80 @@ private:
     const ActorsList::iterator NULL_ACTOR;
     const PersonsList::iterator NULL_PERSON;
 };
+
+template <typename RET_T, typename EX_T, typename IT_T, typename FUNC_T>
+RET_T MainTableModelRegistry::BaseGetter(
+        const std::vector<IT_T>& Storage,
+        int ID,
+        IT_T NULL_IT,
+        const FUNC_T& Func) const
+{
+    if (ID < 0)
+        throw EX_T();
+    if (static_cast<size_t>(ID) < Storage.size())
+    {
+        IT_T findedItValue = Storage[static_cast<size_t>(ID)];
+        if (findedItValue != NULL_IT)
+            return Func(findedItValue);
+    }
+    throw EX_T();
+}
+
+
+template <typename IT_T, typename FUNC_T>
+bool MainTableModelRegistry::BaseSetter(
+        std::vector<IT_T>& Storage,
+        int ID,
+        IT_T NULL_IT,
+        const FUNC_T& Func)
+{
+    if (ID < 0)
+        return false;
+    if (static_cast<int>(ID) < Storage.size())
+    {
+        auto it = Storage[static_cast<int>(ID)];
+        if (it != NULL_IT)
+        {
+            Func(it);
+            return true;
+        }
+    }
+    return false;
+}
+
+template <typename FUNC_T>
+bool MainTableModelRegistry::ActorsBaseSetter(
+        int ID,
+        const FUNC_T& Func)
+{
+    return BaseSetter(m_Actors_ByID, ID, NULL_ACTOR, Func);
+}
+
+template <typename FUNC_T>
+bool MainTableModelRegistry::PersonsBaseSetter(
+        int ID,
+        const FUNC_T& Func)
+{
+    return BaseSetter(m_Persons_ByID, ID, NULL_PERSON, Func);
+}
+
+
+
+template <typename RET_T, typename FUNC_T>
+RET_T MainTableModelRegistry::ActorsBaseGetter(
+        int ID,
+        const FUNC_T& Func) const
+{
+    return BaseGetter<RET_T, MainTableModelRegistry_InvalidActorID>(m_Actors_ByID, ID, NULL_ACTOR, Func);
+}
+
+template <typename RET_T, typename FUNC_T>
+RET_T MainTableModelRegistry::PersonsBaseGetter(
+        int ID,
+        const FUNC_T& Func) const
+{
+    return BaseGetter<RET_T, MainTableModelRegistry_InvalidPersonID>(m_Persons_ByID, ID, NULL_PERSON, Func);
+}
 
 namespace MainTableModelUtils
 {

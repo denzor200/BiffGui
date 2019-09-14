@@ -146,7 +146,7 @@ bool MainTableModelRegistry::RenamePerson(int ID, const ActorName& newName)
     if (TO_SZ(ID) < m_Persons_ByID.size())
     {
         auto it = m_Persons_ByID[TO_SZ(ID)];
-        if (it != m_Persons.end())
+        if (it != NULL_PERSON)
         {
             ActorName OldName = it->name;
             auto inserted = m_Persons_ByName.insert({newName, it});
@@ -173,7 +173,7 @@ bool MainTableModelRegistry::RenameActor(int ID, const ActorName& newName)
     if (TO_SZ(ID) < m_Actors_ByID.size())
     {
         auto it = m_Actors_ByID[TO_SZ(ID)];
-        if (it != m_Actors.end())
+        if (it != NULL_ACTOR)
         {
             ActorName OldName = it->name;
             auto inserted = m_Actors_ByName.insert({newName, it});
@@ -191,6 +191,24 @@ bool MainTableModelRegistry::RenameActor(int ID, const ActorName& newName)
         }
     }
     return false;
+}
+
+bool MainTableModelRegistry::ChangeDenyPerson(int ID, bool State)
+{
+    qDebug() << "[MainTableModelRegistry::ChangeDenyPerson]: " << ID << ", " << State;
+    return PersonsBaseSetter(ID, [&](PersonsList::iterator Value)
+    {
+        Value->deny = State;
+    });
+}
+
+bool MainTableModelRegistry::ChangeDenyActor(int ID, bool State)
+{
+    qDebug() << "[MainTableModelRegistry::ChangeDenyActor]: " << ID << ", " << State;
+    return ActorsBaseSetter(ID, [&](ActorsList::iterator Value)
+    {
+        Value->deny = State;
+    });
 }
 
 
@@ -234,7 +252,7 @@ bool MainTableModelRegistry::Person_ChangeRelation(int personID, const ActorName
     if (actorIt != m_Actors_ByName.end() && TO_SZ(personID) < m_Persons_ByID.size())
     {
         PersonsList::iterator personIt = m_Persons_ByID[TO_SZ(personID)];
-        if (personIt != m_Persons.end())
+        if (personIt != NULL_PERSON)
             return Person_ChangeRelation(personIt, actorIt->second, State);
     }
     return false;
@@ -247,7 +265,7 @@ bool MainTableModelRegistry::Actor_ChangeRelation(int actorID, const ActorName& 
     if (personIt != m_Persons_ByName.end() && TO_SZ(actorID) < m_Actors_ByID.size())
     {
         ActorsList::iterator actorIt = m_Actors_ByID[TO_SZ(actorID)];
-        if (actorIt != m_Actors.end())
+        if (actorIt != NULL_ACTOR)
             return Actor_ChangeRelation(actorIt, personIt->second, State);
     }
     return false;
@@ -265,97 +283,69 @@ bool MainTableModelRegistry::Actor_ChangeRelation(int actorID, const ActorName& 
 QString MainTableModelRegistry::PersonGetName(int ID) const
 {
     GETTER_DEBUG() << "[MainTableModelRegistry::PersonGetName]: " << ID;
-    CHECK_COND_THROW(ID >= 0, MainTableModelRegistry_InvalidPersonID);
-    if (TO_SZ(ID) < m_Persons_ByID.size())
+    return PersonsBaseGetter<QString>(ID,[](PersonsList::iterator Value) -> QString
     {
-        PersonsList::iterator findedItValue = m_Persons_ByID[TO_SZ(ID)];
-        if (findedItValue != m_Persons.end())
-            return findedItValue->name.Get();
-    }
-    throw MainTableModelRegistry_InvalidPersonID();
+        return Value->name.Get();
+    });
 }
 
 QString MainTableModelRegistry::ActorGetName(int ID) const
 {
     GETTER_DEBUG() << "[MainTableModelRegistry::ActorGetName]: " << ID;
-    CHECK_COND_THROW(ID >= 0, MainTableModelRegistry_InvalidActorID);
-    if (TO_SZ(ID) < m_Actors_ByID.size())
+    return ActorsBaseGetter<QString>(ID,[](ActorsList::iterator Value) -> QString
     {
-        ActorsList::iterator findedItValue = m_Actors_ByID[TO_SZ(ID)];
-        if (findedItValue != m_Actors.end())
-            return findedItValue->name.Get();
-    }
-    throw MainTableModelRegistry_InvalidActorID();
+        return Value->name.Get();
+    });
 }
 
 QList<QString> MainTableModelRegistry::PersonGetActors(int ID) const
 {
     GETTER_DEBUG() << "[MainTableModelRegistry::PersonGetActors]: " << ID;
-    CHECK_COND_THROW(ID >= 0, MainTableModelRegistry_InvalidPersonID);
-    if (TO_SZ(ID) < m_Persons_ByID.size())
+    return PersonsBaseGetter<QList<QString>>(ID,[](PersonsList::iterator Value) -> QList<QString>
     {
-        PersonsList::iterator findedItValue = m_Persons_ByID[TO_SZ(ID)];
-        if (findedItValue != m_Persons.end())
+        QList<QString> Actors;
+        Q_ASSERT(Value->actors.size() < TO_SZ(std::numeric_limits<int>::max()));
+        Actors.reserve(static_cast<int>(Value->actors.size()));
+        for (ActorsList::iterator it : Value->actors)
         {
-            QList<QString> Actors;
-            Q_ASSERT(findedItValue->actors.size() < TO_SZ(std::numeric_limits<int>::max()));
-            Actors.reserve(static_cast<int>(findedItValue->actors.size()));
-            for (ActorsList::iterator it : findedItValue->actors)
-            {
-               Actors.push_back(it->name.Get());
-            }
-            return Actors;
+           Actors.push_back(it->name.Get());
         }
-    }
-    throw MainTableModelRegistry_InvalidPersonID();
+        return Actors;
+    });
 }
 
 QList<QString> MainTableModelRegistry::ActorGetPersons(int ID) const
 {
     GETTER_DEBUG() << "[MainTableModelRegistry::ActorGetPersons]: " << ID;
-    CHECK_COND_THROW(ID >= 0, MainTableModelRegistry_InvalidActorID);
-    if (TO_SZ(ID) < m_Actors_ByID.size())
+    return ActorsBaseGetter<QList<QString>>(ID,[](ActorsList::iterator Value) -> QList<QString>
     {
-        ActorsList::iterator findedItValue = m_Actors_ByID[TO_SZ(ID)];
-        if (findedItValue != m_Actors.end())
-        {
-            QList<QString> Persons;
-            Q_ASSERT(findedItValue->persons.size() < TO_SZ(std::numeric_limits<int>::max()));
-            Persons.reserve(static_cast<int>(findedItValue->persons.size()));
-            for (PersonsList::iterator it : findedItValue->persons)
-            {
-               Persons.push_back(it->name.Get());
-            }
-            return Persons;
-        }
-    }
-    throw MainTableModelRegistry_InvalidActorID();
+       QList<QString> Persons;
+       Q_ASSERT(Value->persons.size() < TO_SZ(std::numeric_limits<int>::max()));
+       Persons.reserve(static_cast<int>(Value->persons.size()));
+       for (PersonsList::iterator it : Value->persons)
+       {
+          Persons.push_back(it->name.Get());
+       }
+       return Persons;
+    });
 }
 
 bool MainTableModelRegistry::PersonIsDenied(int ID) const
 {
     GETTER_DEBUG() << "[MainTableModelRegistry::PersonIsDenied]: " << ID;
-    CHECK_COND_THROW(ID >= 0, MainTableModelRegistry_InvalidPersonID);
-    if (TO_SZ(ID) < m_Persons_ByID.size())
+    return PersonsBaseGetter<bool>(ID,[](PersonsList::iterator Value) -> bool
     {
-        PersonsList::iterator findedItValue = m_Persons_ByID[TO_SZ(ID)];
-        if (findedItValue != m_Persons.end())
-            return findedItValue->deny;
-    }
-    throw MainTableModelRegistry_InvalidPersonID();
+        return Value->deny;
+    });
 }
 
 bool MainTableModelRegistry::ActorIsDenied(int ID) const
 {
     GETTER_DEBUG() << "[MainTableModelRegistry::ActorIsDenied]: " << ID;
-    CHECK_COND_THROW(ID >= 0, MainTableModelRegistry_InvalidActorID);
-    if (TO_SZ(ID) < m_Actors_ByID.size())
+    return ActorsBaseGetter<bool>(ID,[](ActorsList::iterator Value) -> bool
     {
-        ActorsList::iterator findedItValue = m_Actors_ByID[TO_SZ(ID)];
-        if (findedItValue != m_Actors.end())
-            return findedItValue->deny;
-    }
-    throw MainTableModelRegistry_InvalidActorID();
+        return Value->deny;
+    });
 }
 
 bool MainTableModelRegistry::RemovePerson(int ID) noexcept
@@ -365,7 +355,7 @@ bool MainTableModelRegistry::RemovePerson(int ID) noexcept
     if (TO_SZ(ID) < m_Persons_ByID.size())
     {
         PersonsList::iterator findedItValue = m_Persons_ByID[TO_SZ(ID)];
-        if (findedItValue != m_Persons.end())
+        if (findedItValue != NULL_PERSON)
         {
             // Снимаем все ссылки на конкретный элемент
             // Нет смысла перебирать все значения из m_Persons, достаточно перебрать только свои
@@ -523,18 +513,40 @@ bool MainTableModel::setData(const QModelIndex &index, const QVariant &value, in
     bool Changed = false;
     switch (index.column())
     {
+
+    // Setting Actor Name..
     case 0:
-        if (m_Other)
-            m_Other->beginResetModel();
-        try {
-            // Возвращаемое значение от SetActor можно игнорировать
-            MainTableModelUtils::SetActor(*m_Mngr->GetRegistry(), index.row(), ActorName(value.toString()));
+        if (value.canConvert<QString>())
+        {
+            if (m_Other)
+                m_Other->beginResetModel();
+            try {
+                // Возвращаемое значение от SetActor можно и проигнорировать
+                MainTableModelUtils::SetActor(*m_Mngr->GetRegistry(), index.row(), ActorName(value.toString()));
+                Changed = true;
+            }
+            catch (const ActorNameStringEmpty&) {
+            }
+            catch (const MainTableModelRegistry_InvalidActorID&) {
+            }
+        }
+        break;
+
+    // Setting Persons list..
+    case 1:
+
+        break;
+
+    // Setting "deny" flag..
+    case 2:
+        if (value.canConvert<bool>())
+        {
+            // Возвращаемое значение от ChangeDenyActor можно и проигнорировать
+            m_Mngr->GetRegistry()->ChangeDenyActor(index.row(), value.toBool());
             Changed = true;
         }
-        catch (const ActorNameStringEmpty&) {
-        }
-        catch (const MainTableModelRegistry_InvalidActorID&) {
-        }
+        break;
+
     }
     if (Changed)
     {
