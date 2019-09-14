@@ -178,8 +178,7 @@ bool MainTableModelRegistry::BaseSetter(
         auto it = Storage[static_cast<int>(ID)];
         if (it != NULL_IT)
         {
-            Func(it);
-            return true;
+            return Func(it);
         }
     }
     return false;
