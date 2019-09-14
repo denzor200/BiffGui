@@ -553,7 +553,7 @@ QVariant MainTableModel::headerData(int section, Qt::Orientation orientation, in
         }
 
         if( orientation == Qt::Vertical ) {
-            return section;
+            return section + 1;
         }
 
         switch( section ) {
@@ -637,7 +637,7 @@ QVariant MainTableModel_Reversed::headerData(int section, Qt::Orientation orient
         }
 
         if( orientation == Qt::Vertical ) {
-            return section;
+            return section + 1;
         }
 
         switch( section ) {
