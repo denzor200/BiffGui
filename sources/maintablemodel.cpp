@@ -1,6 +1,7 @@
 #include "maintablemodel.h"
 #include <algorithm>
 #include <limits>
+#include <QDebug>
 
 #define CHECK_COND(c) \
     if (!(c)) \
@@ -14,6 +15,7 @@
 
 bool MainTableModelRegistry::ReserveNewPersonIndex()
 {
+    qDebug() << "[MainTableModelRegistry::ReserveNewPersonIndex]";
     CHECK_COND(m_Persons_ByID.size() < TO_SZ(std::numeric_limits<int>::max()));
     m_Persons_ByID.push_back(NULL_PERSON);
     return true;
@@ -21,13 +23,37 @@ bool MainTableModelRegistry::ReserveNewPersonIndex()
 
 bool MainTableModelRegistry::ReserveNewActorIndex()
 {
+    qDebug() << "[MainTableModelRegistry::ReserveNewActorIndex]";
     CHECK_COND(m_Actors_ByID.size() < TO_SZ(std::numeric_limits<int>::max()));
     m_Actors_ByID.push_back(NULL_ACTOR);
     return true;
 }
 
+bool MainTableModelRegistry::PersonIndexIsReserved(int ID) const
+{
+    qDebug() << "[MainTableModelRegistry::PersonIndexIsReserved]: " << ID;
+    CHECK_COND_THROW(ID >= 0, MainTableModelRegistry_InvalidPersonID);
+    if (TO_SZ(ID) < m_Persons_ByID.size())
+    {
+        return (m_Persons_ByID[TO_SZ(ID)] == NULL_PERSON);
+    }
+    throw MainTableModelRegistry_InvalidPersonID();
+}
+
+bool MainTableModelRegistry::ActorIndexIsReserved(int ID) const
+{
+    qDebug() << "[MainTableModelRegistry::ActorIndexIsReserved]: " << ID;
+    CHECK_COND_THROW(ID >= 0, MainTableModelRegistry_InvalidActorID);
+    if (TO_SZ(ID) < m_Actors_ByID.size())
+    {
+        return (m_Actors_ByID[TO_SZ(ID)] == NULL_ACTOR);
+    }
+    throw MainTableModelRegistry_InvalidActorID();
+}
+
 bool MainTableModelRegistry::AddPerson(const ActorName& person, int ID)
 {
+    qDebug() << "[MainTableModelRegistry::AddPerson]: " << person << ", " << ID;
     CHECK_COND(ID < 0 || m_Persons_ByID[TO_SZ(ID)] == NULL_PERSON);
     CHECK_COND(m_Persons_ByID.size() < TO_SZ(std::numeric_limits<int>::max()));
     if (m_Persons_ByName.find(person) == m_Persons_ByName.end())
@@ -71,6 +97,7 @@ bool MainTableModelRegistry::AddPerson(const ActorName& person, int ID)
 
 bool MainTableModelRegistry::AddActor(const ActorName& actor, int ID)
 {
+    qDebug() << "[MainTableModelRegistry::AddActor]: " << actor << ", " << ID;
     CHECK_COND(ID < 0 || m_Actors_ByID[TO_SZ(ID)] == NULL_ACTOR);
     CHECK_COND(m_Actors_ByID.size() < TO_SZ(std::numeric_limits<int>::max()));
     if (m_Actors_ByName.find(actor) == m_Actors_ByName.end())
@@ -114,6 +141,7 @@ bool MainTableModelRegistry::AddActor(const ActorName& actor, int ID)
 
 bool MainTableModelRegistry::RenamePerson(int ID, const ActorName& newName)
 {
+    qDebug() << "[MainTableModelRegistry::RenamePerson]: " << ID << ", " << newName;
     CHECK_COND(ID >= 0);
     if (TO_SZ(ID) < m_Persons_ByID.size())
     {
@@ -140,6 +168,7 @@ bool MainTableModelRegistry::RenamePerson(int ID, const ActorName& newName)
 
 bool MainTableModelRegistry::RenameActor(int ID, const ActorName& newName)
 {
+    qDebug() << "[MainTableModelRegistry::RenameActor]: " << ID << ", " << newName;
     CHECK_COND(ID >= 0);
     if (TO_SZ(ID) < m_Actors_ByID.size())
     {
@@ -199,6 +228,7 @@ bool MainTableModelRegistry::Actor_ChangeRelation(ActorsList::iterator actorIt, 
 
 bool MainTableModelRegistry::Person_ChangeRelation(int personID, const ActorName& actor, bool State)
 {
+    qDebug() << "[MainTableModelRegistry::Person_ChangeRelation]: " << personID << ", " << actor << ", " << State;
     CHECK_COND(personID >= 0);
     auto actorIt = m_Actors_ByName.find(actor);
     if (actorIt != m_Actors_ByName.end() && TO_SZ(personID) < m_Persons_ByID.size())
@@ -211,6 +241,7 @@ bool MainTableModelRegistry::Person_ChangeRelation(int personID, const ActorName
 }
 bool MainTableModelRegistry::Actor_ChangeRelation(int actorID, const ActorName& person, bool State)
 {
+    qDebug() << "[MainTableModelRegistry::Actor_ChangeRelation]: " << actorID << ", " << person << ", " << State;
     CHECK_COND(actorID >= 0);
     auto personIt = m_Persons_ByName.find(person);
     if (personIt != m_Persons_ByName.end() && TO_SZ(actorID) < m_Actors_ByID.size())
@@ -222,10 +253,18 @@ bool MainTableModelRegistry::Actor_ChangeRelation(int actorID, const ActorName& 
     return false;
 }
 
+#define DISABLE_DEBUG_GETTERS
+#ifndef DISABLE_DEBUG_GETTERS
+#define GETTER_DEBUG qDebug
+#else
+#define GETTER_DEBUG QT_NO_QDEBUG_MACRO
+#endif // DISABLE_DEBUG_GETTERS
+
 // TODO: геттеры слишком жирные
 // нужна общая функция, которая выполняла бы сама все нужные проверки
 QString MainTableModelRegistry::PersonGetName(int ID) const
 {
+    GETTER_DEBUG() << "[MainTableModelRegistry::PersonGetName]: " << ID;
     CHECK_COND_THROW(ID >= 0, MainTableModelRegistry_InvalidPersonID);
     if (TO_SZ(ID) < m_Persons_ByID.size())
     {
@@ -238,6 +277,7 @@ QString MainTableModelRegistry::PersonGetName(int ID) const
 
 QString MainTableModelRegistry::ActorGetName(int ID) const
 {
+    GETTER_DEBUG() << "[MainTableModelRegistry::ActorGetName]: " << ID;
     CHECK_COND_THROW(ID >= 0, MainTableModelRegistry_InvalidActorID);
     if (TO_SZ(ID) < m_Actors_ByID.size())
     {
@@ -250,6 +290,7 @@ QString MainTableModelRegistry::ActorGetName(int ID) const
 
 QList<QString> MainTableModelRegistry::PersonGetActors(int ID) const
 {
+    GETTER_DEBUG() << "[MainTableModelRegistry::PersonGetActors]: " << ID;
     CHECK_COND_THROW(ID >= 0, MainTableModelRegistry_InvalidPersonID);
     if (TO_SZ(ID) < m_Persons_ByID.size())
     {
@@ -271,6 +312,7 @@ QList<QString> MainTableModelRegistry::PersonGetActors(int ID) const
 
 QList<QString> MainTableModelRegistry::ActorGetPersons(int ID) const
 {
+    GETTER_DEBUG() << "[MainTableModelRegistry::ActorGetPersons]: " << ID;
     CHECK_COND_THROW(ID >= 0, MainTableModelRegistry_InvalidActorID);
     if (TO_SZ(ID) < m_Actors_ByID.size())
     {
@@ -292,6 +334,7 @@ QList<QString> MainTableModelRegistry::ActorGetPersons(int ID) const
 
 bool MainTableModelRegistry::PersonIsDenied(int ID) const
 {
+    GETTER_DEBUG() << "[MainTableModelRegistry::PersonIsDenied]: " << ID;
     CHECK_COND_THROW(ID >= 0, MainTableModelRegistry_InvalidPersonID);
     if (TO_SZ(ID) < m_Persons_ByID.size())
     {
@@ -304,6 +347,7 @@ bool MainTableModelRegistry::PersonIsDenied(int ID) const
 
 bool MainTableModelRegistry::ActorIsDenied(int ID) const
 {
+    GETTER_DEBUG() << "[MainTableModelRegistry::ActorIsDenied]: " << ID;
     CHECK_COND_THROW(ID >= 0, MainTableModelRegistry_InvalidActorID);
     if (TO_SZ(ID) < m_Actors_ByID.size())
     {
@@ -316,6 +360,7 @@ bool MainTableModelRegistry::ActorIsDenied(int ID) const
 
 bool MainTableModelRegistry::RemovePerson(int ID) noexcept
 {
+    qDebug() << "[MainTableModelRegistry::RemovePerson]: " << ID;
     CHECK_COND(ID >= 0);
     if (TO_SZ(ID) < m_Persons_ByID.size())
     {
@@ -347,6 +392,7 @@ bool MainTableModelRegistry::RemovePerson(int ID) noexcept
 
 bool MainTableModelRegistry::RemoveActor(int ID) noexcept
 {
+    qDebug() << "[MainTableModelRegistry::RemoveActor]: " << ID;
     CHECK_COND(ID >= 0);
     if (TO_SZ(ID) < m_Actors_ByID.size())
     {
@@ -378,6 +424,7 @@ bool MainTableModelRegistry::RemoveActor(int ID) noexcept
 
 void MainTableModelRegistry::ClearAllPersons() noexcept
 {
+    qDebug() << "[MainTableModelRegistry::ClearAllPersons]";
     // Снимаем все возможные ссылки на персонажей
     for (Actor& Value : m_Actors)
     {
@@ -391,6 +438,7 @@ void MainTableModelRegistry::ClearAllPersons() noexcept
 
 void MainTableModelRegistry::ClearAllActors() noexcept
 {
+    qDebug() << "[MainTableModelRegistry::ClearAllActors]";
     // Снимаем все возможные ссылки на актеров
     for (Person& Value : m_Persons)
     {
@@ -426,7 +474,7 @@ QVariant MainTableModel::data(const QModelIndex &index, int role) const
 {
     if(!index.isValid() ||
       m_Mngr->GetRegistry()->getActorsCount() <= index.row() ||
-      ( role != Qt::DisplayRole /*&& role != Qt::EditRole*/ )
+      ( role != Qt::DisplayRole && role != Qt::EditRole )
         ) {
             return QVariant();
         }
@@ -455,6 +503,47 @@ QVariant MainTableModel::data(const QModelIndex &index, int role) const
     {
     }
     return QVariant();
+}
+
+Qt::ItemFlags MainTableModel::flags(const QModelIndex &index) const
+{
+    Qt::ItemFlags flags = QAbstractTableModel::flags( index );
+    if( index.isValid() ) {
+        flags |= Qt::ItemIsEditable;
+    }
+    return flags;
+}
+
+bool MainTableModel::setData(const QModelIndex &index, const QVariant &value, int role)
+{
+    if( !index.isValid() || role != Qt::EditRole || m_Mngr->GetRegistry()->getActorsCount() <= index.row() ) {
+        return false;
+    }
+
+    bool Changed = false;
+    switch (index.column())
+    {
+    case 0:
+        if (m_Other)
+            m_Other->beginResetModel();
+        try {
+            // Возвращаемое значение от SetActor можно игнорировать
+            MainTableModelUtils::SetActor(*m_Mngr->GetRegistry(), index.row(), ActorName(value.toString()));
+            Changed = true;
+        }
+        catch (const ActorNameStringEmpty&) {
+        }
+        catch (const MainTableModelRegistry_InvalidActorID&) {
+        }
+    }
+    if (Changed)
+    {
+        emit dataChanged( index, index );
+        if (m_Other)
+            m_Other->endResetModel();
+        return true;
+    }
+    return false;
 }
 
 QVariant MainTableModel::headerData(int section, Qt::Orientation orientation, int role) const
@@ -504,7 +593,7 @@ QVariant MainTableModel_Reversed::data(const QModelIndex &index, int role) const
 {
     if(!index.isValid() ||
       m_Mngr->GetRegistry()->getPersonsCount() <= index.row() ||
-      ( role != Qt::DisplayRole /*&& role != Qt::EditRole*/ )
+      ( role != Qt::DisplayRole && role != Qt::EditRole )
         ) {
             return QVariant();
         }
@@ -535,6 +624,12 @@ QVariant MainTableModel_Reversed::data(const QModelIndex &index, int role) const
     return QVariant();
 }
 
+bool MainTableModel_Reversed::setData(const QModelIndex &index, const QVariant &value, int role)
+{
+    // TODO: implement this
+    return false;
+}
+
 QVariant MainTableModel_Reversed::headerData(int section, Qt::Orientation orientation, int role) const
 {
     if( role != Qt::DisplayRole ) {
@@ -562,6 +657,8 @@ MainTableModelsManager::MainTableModelsManager(QObject *parent) :
 {
     m_Model = new MainTableModel(this);
     m_ModelReversed = new MainTableModel_Reversed(this);
+    m_Model->SetOther(m_ModelReversed);
+    m_ModelReversed->SetOther(m_Model);
 
    // Testing..
    m_Registry.AddActor(ActorName("Черсков"));
@@ -601,4 +698,22 @@ bool MainTableModelsManager::ActorsInsertRow()
         return true;
     }
     return false;
+}
+
+bool MainTableModelUtils::SetPerson(MainTableModelRegistry &R, int ID, const ActorName &Name)
+{
+    if (R.PersonIndexIsReserved(ID))
+        return R.AddPerson(Name, ID);
+    else {
+        return R.RenamePerson(ID, Name);
+    }
+}
+
+bool MainTableModelUtils::SetActor(MainTableModelRegistry &R, int ID, const ActorName &Name)
+{
+    if (R.ActorIndexIsReserved(ID))
+        return R.AddActor(Name, ID);
+    else {
+        return R.RenameActor(ID, Name);
+    }
 }

@@ -2,6 +2,7 @@
 
 #include <QString>
 #include <QHash>
+#include <QDebug>
 
 class ActorNameStringEmpty : public std::exception
 {
@@ -34,6 +35,7 @@ inline uint qHash(const ActorName &key, uint seed = 0)
     return qHash(key.Get().toUpper(), seed);
 }
 
+// for std::unordered_map in MainTableModel
 namespace std {
 template<>
 class hash<ActorName> {
@@ -43,4 +45,10 @@ public:
         return static_cast<size_t>(qHash(key));
     }
 };
+}
+
+inline QDebug & operator<< (QDebug & os, const ActorName& Value)
+{
+    os << Value.Get();
+    return os;
 }

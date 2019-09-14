@@ -54,6 +54,9 @@ public:
     bool ReserveNewPersonIndex();
     bool ReserveNewActorIndex();
 
+    bool PersonIndexIsReserved(int ID) const;
+    bool ActorIndexIsReserved(int ID) const;
+
     bool AddPerson(const ActorName& person, int ID = -1);
     bool AddActor(const ActorName& actor, int ID = -1);
 
@@ -78,9 +81,8 @@ public:
     void ClearAllPersons() noexcept;
     void ClearAllActors() noexcept;
 
-    // TODO: fix warning
-    int getPersonsCount() const noexcept { return m_Persons_ByID.size(); }
-    int getActorsCount() const noexcept { return m_Actors_ByID.size(); }
+    int getPersonsCount() const noexcept { return static_cast<int>(m_Persons_ByID.size()); }
+    int getActorsCount() const noexcept { return static_cast<int>(m_Actors_ByID.size()); }
 
 private:
     bool Person_ChangeRelation(PersonsList::iterator personIt, ActorsList::iterator actorIt, bool State);
@@ -100,6 +102,12 @@ private:
 
     const ActorsList::iterator NULL_ACTOR;
     const PersonsList::iterator NULL_PERSON;
+};
+
+namespace MainTableModelUtils
+{
+    bool SetPerson(MainTableModelRegistry& R, int ID, const ActorName& Name);
+    bool SetActor(MainTableModelRegistry& R, int ID, const ActorName& Name);
 };
 
 class MainTableModel;
@@ -139,32 +147,43 @@ class MainTableModel : public QAbstractTableModel
 public:
     MainTableModel(QObject* parent = nullptr);
 
+    void SetOther(MainTableModel_Reversed* Other) { m_Other = Other; }
+
     int rowCount( const QModelIndex& parent = QModelIndex()) const override;
     int columnCount( const QModelIndex& parent = QModelIndex()) const override;
     QVariant data( const QModelIndex& index, int role = Qt::DisplayRole) const override;
+    Qt::ItemFlags flags( const QModelIndex& index ) const override;
 
+    bool setData( const QModelIndex& index, const QVariant& value, int role ) override;
     QVariant headerData( int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
 
 private:
     friend class MainTableModelsManager;
+    friend class MainTableModel_Reversed;
     MainTableModelsManager* m_Mngr;
+    MainTableModel_Reversed* m_Other = nullptr;
 };
 
 class MainTableModel_Reversed : public QAbstractTableModel
 {
     Q_OBJECT
 public:
-    MainTableModel_Reversed(QObject* parent = nullptr);
+    MainTableModel_Reversed( QObject* parent = nullptr);
+
+    void SetOther(MainTableModel* Other) { m_Other = Other; }
 
     int rowCount( const QModelIndex& parent = QModelIndex()) const override;
     int columnCount( const QModelIndex& parent = QModelIndex()) const override;
     QVariant data( const QModelIndex& index, int role = Qt::DisplayRole) const override;
 
+    bool setData( const QModelIndex& index, const QVariant& value, int role ) override;
     QVariant headerData( int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
 
 private:
     friend class MainTableModelsManager;
+    friend class MainTableModel;
     MainTableModelsManager* m_Mngr;
+    MainTableModel* m_Other = nullptr;
 };
 
 #endif // MAINTABLEMODEL_H
