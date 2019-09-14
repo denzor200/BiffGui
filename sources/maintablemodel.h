@@ -128,6 +128,9 @@ public:
     bool PersonsInsertRow();
     bool ActorsInsertRow();
 
+    bool PersonsRemoveRow(int ID);
+    bool ActorsRemoveRow(int ID);
+
 protected:
     friend class MainTableModel;
     friend class MainTableModel_Reversed;

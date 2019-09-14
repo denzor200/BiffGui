@@ -279,7 +279,7 @@ void MainWindow::on_toolButton_Insert_clicked()
 void MainWindow::on_toolButton_Delete_clicked()
 {
     // preparing..
-    /*QItemSelection selection( ui->tableWidget->selectionModel()->selection() );
+    QItemSelection selection( ui->tableView->selectionModel()->selection() );
 
     QList<int> rows;
     QSet<int> rows_set; // rows_set only for checking
@@ -316,10 +316,10 @@ void MainWindow::on_toolButton_Delete_clicked()
     for( int i = rows.count() - 1; i >= 0; i -= 1 ) {
        int current = rows[i];
        if( current != prev ) {
-          ui->tableWidget->removeRow( current);
+          m_ModelsMgr->ActorsRemoveRow(current);
           prev = current;
        }
-    }*/
+    }
 }
 
 void MainWindow::on_toolButton_Reverse_clicked()

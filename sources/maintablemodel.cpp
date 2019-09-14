@@ -700,6 +700,34 @@ bool MainTableModelsManager::ActorsInsertRow()
     return false;
 }
 
+bool MainTableModelsManager::PersonsRemoveRow(int row)
+{
+    CHECK_COND(row < m_Registry.getPersonsCount());
+    m_ModelReversed->beginRemoveRows( QModelIndex(), row, row );
+    m_Model->beginResetModel();
+    if (m_Registry.RemovePerson(row))
+    {
+        m_ModelReversed->endRemoveRows();
+        m_Model->endResetModel();
+        return true;
+    }
+    return false;
+}
+
+bool MainTableModelsManager::ActorsRemoveRow(int row)
+{
+    CHECK_COND(row < m_Registry.getActorsCount());
+    m_Model->beginRemoveRows( QModelIndex(), row, row );
+    m_ModelReversed->beginResetModel();
+    if (m_Registry.RemoveActor(row))
+    {
+        m_Model->endRemoveRows();
+        m_ModelReversed->endResetModel();
+        return true;
+    }
+    return false;
+}
+
 bool MainTableModelUtils::SetPerson(MainTableModelRegistry &R, int ID, const ActorName &Name)
 {
     if (R.PersonIndexIsReserved(ID))
