@@ -26,6 +26,7 @@ CONFIG += c++11
 
 SOURCES += \
         ActorName.cpp \
+        convertersyncapi.cpp \
         generating.cpp \
         libqxt/core/qxtglobal.cpp \
         libqxt/gui/qxtcheckcombobox.cpp \
@@ -33,10 +34,12 @@ SOURCES += \
         maintabledelegates.cpp \
         maintablemodel.cpp \
         mainwindow.cpp \
-        settings.cpp
+        settings.cpp \
+        utils.cpp
 
 HEADERS += \
         ActorName.h \
+        convertersyncapi.h \
         directoriesregistry.h \
         generating.h \
         libqxt/core/qxtglobal.h \
@@ -46,7 +49,8 @@ HEADERS += \
         maintabledelegates.h \
         maintablemodel.h \
         mainwindow.h \
-        settings.h
+        settings.h \
+        utils.h
 
 FORMS += \
         generating.ui \

@@ -306,6 +306,7 @@ public:
     MainTableModel_Reversed*            GetModelReversed()          { return m_ModelReversed; }
     const MainTableModel_Reversed*      GetModelReversed() const    { return m_ModelReversed; }
 
+    void OpenPersons(const QString& Path);
     void SavePersons(const QString& Path) const;
 
     void OpenTable(const QString& Path);
@@ -334,6 +335,7 @@ public:
     virtual bool InsertRow() = 0;
     virtual bool RemoveRow(int ID) = 0;
 
+    virtual void OpenPersons(const QString& Path) = 0;
     virtual void SavePersons(const QString& Path) const = 0;
 
     virtual void OpenTable(const QString& Path) = 0;
@@ -354,6 +356,7 @@ public:
     bool InsertRow() override;
     bool RemoveRow(int ID) override;
 
+    void OpenPersons(const QString& Path) override;
     void SavePersons(const QString& Path) const override;
 
     void OpenTable(const QString& Path) override;
@@ -390,6 +393,7 @@ public:
     bool InsertRow() override;
     bool RemoveRow(int ID) override;
 
+    void OpenPersons(const QString& Path) override;
     void SavePersons(const QString& Path) const override;
 
     void OpenTable(const QString& Path) override;

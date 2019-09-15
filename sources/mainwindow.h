@@ -57,6 +57,12 @@ private:
     Ui::MainWindow* ui;
     MainTableModelsManager*     m_ModelsMgr;
     bool                        m_IsReversed = false;
+
+    struct SubbtitleContext
+    {
+        QString FileName;
+    };
+    SubbtitleContext*           m_OpenedSubbtitle = nullptr;
 };
 
 #endif // MAINWINDOW_H

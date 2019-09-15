@@ -20,6 +20,8 @@
 
 #include "DirectoriesRegistry.h"
 #include "maintabledelegates.h"
+#include "utils.h"
+#include "convertersyncapi.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -49,6 +51,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
+    delete m_OpenedSubbtitle;
     delete ui;
 }
 
@@ -75,7 +78,41 @@ void MainWindow::makeDoc()
 
 void MainWindow::on_action_open_triggered()
 {
+    QString personsListFilename = Utils::GetNewTempFilename();
+    if (personsListFilename.size()!=0)
+    {
+        QSettings Settings;
+        QString subbtitleFilename = QFileDialog::getOpenFileName(this,
+            tr("Открыть субтитры"),
+            Settings.value(DirectoriesRegistry::SUBBTITLES_INDIR).toString(),
+            tr("Все поддерживаемые форматы(*.ass *.srt);;Advanced SubStation Alpha (*.ass);;SubRip (*.srt)"));
 
+        if (subbtitleFilename!="")
+        {
+            QDir CurrentDir;
+            Settings.setValue(DirectoriesRegistry::SUBBTITLES_INDIR,
+                        CurrentDir.absoluteFilePath(subbtitleFilename));
+
+            if (0 == ConverterSyncAPI::ShowPersonList(subbtitleFilename, personsListFilename))
+            {
+                m_ModelsMgr->OpenPersons(personsListFilename);
+
+                SubbtitleContext* ctx = new SubbtitleContext();
+                ctx->FileName = subbtitleFilename;
+                m_OpenedSubbtitle = ctx;
+            }
+            else {
+                QMessageBox::critical(this, "Что-то пошло не так..", "Не удалось сгенерировать список персонажей во временном файле");
+            }
+        }
+
+        // темповый файл нам больше не нужен..
+        // TODO: потестировать при отсутствии файла, или отсутствии прав
+        QFile::remove(personsListFilename);
+    }
+    else {
+        QMessageBox::critical(this, "Что-то пошло не так..", "Не удалось открыть временный файл");
+    }
 }
 
 void MainWindow::on_action_save_triggered()
