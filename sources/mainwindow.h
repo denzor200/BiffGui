@@ -56,6 +56,7 @@ private slots:
 private:
     Ui::MainWindow* ui;
     MainTableModelsManager*     m_ModelsMgr;
+    bool                        m_IsReversed = false;
 };
 
 #endif // MAINWINDOW_H

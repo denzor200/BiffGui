@@ -43,6 +43,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->tableView->setModel(m_ModelsMgr->GetModel());
     ui->tableView_Reversed->setModel(m_ModelsMgr->GetModelReversed());
+
+    ui->tableView->show();
+    ui->tableView_Reversed->hide();
 }
 
 MainWindow::~MainWindow()
@@ -252,13 +255,29 @@ void MainWindow::on_pushButton_MakeDoc_clicked()
 
 void MainWindow::on_toolButton_Insert_clicked()
 {
-    m_ModelsMgr->GetModel()->InsertRow();
+    if (m_IsReversed)
+        m_ModelsMgr->GetModelReversed()->InsertRow();
+    else {
+        m_ModelsMgr->GetModel()->InsertRow();
+    }
 }
 
 void MainWindow::on_toolButton_Delete_clicked()
 {
+    IMainTableModel* activeModel = nullptr;
+    QTableView* activeView = nullptr;
+    if (m_IsReversed)
+    {
+        activeView = ui->tableView_Reversed;
+        activeModel = m_ModelsMgr->GetModelReversed();
+    }
+    else {
+        activeView = ui->tableView;
+        activeModel = m_ModelsMgr->GetModel();
+    }
+
     // preparing..
-    QItemSelection selection( ui->tableView->selectionModel()->selection() );
+    QItemSelection selection( activeView->selectionModel()->selection() );
 
     QList<int> rows;
     QSet<int> rows_set; // rows_set only for checking
@@ -293,15 +312,25 @@ void MainWindow::on_toolButton_Delete_clicked()
     // strictly in reverse order!!
     int prev = -1;
     for( int i = rows.count() - 1; i >= 0; i -= 1 ) {
-       int current = rows[i];
-       if( current != prev ) {
-           m_ModelsMgr->GetModel()->RemoveRow(current);
-           prev = current;
-       }
+        int current = rows[i];
+        if( current != prev ) {
+            activeModel->RemoveRow(current);
+            prev = current;
+        }
     }
 }
 
 void MainWindow::on_toolButton_Reverse_clicked()
 {
-
+    if (m_IsReversed)
+    {
+        ui->tableView->show();
+        ui->tableView_Reversed->hide();
+        m_IsReversed = false;
+    }
+    else {
+        ui->tableView->hide();
+        ui->tableView_Reversed->show();
+        m_IsReversed = true;
+    }
 }
