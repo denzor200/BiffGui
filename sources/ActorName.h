@@ -4,10 +4,26 @@
 #include <QHash>
 #include <QDebug>
 
-class ActorNameStringEmpty : public std::exception
+class ActorNameException : public std::exception
+{
+protected:
+    ActorNameException(const char* what) : std::exception(what)
+    {
+    }
+};
+
+class ActorNameStringEmpty : public ActorNameException
 {
 public:
-    ActorNameStringEmpty() : std::exception("ActorName can't be an empty string")
+    ActorNameStringEmpty() : ActorNameException("ActorName can't be an empty string")
+    {
+    }
+};
+
+class ActorNameForbiddenSymbols : public ActorNameException
+{
+public:
+    ActorNameForbiddenSymbols() : ActorNameException("ActorName must not contain characters 'dash' and 'comma'")
     {
     }
 };
@@ -25,6 +41,9 @@ public:
     bool operator>(const ActorName& Other) const;
 	bool operator<=(const ActorName& Other) const;
     bool operator>=(const ActorName& Other) const;
+
+    static bool FindForbidenSymbols(const QString& Name);
+    static void ShowForbidenSymbolsError(const QString& header);
 
     const QString& Get() const { return m_Name; }
 

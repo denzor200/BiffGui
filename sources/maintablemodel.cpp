@@ -599,6 +599,10 @@ bool MainTableModel::setData(const QModelIndex &index, const QVariant &value, in
             }
             catch (const ActorNameStringEmpty&) {
             }
+			catch (const ActorNameForbiddenSymbols&)
+			{
+				ActorName::ShowForbidenSymbolsError("");
+			}
             catch (const MainTableModelRegistry_InvalidActorID&) {
             }
         }
@@ -621,6 +625,10 @@ bool MainTableModel::setData(const QModelIndex &index, const QVariant &value, in
             }
             catch (const ActorNameStringEmpty&) {
             }
+			catch (const ActorNameForbiddenSymbols&)
+			{
+				ActorName::ShowForbidenSymbolsError("");
+			}
         }
         break;
 
@@ -787,6 +795,10 @@ bool MainTableModel_Reversed::setData(const QModelIndex &index, const QVariant &
             }
             catch (const MainTableModelRegistry_InvalidPersonID&) {
             }
+			catch (const ActorNameForbiddenSymbols&)
+			{
+				ActorName::ShowForbidenSymbolsError("");
+			}
         }
         break;
 
@@ -807,6 +819,10 @@ bool MainTableModel_Reversed::setData(const QModelIndex &index, const QVariant &
             }
             catch (const ActorNameStringEmpty&) {
             }
+			catch (const ActorNameForbiddenSymbols&)
+			{
+				ActorName::ShowForbidenSymbolsError("");
+			}
         }
         break;
 
@@ -862,19 +878,19 @@ MainTableModelsManager::MainTableModelsManager(QObject *parent) :
     m_ModelReversed->SetOther(m_Model);
 
    // Testing..
-   m_Registry.AddActor(ActorName("Черсков"));
-   m_Registry.AddActor(ActorName("Корш"));
+   m_Registry.AddActor(ActorName(QString::fromUtf8("Черсков")));
+   m_Registry.AddActor(ActorName(QString::fromUtf8("Корш")));
 
-   m_Registry.AddPerson(ActorName("Персонаж 1"));
-   m_Registry.AddPerson(ActorName("Персонаж 2"));
-   m_Registry.AddPerson(ActorName("Персонаж 3"));
-   m_Registry.AddPerson(ActorName("Персонаж 4"));
+   m_Registry.AddPerson(ActorName(QString::fromUtf8("Персонаж 1")));
+   m_Registry.AddPerson(ActorName(QString::fromUtf8("Персонаж 2")));
+   m_Registry.AddPerson(ActorName(QString::fromUtf8("Персонаж 3")));
+   m_Registry.AddPerson(ActorName(QString::fromUtf8("Персонаж 4")));
 
-   m_Registry.Actor_ChangeRelation(0, ActorName("Персонаж 1"), true);
-   m_Registry.Actor_ChangeRelation(0, ActorName("Персонаж 2"), true);
+   m_Registry.Actor_ChangeRelation(0, ActorName(QString::fromUtf8("Персонаж 1")), true);
+   m_Registry.Actor_ChangeRelation(0, ActorName(QString::fromUtf8("Персонаж 2")), true);
 
-   m_Registry.Actor_ChangeRelation(1, ActorName("Персонаж 2"), true);
-   m_Registry.Actor_ChangeRelation(1, ActorName("Персонаж 3"), true);
+   m_Registry.Actor_ChangeRelation(1, ActorName(QString::fromUtf8("Персонаж 2")), true);
+   m_Registry.Actor_ChangeRelation(1, ActorName(QString::fromUtf8("Персонаж 3")), true);
 }
 
 void MainTableModelsManager::SavePersons(const QString &Path)
@@ -893,13 +909,18 @@ void MainTableModelsManager::SavePersons(const QString &Path)
     streamFileOut.setCodec("UTF-8");
     streamFileOut.setGenerateByteOrderMark(true);
     QPair<QStringList, QList<QVariant>> pair = m_Registry.ActorGetPersons(-1);
-    for (const QString& Value : pair.first)
+    for ( const QString& Value : pair.first)
     {
+        if (ActorName::FindForbidenSymbols(Value))
+        {
+            std::stringstream ss;
+            ss << "Персонаж с именем '" << Value.toUtf8().data() << "' будет проигнорирован.";
+            ActorName::ShowForbidenSymbolsError(ss.str().c_str());
+            continue;
+        }
         streamFileOut << Value << endl;
     }
-
     streamFileOut.flush();
-
     fileOut.close();
 }
 
