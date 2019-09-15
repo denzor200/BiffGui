@@ -99,6 +99,12 @@ private:
     void RemoveAllLinksToPerson(PersonsList::iterator personIt);
     void RemoveAllLinksToActor(ActorsList::iterator actorIt);
 
+    enum class SETTER_FLAGS
+    {
+        NONE = 0x0,
+        ALLOW_NULL = 0x01
+    };
+
     template <typename RET_T, typename EX_T, typename IT_T, typename FUNC_T>
     RET_T BaseGetter(
             const std::vector<IT_T>& Storage,
@@ -112,7 +118,8 @@ private:
             std::vector<IT_T>& Storage,
             int ID,
             IT_T NULL_IT,
-            const FUNC_T& Func);
+            const FUNC_T& Func,
+            uint32_t Flags);
 
 
     template <typename RET_T, typename FUNC_T>
@@ -129,12 +136,14 @@ private:
     template <typename FUNC_T>
     bool ActorsBaseSetter(
             int ID,
-            const FUNC_T& Func);
+            const FUNC_T& Func,
+            uint32_t Flags=0);
 
     template <typename FUNC_T>
     bool PersonsBaseSetter(
             int ID,
-            const FUNC_T& Func);
+            const FUNC_T& Func,
+            uint32_t Flags=0);
 
     template <typename FUNC_T>
     void ForeachActors(const FUNC_T& Func) const;
@@ -212,14 +221,15 @@ bool MainTableModelRegistry::BaseSetter(
         std::vector<IT_T>& Storage,
         int ID,
         IT_T NULL_IT,
-        const FUNC_T& Func)
+        const FUNC_T& Func,
+        uint32_t Flags)
 {
     if (ID < 0)
         return false;
     if (static_cast<size_t>(ID) < Storage.size())
     {
         auto it = Storage[static_cast<size_t>(ID)];
-        if (it != NULL_IT)
+        if ((Flags & static_cast<uint32_t>(SETTER_FLAGS::ALLOW_NULL)) || it != NULL_IT)
         {
             return Func(it);
         }
@@ -230,17 +240,19 @@ bool MainTableModelRegistry::BaseSetter(
 template <typename FUNC_T>
 bool MainTableModelRegistry::ActorsBaseSetter(
         int ID,
-        const FUNC_T& Func)
+        const FUNC_T& Func,
+        uint32_t Flags)
 {
-    return BaseSetter(m_Actors_ByID, ID, NULL_ACTOR, Func);
+    return BaseSetter(m_Actors_ByID, ID, NULL_ACTOR, Func, Flags);
 }
 
 template <typename FUNC_T>
 bool MainTableModelRegistry::PersonsBaseSetter(
         int ID,
-        const FUNC_T& Func)
+        const FUNC_T& Func,
+        uint32_t Flags)
 {
-    return BaseSetter(m_Persons_ByID, ID, NULL_PERSON, Func);
+    return BaseSetter(m_Persons_ByID, ID, NULL_PERSON, Func, Flags);
 }
 
 

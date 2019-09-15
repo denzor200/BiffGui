@@ -404,17 +404,17 @@ bool MainTableModelRegistry::RemovePerson(int ID) noexcept
     qDebug() << "[MainTableModelRegistry::RemovePerson]: " << ID;
     return PersonsBaseSetter(ID, [&](PersonsList::iterator Value)
     {
-        // Снимаем все ссылки на конкретный элемент
-        RemoveAllLinksToPerson(Value);
-
-        // Удаляем непосредственно из хранилищ
-        m_Persons_ByID.erase(
-                    std::remove(m_Persons_ByID.begin(), m_Persons_ByID.end(), Value),
-                    m_Persons_ByID.end());
-        m_Persons_ByName.erase(Value->name);
-        m_Persons.erase(Value);
+        // Сначала снимаем все ссылки на конкретный элемент
+        // Затем удаляем элемент непосредственно из хранилищ
+        if (Value != NULL_PERSON)
+        {
+            RemoveAllLinksToPerson(Value);
+            m_Persons_ByName.erase(Value->name);
+            m_Persons.erase(Value);
+        }
+        m_Persons_ByID.erase(m_Persons_ByID.begin() + ID);
         return true;
-    });
+    }, static_cast<uint32_t>(SETTER_FLAGS::ALLOW_NULL));
 }
 
 bool MainTableModelRegistry::RemoveActor(int ID) noexcept
@@ -422,17 +422,17 @@ bool MainTableModelRegistry::RemoveActor(int ID) noexcept
     qDebug() << "[MainTableModelRegistry::RemoveActor]: " << ID;
     return ActorsBaseSetter(ID, [&](ActorsList::iterator Value)
     {
-        // Снимаем все ссылки на конкретный элемент
-        RemoveAllLinksToActor(Value);
-
-        // Удаляем непосредственно из хранилищ
-        m_Actors_ByID.erase(
-                    std::remove(m_Actors_ByID.begin(), m_Actors_ByID.end(), Value),
-                    m_Actors_ByID.end());
-        m_Actors_ByName.erase(Value->name);
-        m_Actors.erase(Value);
+        // Сначала снимаем все ссылки на конкретный элемент
+        // Затем удаляем элемент непосредственно из хранилищ
+        if (Value != NULL_ACTOR)
+        {
+            RemoveAllLinksToActor(Value);
+            m_Actors_ByName.erase(Value->name);
+            m_Actors.erase(Value);
+        }
+        m_Actors_ByID.erase(m_Actors_ByID.begin() + ID);
         return true;
-    });
+    }, static_cast<uint32_t>(SETTER_FLAGS::ALLOW_NULL));
 }
 
 void MainTableModelRegistry::ClearAllPersons() noexcept
