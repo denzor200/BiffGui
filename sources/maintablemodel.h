@@ -7,6 +7,7 @@
 
 #include <ActorName.h>
 #include <QAbstractTableModel>
+#include <QPair>
 
 class MainTableModelRegistry_InvalidPersonID : public std::exception
 {
@@ -66,14 +67,17 @@ public:
     bool ChangeDenyPerson(int ID, bool State);
     bool ChangeDenyActor(int ID, bool State);
 
+    bool PersonClearAllRelations(int ID);
+    bool ActorClearAllRelations(int ID);
+
     bool Person_ChangeRelation(int personID, const ActorName& actor, bool State);
     bool Actor_ChangeRelation(int actorID, const ActorName& person, bool State);
 
     QString PersonGetName(int ID) const;
     QString ActorGetName(int ID) const;
 
-    QList<QString> PersonGetActors(int ID) const;
-    QList<QString> ActorGetPersons(int ID) const;
+    QPair<QStringList, QList<QVariant>> PersonGetActors(int ID) const;
+    QPair<QStringList, QList<QVariant>> ActorGetPersons(int ID) const;
 
     bool PersonIsDenied(int ID) const;
     bool ActorIsDenied(int ID) const;
@@ -90,6 +94,9 @@ public:
 private:
     bool Person_ChangeRelation(PersonsList::iterator personIt, ActorsList::iterator actorIt, bool State);
     bool Actor_ChangeRelation(ActorsList::iterator actorIt, PersonsList::iterator personIt, bool State);
+
+    void RemoveAllLinksToPerson(PersonsList::iterator personIt);
+    void RemoveAllLinksToActor(ActorsList::iterator actorIt);
 
     template <typename RET_T, typename EX_T, typename IT_T, typename FUNC_T>
     RET_T BaseGetter(

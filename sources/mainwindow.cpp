@@ -9,7 +9,6 @@
 #include <QLineEdit>
 #include <QToolButton>
 #include <QSettings>
-#include "libqxt\gui\qxtcheckcombobox.h"
 
 #include <QFileDialog>
 #include <algorithm>
@@ -32,9 +31,12 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->tableView->verticalHeader()->setSectionResizeMode (QHeaderView::Fixed);
     ui->tableView->horizontalHeader()->setSectionResizeMode (QHeaderView::Stretch);
+    ui->tableView->setItemDelegateForColumn(1,new CChoiceLinksDelegate(this) );
     ui->tableView->setItemDelegateForColumn(2,new CChoiceDenyStatusDelegate(this) );
+
     ui->tableView_Reversed->verticalHeader()->setSectionResizeMode (QHeaderView::Fixed);
     ui->tableView_Reversed->horizontalHeader()->setSectionResizeMode (QHeaderView::Stretch);
+    ui->tableView_Reversed->setItemDelegateForColumn(1,new CChoiceLinksDelegate(this) );
     ui->tableView_Reversed->setItemDelegateForColumn(2,new CChoiceDenyStatusDelegate(this) );
 
     ui->tableView->setModel(m_ModelsMgr->GetModel());

@@ -1,10 +1,73 @@
 #include "maintabledelegates.h"
 #include <QComboBox>
 #include <QPainter>
-#include <QApplication>
+#include <QList>
+#include "libqxt\gui\qxtcheckcombobox.h"
 
 #define RU_YES_TEXT "Да"
 #define RU_NO_TEXT "Нет"
+#define SEPARATOR ", "
+
+CChoiceLinksDelegate::CChoiceLinksDelegate(QObject *parent) :
+    QItemDelegate(parent)
+{
+}
+
+QWidget *CChoiceLinksDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const
+{
+    Q_UNUSED(option);
+    Q_UNUSED(index);
+    QxtCheckComboBox* ccBox = new QxtCheckComboBox(parent);
+    ccBox->setSeparator(SEPARATOR);
+    return ccBox;
+}
+
+void CChoiceLinksDelegate::setEditorData(QWidget *editor, const QModelIndex &index) const
+{
+    QxtCheckComboBox *ccBox = qobject_cast<QxtCheckComboBox*> (editor);
+    QList<QVariant> Values = index.model()->data(index).toList();
+    QList<QVariant> CheckedList = Values[1].toList();
+
+    ccBox->clear();
+    ccBox->addItems(Values[0].toStringList());
+    for (const QVariant& variantIndex : CheckedList)
+    {
+        ccBox->setItemCheckState(variantIndex.toInt(), Qt::Checked);
+    }
+}
+
+void CChoiceLinksDelegate::setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const
+{
+    QxtCheckComboBox *ccBox = qobject_cast<QxtCheckComboBox*> (editor);
+    model->setData(index, ccBox->checkedItems());
+}
+
+void CChoiceLinksDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
+{
+    QList<QVariant> value = index.model()->data(index).toList();
+    QRect rect = option.rect;
+    rect.setX(rect.x() + 5);
+    rect.setWidth(rect.width() - 5);
+
+    QString Value;
+    QStringList names = value[0].toStringList();
+    QList<QVariant> ids = value[1].toList();
+    int cur_id = 0;
+    for (const QString& name : names)
+    {
+        for (const QVariant& id : ids)
+        {
+            if (id.toInt() == cur_id)
+            {
+                if (Value.size()!=0)
+                    Value += SEPARATOR;
+                Value += name;
+            }
+        }
+        cur_id++;
+    }
+    painter->drawText(rect, Qt::AlignVCenter | Qt::AlignLeft, Value);
+}
 
 CChoiceDenyStatusDelegate::CChoiceDenyStatusDelegate(QObject *parent) :
     QItemDelegate(parent)
@@ -47,6 +110,7 @@ void CChoiceDenyStatusDelegate::paint(QPainter *painter, const QStyleOptionViewI
     bool value = index.model()->data(index).toBool();
     QRect rect = option.rect;
     rect.setX(rect.x() + 5);
+    rect.setWidth(rect.width() - 5);
     if (value)
         painter->drawText(rect, Qt::AlignVCenter | Qt::AlignLeft, RU_YES_TEXT);
     else {

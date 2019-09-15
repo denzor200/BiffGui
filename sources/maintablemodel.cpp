@@ -203,6 +203,28 @@ bool MainTableModelRegistry::ChangeDenyActor(int ID, bool State)
     });
 }
 
+bool MainTableModelRegistry::PersonClearAllRelations(int ID)
+{
+    qDebug() << "[MainTableModelRegistry::PersonClearAllRelations]: " << ID;
+    return PersonsBaseSetter(ID, [&](PersonsList::iterator Value)
+    {
+        RemoveAllLinksToPerson(Value);
+        Value->actors.clear();
+        return true;
+    });
+}
+
+bool MainTableModelRegistry::ActorClearAllRelations(int ID)
+{
+    qDebug() << "[MainTableModelRegistry::ActorClearAllRelations]: " << ID;
+    return ActorsBaseSetter(ID, [&](ActorsList::iterator Value)
+    {
+        RemoveAllLinksToActor(Value);
+        Value->persons.clear();
+        return true;
+    });
+}
+
 
 // internal method
 bool MainTableModelRegistry::Person_ChangeRelation(PersonsList::iterator personIt, ActorsList::iterator actorIt, bool State)
@@ -233,6 +255,31 @@ bool MainTableModelRegistry::Actor_ChangeRelation(ActorsList::iterator actorIt, 
                     personIt->actors.end());
     }
     return true;
+}
+
+// internal method
+void MainTableModelRegistry::RemoveAllLinksToPerson(PersonsList::iterator personIt)
+{
+    for (ActorsList::iterator actorIt : personIt->actors)
+    {
+        Q_ASSERT(actorIt != m_Actors.end());
+        // TODO: можно ли вызывать std::remove на std::set??
+        actorIt->persons.erase(
+                    std::remove(actorIt->persons.begin(), actorIt->persons.end(), personIt),
+                    actorIt->persons.end());
+    }
+}
+
+// internal method
+void MainTableModelRegistry::RemoveAllLinksToActor(ActorsList::iterator actorIt)
+{
+    for (PersonsList::iterator personIt : actorIt->persons)
+    {
+        Q_ASSERT(personIt != m_Persons.end());
+        personIt->actors.erase(
+                    std::remove(personIt->actors.begin(), personIt->actors.end(), actorIt),
+                    personIt->actors.end());
+    }
 }
 
 
@@ -286,34 +333,48 @@ QString MainTableModelRegistry::ActorGetName(int ID) const
     });
 }
 
-QList<QString> MainTableModelRegistry::PersonGetActors(int ID) const
+QPair<QStringList, QList<QVariant>> MainTableModelRegistry::PersonGetActors(int ID) const
 {
     GETTER_DEBUG() << "[MainTableModelRegistry::PersonGetActors]: " << ID;
-    return PersonsBaseGetter<QList<QString>>(ID,[](PersonsList::iterator Value) -> QList<QString>
+    return PersonsBaseGetter<QPair<QStringList, QList<QVariant>>>(ID,[&](PersonsList::iterator Value) -> QPair<QStringList, QList<QVariant>>
     {
-        QList<QString> Actors;
-        Q_ASSERT(Value->actors.size() < TO_SZ(std::numeric_limits<int>::max()));
-        Actors.reserve(static_cast<int>(Value->actors.size()));
-        for (ActorsList::iterator it : Value->actors)
+        QPair<QStringList, QList<QVariant>> Actors;
+        Q_ASSERT(m_Actors_ByID.size() < TO_SZ(std::numeric_limits<int>::max()));
+        Actors.first.reserve(static_cast<int>(m_Actors_ByID.size()));
+        int index = 0;
+        for (ActorsList::iterator it : m_Actors_ByID)
         {
-           Actors.push_back(it->name.Get());
+           Actors.first.push_back(it->name.Get());
+           for (ActorsList::iterator lit : Value->actors)
+           {
+               if (lit==it)
+                   Actors.second.push_back(index);
+           }
+           index++;
         }
         return Actors;
     });
 }
 
-QList<QString> MainTableModelRegistry::ActorGetPersons(int ID) const
+QPair<QStringList, QList<QVariant>> MainTableModelRegistry::ActorGetPersons(int ID) const
 {
     GETTER_DEBUG() << "[MainTableModelRegistry::ActorGetPersons]: " << ID;
-    return ActorsBaseGetter<QList<QString>>(ID,[](ActorsList::iterator Value) -> QList<QString>
+    return ActorsBaseGetter<QPair<QStringList, QList<QVariant>>>(ID,[&](ActorsList::iterator Value) -> QPair<QStringList, QList<QVariant>>
     {
-       QList<QString> Persons;
-       Q_ASSERT(Value->persons.size() < TO_SZ(std::numeric_limits<int>::max()));
-       Persons.reserve(static_cast<int>(Value->persons.size()));
-       for (PersonsList::iterator it : Value->persons)
-       {
-          Persons.push_back(it->name.Get());
-       }
+        QPair<QStringList, QList<QVariant>> Persons;
+        Q_ASSERT(m_Persons_ByID.size() < TO_SZ(std::numeric_limits<int>::max()));
+        Persons.first.reserve(static_cast<int>(m_Persons_ByID.size()));
+        int index = 0;
+        for (PersonsList::iterator it : m_Persons_ByID)
+        {
+            Persons.first.push_back(it->name.Get());
+            for (PersonsList::iterator lit : Value->persons)
+            {
+                if (lit==it)
+                    Persons.second.push_back(index);
+            }
+            index++;
+        }
        return Persons;
     });
 }
@@ -342,15 +403,7 @@ bool MainTableModelRegistry::RemovePerson(int ID) noexcept
     return PersonsBaseSetter(ID, [&](PersonsList::iterator Value)
     {
         // Снимаем все ссылки на конкретный элемент
-        // Нет смысла перебирать все значения из m_Persons, достаточно перебрать только свои
-        for (ActorsList::iterator actorIt : Value->actors)
-        {
-            Q_ASSERT(actorIt != m_Actors.end());
-            // TODO: можно ли вызывать std::remove на std::set??
-            actorIt->persons.erase(
-                        std::remove(actorIt->persons.begin(), actorIt->persons.end(), Value),
-                        actorIt->persons.end());
-        }
+        RemoveAllLinksToPerson(Value);
 
         // Удаляем непосредственно из хранилищ
         m_Persons_ByID.erase(
@@ -368,15 +421,7 @@ bool MainTableModelRegistry::RemoveActor(int ID) noexcept
     return ActorsBaseSetter(ID, [&](ActorsList::iterator Value)
     {
         // Снимаем все ссылки на конкретный элемент
-        // Нет смысла перебирать все значения из m_Persons, достаточно перебрать только свои
-        for (PersonsList::iterator personIt : Value->persons)
-        {
-            Q_ASSERT(personIt != m_Persons.end());
-            // TODO: можно ли вызывать std::remove на std::set??
-            personIt->actors.erase(
-                        std::remove(personIt->actors.begin(), personIt->actors.end(), Value),
-                        personIt->actors.end());
-        }
+        RemoveAllLinksToActor(Value);
 
         // Удаляем непосредственно из хранилищ
         m_Actors_ByID.erase(
@@ -452,14 +497,11 @@ QVariant MainTableModel::data(const QModelIndex &index, int role) const
             return m_Mngr->GetRegistry()->ActorGetName(index.row());
         case 1:
         {
-            // TODO: refact it
-            QString ret;
-            auto v=m_Mngr->GetRegistry()->ActorGetPersons(index.row());
-            for (auto t:v)
-            {
-                ret += t + ", ";
-            }
-            return ret;
+            auto p = m_Mngr->GetRegistry()->ActorGetPersons(index.row());
+            QList<QVariant> list;
+            list.push_back(std::move(p.first));
+            list.push_back(std::move(p.second));
+            return list;
         }
         case 2:
             return m_Mngr->GetRegistry()->ActorIsDenied(index.row());
@@ -510,7 +552,22 @@ bool MainTableModel::setData(const QModelIndex &index, const QVariant &value, in
 
     // Setting Persons list..
     case 1:
-
+        if (value.canConvert<QStringList>())
+        {
+            if (m_Other)
+                m_Other->beginResetModel();
+            try {
+                QStringList list = value.toStringList();
+                m_Mngr->GetRegistry()->ActorClearAllRelations(index.row());
+                for (const QString& Value : list)
+                {
+                    m_Mngr->GetRegistry()->Actor_ChangeRelation(index.row(), ActorName(Value), true);
+                }
+                Changed = true;
+            }
+            catch (const ActorNameStringEmpty&) {
+            }
+        }
         break;
 
     // Setting "deny" flag..
@@ -593,14 +650,11 @@ QVariant MainTableModel_Reversed::data(const QModelIndex &index, int role) const
             return m_Mngr->GetRegistry()->PersonGetName(index.row());
         case 1:
         {
-            // TODO: refact it
-            QString ret;
-            auto v=m_Mngr->GetRegistry()->PersonGetActors(index.row());
-            for (auto t:v)
-            {
-                ret += t + ", ";
-            }
-            return ret;
+            auto p = m_Mngr->GetRegistry()->PersonGetActors(index.row());
+            QList<QVariant> list;
+            list.push_back(std::move(p.first));
+            list.push_back(std::move(p.second));
+            return list;
         }
         case 2:
             return m_Mngr->GetRegistry()->PersonIsDenied(index.row());
