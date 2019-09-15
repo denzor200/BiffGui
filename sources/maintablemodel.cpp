@@ -670,32 +670,105 @@ QVariant MainTableModel_Reversed::data(const QModelIndex &index, int role) const
     return QVariant();
 }
 
+Qt::ItemFlags MainTableModel_Reversed::flags(const QModelIndex &index) const
+{
+    Qt::ItemFlags flags = QAbstractTableModel::flags( index );
+    if( index.isValid() ) {
+        flags |= Qt::ItemIsEditable;
+    }
+    return flags;
+}
+
+// TODO: слишком много копипаста
 bool MainTableModel_Reversed::setData(const QModelIndex &index, const QVariant &value, int role)
 {
-    // TODO: implement this
+    if( !index.isValid() || role != Qt::EditRole || m_Mngr->GetRegistry()->getPersonsCount() <= index.row() ) {
+        return false;
+    }
+
+    bool Changed = false;
+    switch (index.column())
+    {
+
+    // Setting Actor Name..
+    case 0:
+        if (value.canConvert<QString>())
+        {
+            if (m_Other)
+                m_Other->beginResetModel();
+            try {
+                // Возвращаемое значение от SetPerson можно и проигнорировать
+                MainTableModelUtils::SetPerson(*m_Mngr->GetRegistry(), index.row(), ActorName(value.toString()));
+                Changed = true;
+            }
+            catch (const ActorNameStringEmpty&) {
+            }
+            catch (const MainTableModelRegistry_InvalidPersonID&) {
+            }
+        }
+        break;
+
+    // Setting Persons list..
+    case 1:
+        if (value.canConvert<QStringList>())
+        {
+            if (m_Other)
+                m_Other->beginResetModel();
+            try {
+                QStringList list = value.toStringList();
+                m_Mngr->GetRegistry()->PersonClearAllRelations(index.row());
+                for (const QString& Value : list)
+                {
+                    m_Mngr->GetRegistry()->Person_ChangeRelation(index.row(), ActorName(Value), true);
+                }
+                Changed = true;
+            }
+            catch (const ActorNameStringEmpty&) {
+            }
+        }
+        break;
+
+    // Setting "deny" flag..
+    case 2:
+        if (value.canConvert<bool>())
+        {
+            // Возвращаемое значение от ChangeDenyPerson можно и проигнорировать
+            m_Mngr->GetRegistry()->ChangeDenyPerson(index.row(), value.toBool());
+            Changed = true;
+        }
+        break;
+
+    }
+    if (Changed)
+    {
+        emit dataChanged( index, index );
+        if (m_Other)
+            m_Other->endResetModel();
+        return true;
+    }
     return false;
 }
 
 QVariant MainTableModel_Reversed::headerData(int section, Qt::Orientation orientation, int role) const
 {
     if( role != Qt::DisplayRole ) {
-            return QVariant();
-        }
-
-        if( orientation == Qt::Vertical ) {
-            return section + 1;
-        }
-
-        switch( section ) {
-        case 0:
-            return QString::fromUtf8( "Персонаж" );
-        case 1:
-            return QString::fromUtf8( "Актеры" );
-        case 2:
-            return QString::fromUtf8( "Исключить" );
-        }
-
         return QVariant();
+    }
+
+    if( orientation == Qt::Vertical ) {
+        return section + 1;
+    }
+
+    switch( section ) {
+    case 0:
+        return QString::fromUtf8( "Персонаж" );
+    case 1:
+        return QString::fromUtf8( "Актеры" );
+    case 2:
+        return QString::fromUtf8( "Исключить" );
+    }
+
+    return QVariant();
 }
 
 MainTableModelsManager::MainTableModelsManager(QObject *parent) :
