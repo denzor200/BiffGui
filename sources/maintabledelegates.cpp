@@ -1,12 +1,43 @@
 #include "maintabledelegates.h"
-#include <QComboBox>
 #include <QPainter>
 #include <QList>
+
+#include <QComboBox>
 #include "libqxt\gui\qxtcheckcombobox.h"
+#include <QLineEdit>
 
 #define RU_YES_TEXT "Да"
 #define RU_NO_TEXT "Нет"
 #define SEPARATOR ", "
+
+CEnterNameDelegate::CEnterNameDelegate(QObject *parent) :
+    QItemDelegate(parent)
+{
+}
+
+QWidget *CEnterNameDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const
+{
+    Q_UNUSED(option);
+    Q_UNUSED(index);
+    return new QLineEdit(parent);
+}
+
+void CEnterNameDelegate::setEditorData(QWidget *editor, const QModelIndex &index) const
+{
+    const QVariant& Data = index.model()->data(index);
+    QLineEdit *lineEdit = qobject_cast<QLineEdit*> (editor);
+    if (Data.canConvert<QString>())
+        lineEdit->setText(Data.toString());
+    else {
+        lineEdit->setText("");
+    }
+}
+
+void CEnterNameDelegate::setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const
+{
+    QLineEdit *lineEdit = qobject_cast<QLineEdit*> (editor);
+    model->setData(index, lineEdit->text());
+}
 
 CChoiceLinksDelegate::CChoiceLinksDelegate(QObject *parent) :
     QItemDelegate(parent)
@@ -25,9 +56,9 @@ QWidget *CChoiceLinksDelegate::createEditor(QWidget *parent, const QStyleOptionV
 void CChoiceLinksDelegate::setEditorData(QWidget *editor, const QModelIndex &index) const
 {
     const QVariant& Data = index.model()->data(index);
+    QxtCheckComboBox *ccBox = qobject_cast<QxtCheckComboBox*> (editor);
     if (Data.canConvert<QList<QVariant>>())
     {
-        QxtCheckComboBox *ccBox = qobject_cast<QxtCheckComboBox*> (editor);
         QList<QVariant> pair = Data.toList();
         QList<QVariant> CheckedList = pair[1].toList();
 
@@ -37,6 +68,9 @@ void CChoiceLinksDelegate::setEditorData(QWidget *editor, const QModelIndex &ind
         {
             ccBox->setItemCheckState(variantIndex.toInt(), Qt::Checked);
         }
+    }
+    else {
+         ccBox->clear();
     }
 }
 
@@ -69,6 +103,7 @@ void CChoiceLinksDelegate::paint(QPainter *painter, const QStyleOptionViewItem &
                     if (Value.size()!=0)
                         Value += SEPARATOR;
                     Value += name;
+                    break;
                 }
             }
             cur_id++;
@@ -96,6 +131,8 @@ QWidget *CChoiceDenyStatusDelegate::createEditor(QWidget *parent, const QStyleOp
 
 void CChoiceDenyStatusDelegate::setEditorData(QWidget *editor, const QModelIndex &index) const
 {
+    // если editor еще не был создан, то эта функция никогда не вызовeтся
+    // дополнительные проверки не нужны
     bool value = index.model()->data(index).toBool();
     QComboBox *comboBox = qobject_cast<QComboBox*> (editor);
     if (value)
@@ -107,6 +144,8 @@ void CChoiceDenyStatusDelegate::setEditorData(QWidget *editor, const QModelIndex
 
 void CChoiceDenyStatusDelegate::setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const
 {
+    // если editor еще не был создан, то эта функция никогда не вызовeтся
+    // дополнительные проверки не нужны
     QComboBox *comboBox = qobject_cast<QComboBox*> (editor);
     if (comboBox->currentIndex() == 0)
         model->setData(index, true);

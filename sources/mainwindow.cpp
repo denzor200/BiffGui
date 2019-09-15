@@ -31,11 +31,13 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->tableView->verticalHeader()->setSectionResizeMode (QHeaderView::Fixed);
     ui->tableView->horizontalHeader()->setSectionResizeMode (QHeaderView::Stretch);
+    ui->tableView->setItemDelegateForColumn(0,new CEnterNameDelegate(this) );
     ui->tableView->setItemDelegateForColumn(1,new CChoiceLinksDelegate(this) );
     ui->tableView->setItemDelegateForColumn(2,new CChoiceDenyStatusDelegate(this) );
 
     ui->tableView_Reversed->verticalHeader()->setSectionResizeMode (QHeaderView::Fixed);
     ui->tableView_Reversed->horizontalHeader()->setSectionResizeMode (QHeaderView::Stretch);
+    ui->tableView_Reversed->setItemDelegateForColumn(0,new CEnterNameDelegate(this) );
     ui->tableView_Reversed->setItemDelegateForColumn(1,new CChoiceLinksDelegate(this) );
     ui->tableView_Reversed->setItemDelegateForColumn(2,new CChoiceDenyStatusDelegate(this) );
 
