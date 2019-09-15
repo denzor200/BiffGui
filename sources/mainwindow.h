@@ -17,6 +17,8 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+    void makeDoc();
+
 private slots:
     void on_action_open_triggered();
     void on_action_save_triggered();

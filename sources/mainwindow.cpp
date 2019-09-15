@@ -52,6 +52,27 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+void MainWindow::makeDoc()
+{
+    QString InFile, OutDir;
+
+    // TODO: Сделать нормальную выборку InFile
+    InFile = "D:\\repos\\subtitles\\Debug\\Subtitry4.ass";
+    QSettings Settings;
+    OutDir = QFileDialog::getExistingDirectory(this, "Создать монтажные листы", Settings.value(DirectoriesRegistry::DOC_OUTDIR).toString());
+
+    if (OutDir!="")
+    {
+        QDir CurrentDir;
+        Settings.setValue(DirectoriesRegistry::DOC_OUTDIR,
+            CurrentDir.absoluteFilePath(OutDir));
+
+        Generating w(this);
+        w.StartProcess(InFile, OutDir);
+        w.exec();
+    }
+}
+
 void MainWindow::on_action_open_triggered()
 {
 
@@ -104,7 +125,8 @@ void MainWindow::on_action_save_persons_triggered()
 
 void MainWindow::on_action_close_all_triggered()
 {
-
+    m_ModelsMgr->ClearAll();
+    // TODO: the next..
 }
 
 void MainWindow::on_action_open_table_triggered()
@@ -150,7 +172,7 @@ void MainWindow::on_action_close_table_triggered()
 
 void MainWindow::on_action_generate_doc_triggered()
 {
-
+    this->makeDoc();
 }
 
 void MainWindow::on_action_save_individual_triggered()
@@ -170,23 +192,7 @@ void MainWindow::on_action_make_individual_flag_triggered()
 
 void MainWindow::on_pushButton_MakeDoc_clicked()
 {
-    QString InFile, OutDir;
-
-    // TODO: Сделать нормальную выборку InFile
-    InFile = "D:\\repos\\subtitles\\Debug\\Subtitry4.ass";
-    QSettings Settings;
-    OutDir = QFileDialog::getExistingDirectory(this, "Создать монтажные листы", Settings.value(DirectoriesRegistry::DOC_OUTDIR).toString());
-
-    if (OutDir!="")
-    {
-        QDir CurrentDir;
-        Settings.setValue(DirectoriesRegistry::DOC_OUTDIR,
-            CurrentDir.absoluteFilePath(OutDir));
-
-        Generating w(this);
-        w.StartProcess(InFile, OutDir);
-        w.exec();
-    }
+    this->makeDoc();
 }
 
 void MainWindow::on_toolButton_Insert_clicked()
