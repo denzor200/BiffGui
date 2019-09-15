@@ -342,16 +342,17 @@ QPair<QStringList, QList<QVariant>> MainTableModelRegistry::PersonGetActors(int 
         Q_ASSERT(m_Actors_ByID.size() < TO_SZ(std::numeric_limits<int>::max()));
         Actors.first.reserve(static_cast<int>(m_Actors_ByID.size()));
         int index = 0;
-        for (ActorsList::iterator it : m_Actors_ByID)
+        ForeachActors([&](int, ActorsList::iterator actorValue) -> bool
         {
-           Actors.first.push_back(it->name.Get());
-           for (ActorsList::iterator lit : Value->actors)
-           {
-               if (lit==it)
-                   Actors.second.push_back(index);
-           }
-           index++;
-        }
+            Actors.first.push_back(actorValue->name.Get());
+            for (ActorsList::iterator lit : Value->actors)
+            {
+                if (lit==actorValue)
+                    Actors.second.push_back(index);
+            }
+            index++;
+            return true;
+        });
         return Actors;
     });
 }
@@ -365,16 +366,17 @@ QPair<QStringList, QList<QVariant>> MainTableModelRegistry::ActorGetPersons(int 
         Q_ASSERT(m_Persons_ByID.size() < TO_SZ(std::numeric_limits<int>::max()));
         Persons.first.reserve(static_cast<int>(m_Persons_ByID.size()));
         int index = 0;
-        for (PersonsList::iterator it : m_Persons_ByID)
+        ForeachPersons([&](int, PersonsList::iterator personValue) -> bool
         {
-            Persons.first.push_back(it->name.Get());
+            Persons.first.push_back(personValue->name.Get());
             for (PersonsList::iterator lit : Value->persons)
             {
-                if (lit==it)
+                if (lit==personValue)
                     Persons.second.push_back(index);
             }
             index++;
-        }
+            return true;
+        });
        return Persons;
     });
 }
@@ -499,6 +501,7 @@ QVariant MainTableModel::data(const QModelIndex &index, int role) const
         {
             auto p = m_Mngr->GetRegistry()->ActorGetPersons(index.row());
             QList<QVariant> list;
+            list.reserve(2);
             list.push_back(std::move(p.first));
             list.push_back(std::move(p.second));
             return list;
@@ -652,6 +655,7 @@ QVariant MainTableModel_Reversed::data(const QModelIndex &index, int role) const
         {
             auto p = m_Mngr->GetRegistry()->PersonGetActors(index.row());
             QList<QVariant> list;
+            list.reserve(2);
             list.push_back(std::move(p.first));
             list.push_back(std::move(p.second));
             return list;

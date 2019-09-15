@@ -8,6 +8,7 @@
 #include <ActorName.h>
 #include <QAbstractTableModel>
 #include <QPair>
+#include <QDebug>
 
 class MainTableModelRegistry_InvalidPersonID : public std::exception
 {
@@ -135,6 +136,11 @@ private:
             int ID,
             const FUNC_T& Func);
 
+    template <typename FUNC_T>
+    void ForeachActors(const FUNC_T& Func) const;
+
+    template <typename FUNC_T>
+    void ForeachPersons(const FUNC_T& Func) const;
 
 private:
     // main storage
@@ -152,6 +158,36 @@ private:
     const PersonsList::iterator NULL_PERSON;
 };
 
+template<typename FUNC_T>
+void MainTableModelRegistry::ForeachPersons(const FUNC_T &Func) const
+{
+    int index = 0;
+    for (PersonsList::iterator it : m_Persons_ByID)
+    {
+        if (it != NULL_PERSON)
+        {
+            if (!Func(index, it))
+                break;
+        }
+        index++;
+    }
+}
+
+template<typename FUNC_T>
+void MainTableModelRegistry::ForeachActors(const FUNC_T &Func) const
+{
+    int index = 0;
+    for (ActorsList::iterator it : m_Actors_ByID)
+    {
+        if (it != NULL_ACTOR)
+        {
+            if (!Func(index, it))
+                break;
+        }
+        index++;
+    }
+}
+
 template <typename RET_T, typename EX_T, typename IT_T, typename FUNC_T>
 RET_T MainTableModelRegistry::BaseGetter(
         const std::vector<IT_T>& Storage,
@@ -163,9 +199,9 @@ RET_T MainTableModelRegistry::BaseGetter(
         throw EX_T();
     if (static_cast<size_t>(ID) < Storage.size())
     {
-        IT_T findedItValue = Storage[static_cast<size_t>(ID)];
-        if (findedItValue != NULL_IT)
-            return Func(findedItValue);
+        IT_T it = Storage[static_cast<size_t>(ID)];
+        if (it != NULL_IT)
+            return Func(it);
     }
     throw EX_T();
 }
@@ -180,9 +216,9 @@ bool MainTableModelRegistry::BaseSetter(
 {
     if (ID < 0)
         return false;
-    if (static_cast<int>(ID) < Storage.size())
+    if (static_cast<size_t>(ID) < Storage.size())
     {
-        auto it = Storage[static_cast<int>(ID)];
+        auto it = Storage[static_cast<size_t>(ID)];
         if (it != NULL_IT)
         {
             return Func(it);

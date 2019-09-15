@@ -24,15 +24,19 @@ QWidget *CChoiceLinksDelegate::createEditor(QWidget *parent, const QStyleOptionV
 
 void CChoiceLinksDelegate::setEditorData(QWidget *editor, const QModelIndex &index) const
 {
-    QxtCheckComboBox *ccBox = qobject_cast<QxtCheckComboBox*> (editor);
-    QList<QVariant> Values = index.model()->data(index).toList();
-    QList<QVariant> CheckedList = Values[1].toList();
-
-    ccBox->clear();
-    ccBox->addItems(Values[0].toStringList());
-    for (const QVariant& variantIndex : CheckedList)
+    const QVariant& Data = index.model()->data(index);
+    if (Data.canConvert<QList<QVariant>>())
     {
-        ccBox->setItemCheckState(variantIndex.toInt(), Qt::Checked);
+        QxtCheckComboBox *ccBox = qobject_cast<QxtCheckComboBox*> (editor);
+        QList<QVariant> pair = Data.toList();
+        QList<QVariant> CheckedList = pair[1].toList();
+
+        ccBox->clear();
+        ccBox->addItems(pair[0].toStringList());
+        for (const QVariant& variantIndex : CheckedList)
+        {
+            ccBox->setItemCheckState(variantIndex.toInt(), Qt::Checked);
+        }
     }
 }
 
@@ -44,29 +48,33 @@ void CChoiceLinksDelegate::setModelData(QWidget *editor, QAbstractItemModel *mod
 
 void CChoiceLinksDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
-    QList<QVariant> value = index.model()->data(index).toList();
-    QRect rect = option.rect;
-    rect.setX(rect.x() + 5);
-    rect.setWidth(rect.width() - 5);
-
-    QString Value;
-    QStringList names = value[0].toStringList();
-    QList<QVariant> ids = value[1].toList();
-    int cur_id = 0;
-    for (const QString& name : names)
+    const QVariant& Data = index.model()->data(index);
+    if (Data.canConvert<QList<QVariant>>())
     {
-        for (const QVariant& id : ids)
+        QList<QVariant> pair = Data.toList();
+        QRect rect = option.rect;
+        rect.setX(rect.x() + 5);
+        rect.setWidth(rect.width() - 5);
+
+        QString Value;
+        QStringList names = pair[0].toStringList();
+        QList<QVariant> ids = pair[1].toList();
+        int cur_id = 0;
+        for (const QString& name : names)
         {
-            if (id.toInt() == cur_id)
+            for (const QVariant& id : ids)
             {
-                if (Value.size()!=0)
-                    Value += SEPARATOR;
-                Value += name;
+                if (id.toInt() == cur_id)
+                {
+                    if (Value.size()!=0)
+                        Value += SEPARATOR;
+                    Value += name;
+                }
             }
+            cur_id++;
         }
-        cur_id++;
+        painter->drawText(rect, Qt::AlignVCenter | Qt::AlignLeft, Value);
     }
-    painter->drawText(rect, Qt::AlignVCenter | Qt::AlignLeft, Value);
 }
 
 CChoiceDenyStatusDelegate::CChoiceDenyStatusDelegate(QObject *parent) :
@@ -77,10 +85,13 @@ CChoiceDenyStatusDelegate::CChoiceDenyStatusDelegate(QObject *parent) :
 QWidget *CChoiceDenyStatusDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
     Q_UNUSED(option);
-    Q_UNUSED(index);
-    QComboBox* comboBox = new QComboBox(parent);
-    comboBox->addItems({RU_YES_TEXT, RU_NO_TEXT});
-    return comboBox;
+    if (index.model()->data(index).canConvert<bool>())
+    {
+        QComboBox* comboBox = new QComboBox(parent);
+        comboBox->addItems({RU_YES_TEXT, RU_NO_TEXT});
+        return comboBox;
+    }
+    return nullptr;
 }
 
 void CChoiceDenyStatusDelegate::setEditorData(QWidget *editor, const QModelIndex &index) const
@@ -107,11 +118,14 @@ void CChoiceDenyStatusDelegate::setModelData(QWidget *editor, QAbstractItemModel
 
 void CChoiceDenyStatusDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
-    bool value = index.model()->data(index).toBool();
+    bool Value = false;
+    const QVariant& Data = index.model()->data(index);
+    if (Data.canConvert<bool>())
+        Value = Data.toBool();
     QRect rect = option.rect;
     rect.setX(rect.x() + 5);
     rect.setWidth(rect.width() - 5);
-    if (value)
+    if (Value)
         painter->drawText(rect, Qt::AlignVCenter | Qt::AlignLeft, RU_YES_TEXT);
     else {
         painter->drawText(rect, Qt::AlignVCenter | Qt::AlignLeft, RU_NO_TEXT);
