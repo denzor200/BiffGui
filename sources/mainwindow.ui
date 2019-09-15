@@ -135,9 +135,7 @@
     <addaction name="action_save_individual"/>
     <addaction name="action_close"/>
     <addaction name="separator"/>
-    <addaction name="action_open_persons"/>
     <addaction name="action_save_persons"/>
-    <addaction name="action_close_persons"/>
     <addaction name="separator"/>
     <addaction name="action_generate_doc"/>
     <addaction name="separator"/>
@@ -171,22 +169,6 @@
    <addaction name="menu_help"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
-  <action name="action_open_persons">
-   <property name="text">
-    <string>Импортировать список персонажей</string>
-   </property>
-   <property name="toolTip">
-    <string>Открыть список персонажей</string>
-   </property>
-  </action>
-  <action name="action_close_persons">
-   <property name="text">
-    <string>Очистить список персонажей</string>
-   </property>
-   <property name="toolTip">
-    <string>Закрыть список персонажей</string>
-   </property>
-  </action>
   <action name="action_exit">
    <property name="text">
     <string>Выход</string>

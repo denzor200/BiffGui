@@ -1,4 +1,3 @@
-#include "actorslist.h"
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
@@ -55,8 +54,8 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_action_open_triggered()
 {
-    auto actors = ActorsList::Inctance().lock();
-    assert(actors);
+    //auto actors = ActorsList::Inctance().lock();
+    //assert(actors);
 
     QSettings Settings;
     QString fileName = QFileDialog::getOpenFileName(this,
@@ -81,7 +80,7 @@ void MainWindow::on_action_open_triggered()
 
         QTextStream in(&file);
         in.setCodec("UTF-8"); // change the file codec to UTF-8.
-        actors->Native().clear();
+        //actors->Native().clear();
 
         while (!in.atEnd()) {
             QString line = in.readLine();
@@ -94,7 +93,7 @@ void MainWindow::on_action_open_triggered()
                 continue;
             }
             try {
-                actors->Native().insert(ActorName(line));
+               // actors->Native().insert(ActorName(line));
             } catch (const ActorNameStringEmpty&)
             {
             }
@@ -105,59 +104,12 @@ void MainWindow::on_action_open_triggered()
 
 void MainWindow::on_action_save_triggered()
 {
-    // TODO: сохранять весь текст только в UTF-8 with bom
-    auto actors = ActorsList::Inctance().lock();
-    assert(actors);
 
-    QSettings Settings;
-    QString fileName = QFileDialog::getSaveFileName(this,
-        tr("Сохранить список персонажей"),
-        Settings.value(DirectoriesRegistry::PERSONS_OUTDIR).toString(),
-        tr("Text files (*.txt)"));
-
-    if (fileName!="")
-    {
-        QDir CurrentDir;
-        Settings.setValue(DirectoriesRegistry::PERSONS_OUTDIR,
-                    CurrentDir.absoluteFilePath(fileName));
-
-        QFile fileOut(fileName);
-        if (!fileOut.open(QIODevice::WriteOnly | QIODevice::Text))
-        {
-            std::stringstream ss;
-            ss << "Не удалось открыть файл '" << fileName.toUtf8().data() << "' на запись";
-            QMessageBox::critical(this, "Ошибка", ss.str().c_str());
-            return;
-        }
-
-        // Все текстовые файлы мы сохраняем только в UTF-8 with BOM
-        QTextStream streamFileOut(&fileOut);
-        streamFileOut.setCodec("UTF-8");
-        streamFileOut.setGenerateByteOrderMark(true);
-        for (const auto& Value : actors->Native())
-        {
-            streamFileOut << Value.Get() << endl;
-        }
-        streamFileOut.flush();
-
-        fileOut.close();
-    }
 }
 
 void MainWindow::on_action_close_triggered()
 {
-    auto actors = ActorsList::Inctance().lock();
-    assert(actors);
 
-    /*for (int i=0;i<ui->tableWidget->rowCount();++i)
-    {
-        auto widget = ui->tableWidget->cellWidget(i, 1);
-        auto multiWidget = (MultiListWidget*)widget;
-        assert(multiWidget);
-        multiWidget->clear();
-    }*/
-
-    actors->Native().clear();
 }
 
 
@@ -177,19 +129,22 @@ void MainWindow::on_action_settings_triggered()
     w.exec();
 }
 
-void MainWindow::on_action_open_persons_triggered()
-{
-
-}
-
 void MainWindow::on_action_save_persons_triggered()
 {
+    QSettings Settings;
+    QString fileName = QFileDialog::getSaveFileName(this,
+        tr("Сохранить список персонажей"),
+        Settings.value(DirectoriesRegistry::PERSONS_OUTDIR).toString(),
+        tr("Text files (*.txt)"));
 
-}
+    if (fileName!="")
+    {
+        QDir CurrentDir;
+        Settings.setValue(DirectoriesRegistry::PERSONS_OUTDIR,
+                    CurrentDir.absoluteFilePath(fileName));
 
-void MainWindow::on_action_close_persons_triggered()
-{
-
+        m_ModelsMgr->SavePersons(fileName);
+    }
 }
 
 void MainWindow::on_action_close_all_triggered()

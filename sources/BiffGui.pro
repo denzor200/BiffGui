@@ -26,7 +26,6 @@ CONFIG += c++11
 
 SOURCES += \
         ActorName.cpp \
-        actorslist.cpp \
         generating.cpp \
         libqxt/core/qxtglobal.cpp \
         libqxt/gui/qxtcheckcombobox.cpp \
@@ -38,7 +37,6 @@ SOURCES += \
 
 HEADERS += \
         ActorName.h \
-        actorslist.h \
         directoriesregistry.h \
         generating.h \
         libqxt/core/qxtglobal.h \

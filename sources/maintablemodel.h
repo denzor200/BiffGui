@@ -294,6 +294,8 @@ public:
     MainTableModel_Reversed*            GetModelReversed()          { return m_ModelReversed; }
     const MainTableModel_Reversed*      GetModelReversed() const    { return m_ModelReversed; }
 
+    void SavePersons(const QString& Path);
+
 protected:
     friend class MainTableModel;
     friend class MainTableModel_Reversed;
@@ -314,6 +316,8 @@ public:
 
     virtual bool InsertRow() = 0;
     virtual bool RemoveRow(int ID) = 0;
+
+    virtual void SavePersons(const QString& Path) = 0;
 };
 
 class MainTableModel : public QAbstractTableModel, public IMainTableModel
@@ -327,6 +331,8 @@ public:
     // IMainTableModel interface
     bool InsertRow() override;
     bool RemoveRow(int ID) override;
+
+    void SavePersons(const QString& Path) override;
 
     // QAbstractTableModel override methods
     int rowCount( const QModelIndex& parent = QModelIndex()) const override;
@@ -356,6 +362,8 @@ public:
     // IMainTableModel interface
     bool InsertRow() override;
     bool RemoveRow(int ID) override;
+
+    void SavePersons(const QString& Path) override;
 
     // QAbstractTableModel override methods
     int rowCount( const QModelIndex& parent = QModelIndex()) const override;

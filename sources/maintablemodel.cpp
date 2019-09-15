@@ -2,6 +2,10 @@
 #include <algorithm>
 #include <limits>
 #include <QDebug>
+#include <QMessageBox>
+#include <QFile>
+#include <sstream>
+#include <QApplication>
 
 #define CHECK_COND(c) \
     if (!(c)) \
@@ -336,7 +340,7 @@ QString MainTableModelRegistry::ActorGetName(int ID) const
 QPair<QStringList, QList<QVariant>> MainTableModelRegistry::PersonGetActors(int ID) const
 {
     GETTER_DEBUG() << "[MainTableModelRegistry::PersonGetActors]: " << ID;
-    return PersonsBaseGetter<QPair<QStringList, QList<QVariant>>>(ID,[&](PersonsList::iterator Value) -> QPair<QStringList, QList<QVariant>>
+    auto Handler = [&](PersonsList::iterator Value) -> QPair<QStringList, QList<QVariant>>
     {
         QPair<QStringList, QList<QVariant>> Actors;
         Q_ASSERT(m_Actors_ByID.size() < TO_SZ(std::numeric_limits<int>::max()));
@@ -345,22 +349,30 @@ QPair<QStringList, QList<QVariant>> MainTableModelRegistry::PersonGetActors(int 
         ForeachActors([&](int, ActorsList::iterator actorValue) -> bool
         {
             Actors.first.push_back(actorValue->name.Get());
-            for (ActorsList::iterator lit : Value->actors)
+            if (Value != NULL_PERSON)
             {
-                if (lit==actorValue)
-                    Actors.second.push_back(index);
+                for (ActorsList::iterator lit : Value->actors)
+                {
+                    if (lit==actorValue)
+                        Actors.second.push_back(index);
+                }
             }
             index++;
             return true;
         });
         return Actors;
-    });
+    };
+    if (ID >= 0)
+        return PersonsBaseGetter<QPair<QStringList, QList<QVariant>>>(ID,Handler);
+    else {
+        return Handler(NULL_PERSON);
+    }
 }
 
 QPair<QStringList, QList<QVariant>> MainTableModelRegistry::ActorGetPersons(int ID) const
 {
     GETTER_DEBUG() << "[MainTableModelRegistry::ActorGetPersons]: " << ID;
-    return ActorsBaseGetter<QPair<QStringList, QList<QVariant>>>(ID,[&](ActorsList::iterator Value) -> QPair<QStringList, QList<QVariant>>
+    auto Handler = [&](ActorsList::iterator Value) -> QPair<QStringList, QList<QVariant>>
     {
         QPair<QStringList, QList<QVariant>> Persons;
         Q_ASSERT(m_Persons_ByID.size() < TO_SZ(std::numeric_limits<int>::max()));
@@ -369,16 +381,24 @@ QPair<QStringList, QList<QVariant>> MainTableModelRegistry::ActorGetPersons(int 
         ForeachPersons([&](int, PersonsList::iterator personValue) -> bool
         {
             Persons.first.push_back(personValue->name.Get());
-            for (PersonsList::iterator lit : Value->persons)
+            if (Value != NULL_ACTOR)
             {
-                if (lit==personValue)
-                    Persons.second.push_back(index);
+                for (PersonsList::iterator lit : Value->persons)
+                {
+                    if (lit==personValue)
+                        Persons.second.push_back(index);
+                }
             }
             index++;
             return true;
         });
        return Persons;
-    });
+    };
+    if (ID >= 0)
+        return ActorsBaseGetter<QPair<QStringList, QList<QVariant>>>(ID,Handler);
+    else {
+        return Handler(NULL_ACTOR);
+    }
 }
 
 bool MainTableModelRegistry::PersonIsDenied(int ID) const
@@ -495,6 +515,11 @@ bool MainTableModel::RemoveRow(int row)
         return true;
     }
     return false;
+}
+
+void MainTableModel::SavePersons(const QString &Path)
+{
+    m_Mngr->SavePersons(Path);
 }
 
 int MainTableModel::rowCount(const QModelIndex &parent) const
@@ -677,6 +702,11 @@ bool MainTableModel_Reversed::RemoveRow(int row)
     return false;
 }
 
+void MainTableModel_Reversed::SavePersons(const QString &Path)
+{
+    m_Mngr->SavePersons(Path);
+}
+
 int MainTableModel_Reversed::rowCount(const QModelIndex &parent) const
 {
     Q_UNUSED(parent);
@@ -845,6 +875,32 @@ MainTableModelsManager::MainTableModelsManager(QObject *parent) :
 
    m_Registry.Actor_ChangeRelation(1, ActorName("Персонаж 2"), true);
    m_Registry.Actor_ChangeRelation(1, ActorName("Персонаж 3"), true);
+}
+
+void MainTableModelsManager::SavePersons(const QString &Path)
+{
+    QFile fileOut(Path);
+    if (!fileOut.open(QIODevice::WriteOnly | QIODevice::Text))
+    {
+        std::stringstream ss;
+        ss << "Не удалось открыть файл '" << Path.toUtf8().data() << "' на запись";
+        QMessageBox::critical(QApplication::activeWindow(), "Ошибка", ss.str().c_str());
+        return;
+    }
+
+    // Все текстовые файлы мы сохраняем только в UTF-8 with BOM
+    QTextStream streamFileOut(&fileOut);
+    streamFileOut.setCodec("UTF-8");
+    streamFileOut.setGenerateByteOrderMark(true);
+    QPair<QStringList, QList<QVariant>> pair = m_Registry.ActorGetPersons(-1);
+    for (const QString& Value : pair.first)
+    {
+        streamFileOut << Value << endl;
+    }
+
+    streamFileOut.flush();
+
+    fileOut.close();
 }
 
 bool MainTableModelUtils::SetPerson(MainTableModelRegistry &R, int ID, const ActorName &Name)
