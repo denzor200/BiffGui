@@ -471,6 +471,32 @@ MainTableModel::MainTableModel( QObject *parent) :
     Q_ASSERT(m_Mngr);
 }
 
+bool MainTableModel::InsertRow()
+{
+    int row = m_Mngr->GetRegistry()->getActorsCount();
+    beginInsertRows( QModelIndex(), row, row );
+    if (m_Mngr->GetRegistry()->ReserveNewActorIndex())
+    {
+        endInsertRows();
+        return true;
+    }
+    return false;
+}
+
+bool MainTableModel::RemoveRow(int row)
+{
+    CHECK_COND(row < m_Mngr->GetRegistry()->getActorsCount());
+    beginRemoveRows( QModelIndex(), row, row );
+    m_Other->beginResetModel();
+    if (m_Mngr->GetRegistry()->RemoveActor(row))
+    {
+        endRemoveRows();
+        m_Other->endResetModel();
+        return true;
+    }
+    return false;
+}
+
 int MainTableModel::rowCount(const QModelIndex &parent) const
 {
     Q_UNUSED(parent);
@@ -623,6 +649,32 @@ MainTableModel_Reversed::MainTableModel_Reversed(QObject *parent) :
     m_Mngr(qobject_cast<MainTableModelsManager*>(parent))
 {
     Q_ASSERT(m_Mngr);
+}
+
+bool MainTableModel_Reversed::InsertRow()
+{
+    int row = m_Mngr->GetRegistry()->getPersonsCount();
+    beginInsertRows( QModelIndex(), row, row );
+    if (m_Mngr->GetRegistry()->ReserveNewPersonIndex())
+    {
+        endInsertRows();
+        return true;
+    }
+    return false;
+}
+
+bool MainTableModel_Reversed::RemoveRow(int row)
+{
+    CHECK_COND(row < m_Mngr->GetRegistry()->getPersonsCount());
+    beginRemoveRows( QModelIndex(), row, row );
+    m_Other->beginResetModel();
+    if (m_Mngr->GetRegistry()->RemovePerson(row))
+    {
+        endRemoveRows();
+        m_Other->endResetModel();
+        return true;
+    }
+    return false;
 }
 
 int MainTableModel_Reversed::rowCount(const QModelIndex &parent) const
@@ -793,58 +845,6 @@ MainTableModelsManager::MainTableModelsManager(QObject *parent) :
 
    m_Registry.Actor_ChangeRelation(1, ActorName("Персонаж 2"), true);
    m_Registry.Actor_ChangeRelation(1, ActorName("Персонаж 3"), true);
-}
-
-bool MainTableModelsManager::PersonsInsertRow()
-{
-    int row = m_Registry.getPersonsCount();
-    m_ModelReversed->beginInsertRows( QModelIndex(), row, row );
-    if (m_Registry.ReserveNewPersonIndex())
-    {
-        m_ModelReversed->endInsertRows();
-        return true;
-    }
-    return false;
-}
-
-bool MainTableModelsManager::ActorsInsertRow()
-{
-    int row = m_Registry.getActorsCount();
-    m_Model->beginInsertRows( QModelIndex(), row, row );
-    if (m_Registry.ReserveNewActorIndex())
-    {
-        m_Model->endInsertRows();
-        return true;
-    }
-    return false;
-}
-
-bool MainTableModelsManager::PersonsRemoveRow(int row)
-{
-    CHECK_COND(row < m_Registry.getPersonsCount());
-    m_ModelReversed->beginRemoveRows( QModelIndex(), row, row );
-    m_Model->beginResetModel();
-    if (m_Registry.RemovePerson(row))
-    {
-        m_ModelReversed->endRemoveRows();
-        m_Model->endResetModel();
-        return true;
-    }
-    return false;
-}
-
-bool MainTableModelsManager::ActorsRemoveRow(int row)
-{
-    CHECK_COND(row < m_Registry.getActorsCount());
-    m_Model->beginRemoveRows( QModelIndex(), row, row );
-    m_ModelReversed->beginResetModel();
-    if (m_Registry.RemoveActor(row))
-    {
-        m_Model->endRemoveRows();
-        m_ModelReversed->endResetModel();
-        return true;
-    }
-    return false;
 }
 
 bool MainTableModelUtils::SetPerson(MainTableModelRegistry &R, int ID, const ActorName &Name)

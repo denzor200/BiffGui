@@ -294,12 +294,6 @@ public:
     MainTableModel_Reversed*            GetModelReversed()          { return m_ModelReversed; }
     const MainTableModel_Reversed*      GetModelReversed() const    { return m_ModelReversed; }
 
-    bool PersonsInsertRow();
-    bool ActorsInsertRow();
-
-    bool PersonsRemoveRow(int ID);
-    bool ActorsRemoveRow(int ID);
-
 protected:
     friend class MainTableModel;
     friend class MainTableModel_Reversed;
@@ -313,7 +307,16 @@ private:
     MainTableModel_Reversed*    m_ModelReversed;
 };
 
-class MainTableModel : public QAbstractTableModel
+class IMainTableModel
+{
+public:
+    virtual ~IMainTableModel() = default;
+
+    virtual bool InsertRow() = 0;
+    virtual bool RemoveRow(int ID) = 0;
+};
+
+class MainTableModel : public QAbstractTableModel, public IMainTableModel
 {
     Q_OBJECT
 public:
@@ -321,6 +324,11 @@ public:
 
     void SetOther(MainTableModel_Reversed* Other) { m_Other = Other; }
 
+    // IMainTableModel interface
+    bool InsertRow() override;
+    bool RemoveRow(int ID) override;
+
+    // QAbstractTableModel override methods
     int rowCount( const QModelIndex& parent = QModelIndex()) const override;
     int columnCount( const QModelIndex& parent = QModelIndex()) const override;
     QVariant data( const QModelIndex& index, int role = Qt::DisplayRole) const override;
@@ -334,9 +342,10 @@ private:
     friend class MainTableModel_Reversed;
     MainTableModelsManager* m_Mngr;
     MainTableModel_Reversed* m_Other = nullptr;
+
 };
 
-class MainTableModel_Reversed : public QAbstractTableModel
+class MainTableModel_Reversed : public QAbstractTableModel, public IMainTableModel
 {
     Q_OBJECT
 public:
@@ -344,6 +353,11 @@ public:
 
     void SetOther(MainTableModel* Other) { m_Other = Other; }
 
+    // IMainTableModel interface
+    bool InsertRow() override;
+    bool RemoveRow(int ID) override;
+
+    // QAbstractTableModel override methods
     int rowCount( const QModelIndex& parent = QModelIndex()) const override;
     int columnCount( const QModelIndex& parent = QModelIndex()) const override;
     QVariant data( const QModelIndex& index, int role = Qt::DisplayRole) const override;

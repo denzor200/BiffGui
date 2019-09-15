@@ -252,35 +252,7 @@ void MainWindow::on_pushButton_MakeDoc_clicked()
 
 void MainWindow::on_toolButton_Insert_clicked()
 {
-    m_ModelsMgr->ActorsInsertRow();
-
-    /*int r = ui->tableWidget->rowCount();
-    ui->tableWidget->insertRow(ui->tableWidget->rowCount());
-    ui->tableWidget->setRowHeight(r, ui->tableWidget->rowHeight(r)+5);
-
-    {
-        auto multiWidget = new QxtCheckComboBox;
-        auto toolButton = new QToolButton;
-        toolButton->setText("+");
-        multiWidget->setSeparator(", ");
-
-        QWidget * w = new QWidget();
-        QHBoxLayout *l = new QHBoxLayout();
-        //l->setAlignment( Qt::AlignCenter );
-        l->addWidget( multiWidget );
-        l->addWidget( toolButton );
-        w->setLayout( l );
-        ui->tableWidget->setCellWidget(r, 1, w);
-    }
-    {
-        QWidget * w = new QWidget();
-        QHBoxLayout *l = new QHBoxLayout();
-        l->setAlignment( Qt::AlignCenter );
-        l->addWidget( new QCheckBox );
-        w->setLayout( l );
-        ui->tableWidget->setCellWidget(r, 2, w);
-    }*/
-
+    m_ModelsMgr->GetModel()->InsertRow();
 }
 
 void MainWindow::on_toolButton_Delete_clicked()
@@ -323,8 +295,8 @@ void MainWindow::on_toolButton_Delete_clicked()
     for( int i = rows.count() - 1; i >= 0; i -= 1 ) {
        int current = rows[i];
        if( current != prev ) {
-          m_ModelsMgr->ActorsRemoveRow(current);
-          prev = current;
+           m_ModelsMgr->GetModel()->RemoveRow(current);
+           prev = current;
        }
     }
 }
