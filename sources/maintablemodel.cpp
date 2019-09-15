@@ -310,6 +310,26 @@ bool MainTableModelRegistry::Actor_ChangeRelation(int actorID, const ActorName& 
     });
 }
 
+bool MainTableModelRegistry::Person_ChangeRelation(const ActorName &person, const ActorName &actor, bool State)
+{
+    qDebug() << "[MainTableModelRegistry::Person_ChangeRelation]: " << person << ", " << actor << ", " << State;
+    auto personIt = m_Persons_ByName.find(person);
+    auto actorIt = m_Actors_ByName.find(actor);
+    if (personIt != m_Persons_ByName.end() && actorIt != m_Actors_ByName.end() )
+        return Person_ChangeRelation(personIt->second, actorIt->second, State);
+    return false;
+}
+
+bool MainTableModelRegistry::Actor_ChangeRelation(const ActorName &actor, const ActorName &person, bool State)
+{
+    qDebug() << "[MainTableModelRegistry::Actor_ChangeRelation]: " << actor << ", " << person << ", " << State;
+    auto personIt = m_Persons_ByName.find(person);
+    auto actorIt = m_Actors_ByName.find(actor);
+    if (personIt != m_Persons_ByName.end() && actorIt != m_Actors_ByName.end() )
+        return Actor_ChangeRelation(actorIt->second, personIt->second, State);
+    return false;
+}
+
 #define DISABLE_DEBUG_GETTERS
 #ifndef DISABLE_DEBUG_GETTERS
 #define GETTER_DEBUG qDebug
@@ -483,6 +503,93 @@ void MainTableModelRegistry::ClearAllActors() noexcept
     m_Actors.clear();
 }
 
+MainTableModelRegistry::ReadingStats MainTableModelRegistry::ReadInStream(QTextStream &in)
+{
+    qDebug() << "[MainTableModelRegistry::ReadInStream]";
+    ReadingStats Stats;
+    ClearAllPersons();
+    ClearAllActors();
+    while (!in.atEnd()) {
+        QString line = in.readLine();
+        QStringList pair = line.split("-", QString::SkipEmptyParts);
+
+        // Предварительные проверки..
+        if (pair.size()>2)
+        {
+            Stats.UnrecognisedLines += line;
+            continue;
+        }
+        if (pair.size()==0)
+            continue;
+
+        // Оборачиваем имя актера в объект..
+        ActorName actorObj;
+        try {
+            actorObj = ActorName(pair[0]);
+        }
+        catch (const ActorNameStringEmpty&)
+        {
+        }
+        catch (const ActorNameForbiddenSymbols&)
+        {
+            Stats.UnrecognisedActors += pair[0];
+        }
+
+        // Можем извлечь: актер и несколько персонажей
+        if (pair.size()==2)
+        {
+            QStringList persons = pair[1].split(",", QString::SkipEmptyParts);
+            AddActor(actorObj);
+            for (const QString& person : persons)
+            {
+                // Оборачиваем имя персонажа в объект..
+                ActorName personObj;
+                try {
+                    personObj = ActorName(person);
+                }
+                catch (const ActorNameStringEmpty&)
+                {
+                }
+                catch (const ActorNameForbiddenSymbols&)
+                {
+                    Stats.UnrecognisedPersons += person;
+                }
+
+                AddPerson(personObj);
+                Actor_ChangeRelation(actorObj, personObj, true);
+            }
+        }
+
+        // Можем извлечь: только актер
+        else if (pair.size()==1)
+        {
+            // TODO: exception
+            AddActor(actorObj);
+        }
+    }
+    return Stats;
+}
+
+void MainTableModelRegistry::WriteToStream(QTextStream &Out) const
+{
+    qDebug() << "[MainTableModelRegistry::WriteToStream]";
+    for (const Actor& Value : m_Actors)
+    {
+        Out << Value.name.Get();
+        QString Persons;
+        for (PersonsList::iterator personIt : Value.persons)
+        {
+            if (Persons.size() == 0)
+                Persons += " - ";
+            else {
+                Persons += ", ";
+            }
+            Persons += personIt->name.Get();
+        }
+        Out << Persons << endl;
+    }
+}
+
 // Актер как ключ
 MainTableModel::MainTableModel( QObject *parent) :
     QAbstractTableModel(parent),
@@ -517,9 +624,24 @@ bool MainTableModel::RemoveRow(int row)
     return false;
 }
 
-void MainTableModel::SavePersons(const QString &Path)
+void MainTableModel::SaveTable(const QString &Path) const
+{
+    m_Mngr->SaveTable(Path);
+}
+
+void MainTableModel::ClearAll()
+{
+    m_Mngr->ClearAll();
+}
+
+void MainTableModel::SavePersons(const QString &Path) const
 {
     m_Mngr->SavePersons(Path);
+}
+
+void MainTableModel::OpenTable(const QString &Path)
+{
+    m_Mngr->OpenTable(Path);
 }
 
 int MainTableModel::rowCount(const QModelIndex &parent) const
@@ -710,9 +832,24 @@ bool MainTableModel_Reversed::RemoveRow(int row)
     return false;
 }
 
-void MainTableModel_Reversed::SavePersons(const QString &Path)
+void MainTableModel_Reversed::SaveTable(const QString &Path) const
+{
+    m_Mngr->SaveTable(Path);
+}
+
+void MainTableModel_Reversed::ClearAll()
+{
+    m_Mngr->ClearAll();
+}
+
+void MainTableModel_Reversed::SavePersons(const QString &Path) const
 {
     m_Mngr->SavePersons(Path);
+}
+
+void MainTableModel_Reversed::OpenTable(const QString &Path)
+{
+    m_Mngr->OpenTable(Path);
 }
 
 int MainTableModel_Reversed::rowCount(const QModelIndex &parent) const
@@ -893,7 +1030,39 @@ MainTableModelsManager::MainTableModelsManager(QObject *parent) :
    m_Registry.Actor_ChangeRelation(1, ActorName(QString::fromUtf8("Персонаж 3")), true);
 }
 
-void MainTableModelsManager::SavePersons(const QString &Path)
+void MainTableModelsManager::SaveTable(const QString &Path) const
+{
+    QFile fileOut(Path);
+    if (!fileOut.open(QIODevice::WriteOnly | QIODevice::Text))
+    {
+        std::stringstream ss;
+        ss << "Не удалось открыть файл '" << Path.toUtf8().data() << "' на запись";
+        QMessageBox::critical(QApplication::activeWindow(), "Ошибка", ss.str().c_str());
+        return;
+    }
+
+    // Все текстовые файлы мы сохраняем только в UTF-8 with BOM
+    QTextStream streamFileOut(&fileOut);
+    streamFileOut.setCodec("UTF-8");
+    streamFileOut.setGenerateByteOrderMark(true);
+    m_Registry.WriteToStream(streamFileOut);
+    streamFileOut.flush();
+    fileOut.close();
+}
+
+void MainTableModelsManager::ClearAll()
+{
+    m_Model->beginResetModel();
+    m_ModelReversed->beginResetModel();
+
+    m_Registry.ClearAllActors();
+    m_Registry.ClearAllPersons();
+
+    m_Model->endResetModel();
+    m_ModelReversed->endResetModel();
+}
+
+void MainTableModelsManager::SavePersons(const QString &Path) const
 {
     QFile fileOut(Path);
     if (!fileOut.open(QIODevice::WriteOnly | QIODevice::Text))
@@ -922,6 +1091,72 @@ void MainTableModelsManager::SavePersons(const QString &Path)
     }
     streamFileOut.flush();
     fileOut.close();
+}
+
+void MainTableModelsManager::OpenTable(const QString &Path)
+{
+    QFile file(Path);
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+    {
+        std::stringstream ss;
+        ss << "Не удалось открыть файл '" << Path.toUtf8().data() << "' на чтение";
+        QMessageBox::critical(QApplication::activeWindow(), "Ошибка", ss.str().c_str());
+        return;
+    }
+
+    QTextStream in(&file);
+    in.setCodec("UTF-8"); // change the file codec to UTF-8.
+
+    m_Model->beginResetModel();
+    m_ModelReversed->beginResetModel();
+    auto Stats = m_Registry.ReadInStream(in);
+    m_Model->endResetModel();
+    m_ModelReversed->endResetModel();
+
+    if (!Stats.UnrecognisedLines.empty() || !Stats.UnrecognisedActors.empty() || !Stats.UnrecognisedPersons.empty())
+    {
+        std::stringstream ss;
+        ss << "В ходе открытия таблицы из файла произошли некоторые ошибки." << std::endl;
+        int index = 1;
+        if (!Stats.UnrecognisedLines.empty())
+        {
+            ss << index << ". Следующие строки не были разобраны:" << std::endl;
+            for (const QString& Value : Stats.UnrecognisedLines)
+            {
+                ss << "\t\t" << Value.toUtf8().data() << std::endl;
+            }
+            index++;
+        }
+        if (!Stats.UnrecognisedActors.empty())
+        {
+            ss << index << ". Следующие имена актеров были отклонены:" << std::endl;
+            QString Actors;
+            for (const QString& Value : Stats.UnrecognisedActors)
+            {
+                if (Actors.size()!=0)
+                    Actors += ", ";
+                Actors += Value;
+            }
+            ss << Actors.toUtf8().data() << std::endl;
+            ss << "Возможно они содержат неразрешенные символы" << std::endl;
+            index++;
+        }
+        if (!Stats.UnrecognisedPersons.empty())
+        {
+            ss << index << ". Следующие имена персонажей были отклонены:" << std::endl;
+            QString Persons;
+            for (const QString& Value : Stats.UnrecognisedPersons)
+            {
+                if (Persons.size()!=0)
+                    Persons += ", ";
+                Persons += Value;
+            }
+            ss << Persons.toUtf8().data() << std::endl;
+            ss << "Возможно они содержат неразрешенные символы" << std::endl;
+            index++;
+        }
+        QMessageBox::warning(QApplication::activeWindow(), "Предупреждение", ss.str().c_str());
+    }
 }
 
 bool MainTableModelUtils::SetPerson(MainTableModelRegistry &R, int ID, const ActorName &Name)

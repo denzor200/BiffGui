@@ -74,6 +74,9 @@ public:
     bool Person_ChangeRelation(int personID, const ActorName& actor, bool State);
     bool Actor_ChangeRelation(int actorID, const ActorName& person, bool State);
 
+    bool Person_ChangeRelation(const ActorName& person, const ActorName& actor, bool State);
+    bool Actor_ChangeRelation(const ActorName& actor, const ActorName& person, bool State);
+
     QString PersonGetName(int ID) const;
     QString ActorGetName(int ID) const;
 
@@ -91,6 +94,15 @@ public:
 
     int getPersonsCount() const noexcept { return static_cast<int>(m_Persons_ByID.size()); }
     int getActorsCount() const noexcept { return static_cast<int>(m_Actors_ByID.size()); }
+
+    struct ReadingStats
+    {
+        QStringList UnrecognisedLines;
+        QStringList UnrecognisedPersons;
+        QStringList UnrecognisedActors;
+    };
+    ReadingStats ReadInStream( QTextStream& In);
+    void WriteToStream( QTextStream& Out) const;
 
 private:
     bool Person_ChangeRelation(PersonsList::iterator personIt, ActorsList::iterator actorIt, bool State);
@@ -294,7 +306,12 @@ public:
     MainTableModel_Reversed*            GetModelReversed()          { return m_ModelReversed; }
     const MainTableModel_Reversed*      GetModelReversed() const    { return m_ModelReversed; }
 
-    void SavePersons(const QString& Path);
+    void SavePersons(const QString& Path) const;
+
+    void OpenTable(const QString& Path);
+    void SaveTable(const QString& Path) const;
+
+    void ClearAll();
 
 protected:
     friend class MainTableModel;
@@ -317,7 +334,12 @@ public:
     virtual bool InsertRow() = 0;
     virtual bool RemoveRow(int ID) = 0;
 
-    virtual void SavePersons(const QString& Path) = 0;
+    virtual void SavePersons(const QString& Path) const = 0;
+
+    virtual void OpenTable(const QString& Path) = 0;
+    virtual void SaveTable(const QString& Path) const = 0;
+
+    virtual void ClearAll() = 0;
 };
 
 class MainTableModel : public QAbstractTableModel, public IMainTableModel
@@ -332,7 +354,12 @@ public:
     bool InsertRow() override;
     bool RemoveRow(int ID) override;
 
-    void SavePersons(const QString& Path) override;
+    void SavePersons(const QString& Path) const override;
+
+    void OpenTable(const QString& Path) override;
+    void SaveTable(const QString& Path) const override;
+
+    void ClearAll() override;
 
     // QAbstractTableModel override methods
     int rowCount( const QModelIndex& parent = QModelIndex()) const override;
@@ -363,7 +390,12 @@ public:
     bool InsertRow() override;
     bool RemoveRow(int ID) override;
 
-    void SavePersons(const QString& Path) override;
+    void SavePersons(const QString& Path) const override;
+
+    void OpenTable(const QString& Path) override;
+    void SaveTable(const QString& Path) const override;
+
+    void ClearAll() override;
 
     // QAbstractTableModel override methods
     int rowCount( const QModelIndex& parent = QModelIndex()) const override;

@@ -54,51 +54,6 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_action_open_triggered()
 {
-    //auto actors = ActorsList::Inctance().lock();
-    //assert(actors);
-
-    QSettings Settings;
-    QString fileName = QFileDialog::getOpenFileName(this,
-        tr("Открыть список персонажей"),
-        Settings.value(DirectoriesRegistry::PERSONS_INDIR).toString(),
-        tr("Text files (*.txt)"));
-
-    if (fileName!="")
-    {
-        QDir CurrentDir;
-        Settings.setValue(DirectoriesRegistry::PERSONS_INDIR,
-                    CurrentDir.absoluteFilePath(fileName));
-
-        QFile file(fileName);
-        if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
-        {
-            std::stringstream ss;
-            ss << "Не удалось открыть файл '" << fileName.toUtf8().data() << "' на чтение";
-            QMessageBox::critical(this, "Ошибка", ss.str().c_str());
-            return;
-        }
-
-        QTextStream in(&file);
-        in.setCodec("UTF-8"); // change the file codec to UTF-8.
-        //actors->Native().clear();
-
-        while (!in.atEnd()) {
-            QString line = in.readLine();
-            // Processing line..
-            if (line.indexOf(';') != -1)
-            {
-                std::stringstream ss;
-                ss <<  "Наличие символа ';' в имени персонажа недопустимо. Имя '" << line.toUtf8().data() << "' будет проигнорировано.";
-                QMessageBox::warning(this, "Предупреждение", ss.str().c_str());
-                continue;
-            }
-            try {
-               // actors->Native().insert(ActorName(line));
-            } catch (const ActorNameStringEmpty&)
-            {
-            }
-        }
-    }
 
 }
 
@@ -154,17 +109,43 @@ void MainWindow::on_action_close_all_triggered()
 
 void MainWindow::on_action_open_table_triggered()
 {
+    QSettings Settings;
+    QString fileName = QFileDialog::getOpenFileName(this,
+        tr("Открыть таблицу"),
+        Settings.value(DirectoriesRegistry::TABLE_INDIR).toString(),
+        tr("Config files (*.cfg)"));
 
+    if (fileName!="")
+    {
+        QDir CurrentDir;
+        Settings.setValue(DirectoriesRegistry::TABLE_INDIR,
+                    CurrentDir.absoluteFilePath(fileName));
+
+        m_ModelsMgr->OpenTable(fileName);
+    }
 }
 
 void MainWindow::on_action_save_table_triggered()
 {
+    QSettings Settings;
+    QString fileName = QFileDialog::getSaveFileName(this,
+        tr("Сохранить таблицу"),
+        Settings.value(DirectoriesRegistry::TABLE_OUTDIR).toString(),
+        tr("Config files (*.cfg)"));
 
+    if (fileName!="")
+    {
+        QDir CurrentDir;
+        Settings.setValue(DirectoriesRegistry::TABLE_OUTDIR,
+                    CurrentDir.absoluteFilePath(fileName));
+
+        m_ModelsMgr->SaveTable(fileName);
+    }
 }
 
 void MainWindow::on_action_close_table_triggered()
 {
-
+    m_ModelsMgr->ClearAll();
 }
 
 void MainWindow::on_action_generate_doc_triggered()
