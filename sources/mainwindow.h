@@ -45,13 +45,13 @@ private slots:
 
     void on_action_make_individual_flag_triggered();
 
-    void on_pushButton_MakeDoc_clicked();
-
     void on_toolButton_Insert_clicked();
 
     void on_toolButton_Delete_clicked();
 
     void on_toolButton_Reverse_clicked();
+
+    void on_commandLinkButton_makeDoc_clicked();
 
 private:
     Ui::MainWindow* ui;

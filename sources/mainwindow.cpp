@@ -217,11 +217,6 @@ void MainWindow::on_action_make_individual_flag_triggered()
 
 }
 
-void MainWindow::on_pushButton_MakeDoc_clicked()
-{
-    this->makeDoc();
-}
-
 void MainWindow::on_toolButton_Insert_clicked()
 {
     if (m_IsReversed)
@@ -302,4 +297,9 @@ void MainWindow::on_toolButton_Reverse_clicked()
         ui->tableView_Reversed->show();
         m_IsReversed = true;
     }
+}
+
+void MainWindow::on_commandLinkButton_makeDoc_clicked()
+{
+    this->makeDoc();
 }
