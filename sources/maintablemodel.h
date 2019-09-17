@@ -307,6 +307,7 @@ public:
     const MainTableModel_Reversed*      GetModelReversed() const    { return m_ModelReversed; }
 
     void OpenPersons(const QString& Path);
+    void LoadPersons(const QStringList& Persons);
     void SavePersons(const QString& Path) const;
 
     void OpenTable(const QString& Path);
@@ -322,6 +323,8 @@ protected:
     const MainTableModelRegistry*   GetRegistry() const { return &m_Registry; }
 
 private:
+    void HandleUnrecognisedPersons(const QStringList& persons);
+private:
     MainTableModelRegistry      m_Registry;
     MainTableModel*             m_Model;
     MainTableModel_Reversed*    m_ModelReversed;
@@ -336,6 +339,7 @@ public:
     virtual bool RemoveRow(int ID) = 0;
 
     virtual void OpenPersons(const QString& Path) = 0;
+    virtual void LoadPersons(const QStringList& Persons) = 0;
     virtual void SavePersons(const QString& Path) const = 0;
 
     virtual void OpenTable(const QString& Path) = 0;
@@ -357,6 +361,7 @@ public:
     bool RemoveRow(int ID) override;
 
     void OpenPersons(const QString& Path) override;
+    void LoadPersons(const QStringList& Persons) override;
     void SavePersons(const QString& Path) const override;
 
     void OpenTable(const QString& Path) override;
@@ -394,6 +399,7 @@ public:
     bool RemoveRow(int ID) override;
 
     void OpenPersons(const QString& Path) override;
+    void LoadPersons(const QStringList& Persons) override;
     void SavePersons(const QString& Path) const override;
 
     void OpenTable(const QString& Path) override;

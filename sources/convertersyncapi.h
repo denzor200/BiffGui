@@ -2,9 +2,10 @@
 #define CONVERTERSYNCAPI_H
 
 class QString;
+class QStringList;
 
 namespace ConverterSyncAPI {
-    int ShowPersonList(const QString& SubbtitlePath, const QString& OutPath);
+    int ShowPersonList(QStringList& PersonsList,const QString &SubbtitlePath);
 };
 
 #endif // CONVERTERSYNCAPI_H

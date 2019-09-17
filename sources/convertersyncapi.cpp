@@ -1,15 +1,23 @@
 #include "convertersyncapi.h"
 #include <QProcess>
+#include <QDebug>
 
-int ConverterSyncAPI::ShowPersonList(const QString &SubbtitlePath, const QString &OutPath)
+int ConverterSyncAPI::ShowPersonList(QStringList& PersonsList,const QString &SubbtitlePath)
 {
     QProcess process;
     // TODO: make normal command
     // TODO: потестить на открытии файла, который не является субтитрой
     QStringList Arguments;
-    Arguments.reserve(3);
+    Arguments.reserve(2);
     Arguments.push_back("-show_person_list");
     Arguments.push_back(SubbtitlePath);
-    Arguments.push_back(OutPath);
-    return QProcess::execute("D:\\repos\\subtitles\\Debug\\converter", Arguments);
+    process.start("D:\\repos\\subtitles\\Debug\\converter", Arguments);
+    process.setReadChannel(QProcess::StandardOutput);
+    process.waitForReadyRead();
+    while (process.canReadLine())
+    {
+        PersonsList << QString::fromUtf8(process.readLine());
+    }
+    process.waitForFinished(-1);
+    return process.exitCode();
 }

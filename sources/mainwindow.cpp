@@ -78,40 +78,30 @@ void MainWindow::makeDoc()
 
 void MainWindow::on_action_open_triggered()
 {
-    QString personsListFilename = Utils::GetNewTempFilename();
-    if (personsListFilename.size()!=0)
+    QSettings Settings;
+    QString subbtitleFilename = QFileDialog::getOpenFileName(this,
+        tr("Открыть субтитры"),
+        Settings.value(DirectoriesRegistry::SUBBTITLES_INDIR).toString(),
+        tr("Все поддерживаемые форматы(*.ass *.srt);;Advanced SubStation Alpha (*.ass);;SubRip (*.srt)"));
+
+    if (subbtitleFilename!="")
     {
-        QSettings Settings;
-        QString subbtitleFilename = QFileDialog::getOpenFileName(this,
-            tr("Открыть субтитры"),
-            Settings.value(DirectoriesRegistry::SUBBTITLES_INDIR).toString(),
-            tr("Все поддерживаемые форматы(*.ass *.srt);;Advanced SubStation Alpha (*.ass);;SubRip (*.srt)"));
+        QDir CurrentDir;
+        Settings.setValue(DirectoriesRegistry::SUBBTITLES_INDIR,
+                    CurrentDir.absoluteFilePath(subbtitleFilename));
 
-        if (subbtitleFilename!="")
+        QStringList personsList;
+        if (0 == ConverterSyncAPI::ShowPersonList(personsList, subbtitleFilename))
         {
-            QDir CurrentDir;
-            Settings.setValue(DirectoriesRegistry::SUBBTITLES_INDIR,
-                        CurrentDir.absoluteFilePath(subbtitleFilename));
+            m_ModelsMgr->LoadPersons(personsList);
 
-            if (0 == ConverterSyncAPI::ShowPersonList(subbtitleFilename, personsListFilename))
-            {
-                m_ModelsMgr->OpenPersons(personsListFilename);
-
-                SubbtitleContext* ctx = new SubbtitleContext();
-                ctx->FileName = subbtitleFilename;
-                m_OpenedSubbtitle = ctx;
-            }
-            else {
-                QMessageBox::critical(this, "Что-то пошло не так..", "Не удалось сгенерировать список персонажей во временном файле");
-            }
+            SubbtitleContext* ctx = new SubbtitleContext();
+            ctx->FileName = subbtitleFilename;
+            m_OpenedSubbtitle = ctx;
         }
-
-        // темповый файл нам больше не нужен..
-        // TODO: потестировать при отсутствии файла, или отсутствии прав
-        QFile::remove(personsListFilename);
-    }
-    else {
-        QMessageBox::critical(this, "Что-то пошло не так..", "Не удалось открыть временный файл");
+        else {
+            QMessageBox::critical(this, "Что-то пошло не так..", "Не удалось сгенерировать список персонажей во временном файле");
+        }
     }
 }
 

@@ -627,6 +627,11 @@ void MainTableModel::OpenPersons(const QString &Path)
     m_Mngr->OpenPersons(Path);
 }
 
+void MainTableModel::LoadPersons(const QStringList &Persons)
+{
+    m_Mngr->LoadPersons(Persons);
+}
+
 void MainTableModel::SaveTable(const QString &Path) const
 {
     m_Mngr->SaveTable(Path);
@@ -838,6 +843,11 @@ bool MainTableModel_Reversed::RemoveRow(int row)
 void MainTableModel_Reversed::OpenPersons(const QString &Path)
 {
     m_Mngr->OpenPersons(Path);
+}
+
+void MainTableModel_Reversed::LoadPersons(const QStringList &Persons)
+{
+    m_Mngr->LoadPersons(Persons);
 }
 
 void MainTableModel_Reversed::SaveTable(const QString &Path) const
@@ -1055,21 +1065,29 @@ void MainTableModelsManager::OpenPersons(const QString &Path)
     }
     m_Model->endResetModel();
     m_ModelReversed->endResetModel();
+    HandleUnrecognisedPersons(unrecognised);
+}
 
+void MainTableModelsManager::LoadPersons(const QStringList &Persons)
+{
+    QStringList unrecognised;
 
-    if (unrecognised.size() > 0)
-    {
-        std::stringstream ss;
-        if (unrecognised.size() == 1)
+    m_Model->beginResetModel();
+    m_ModelReversed->beginResetModel();
+    for (const QString& person : Persons) {
+        try {
+            m_Registry.AddPerson(ActorName(person));
+        }
+        catch (const ActorNameStringEmpty&) {
+        }
+        catch (const ActorNameForbiddenSymbols&)
         {
-            ss << "Персонаж с именем '" << unrecognised[0].toUtf8().data() << "' будет проигнорирован.";
+            unrecognised.push_back(person);
         }
-        else {
-            ss << "Следующие персонажи будут проигнорированы:" << std::endl;
-            ss << "\t" << unrecognised.join("\n\t").toUtf8().data();
-        }
-        ActorName::ShowForbidenSymbolsError(ss.str().c_str());
     }
+    m_Model->endResetModel();
+    m_ModelReversed->endResetModel();
+    HandleUnrecognisedPersons(unrecognised);
 }
 
 void MainTableModelsManager::SaveTable(const QString &Path) const
@@ -1102,6 +1120,24 @@ void MainTableModelsManager::ClearAll()
 
     m_Model->endResetModel();
     m_ModelReversed->endResetModel();
+}
+
+void MainTableModelsManager::HandleUnrecognisedPersons(const QStringList &persons)
+{
+    // TODO: test it two cases
+    if (persons.size() > 0)
+    {
+        std::stringstream ss;
+        if (persons.size() == 1)
+        {
+            ss << "Персонаж с именем '" << persons[0].toUtf8().data() << "' будет проигнорирован.";
+        }
+        else {
+            ss << "Следующие персонажи будут проигнорированы:" << std::endl;
+            ss << "\t" << persons.join("\n\t").toUtf8().data();
+        }
+        ActorName::ShowForbidenSymbolsError(ss.str().c_str());
+    }
 }
 
 void MainTableModelsManager::SavePersons(const QString &Path) const
