@@ -27,6 +27,7 @@ CONFIG += c++11
 SOURCES += \
         ActorName.cpp \
         convertersyncapi.cpp \
+        converterwaiting.cpp \
         generating.cpp \
         libqxt/core/qxtglobal.cpp \
         libqxt/gui/qxtcheckcombobox.cpp \
@@ -40,6 +41,7 @@ SOURCES += \
 HEADERS += \
         ActorName.h \
         convertersyncapi.h \
+        converterwaiting.h \
         directoriesregistry.h \
         generating.h \
         libqxt/core/qxtglobal.h \
@@ -53,6 +55,7 @@ HEADERS += \
         utils.h
 
 FORMS += \
+        converterwaiting.ui \
         generating.ui \
         mainwindow.ui \
         settings.ui

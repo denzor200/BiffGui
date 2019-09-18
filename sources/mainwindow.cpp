@@ -22,6 +22,7 @@
 #include "maintabledelegates.h"
 #include "utils.h"
 #include "convertersyncapi.h"
+#include "converterwaiting.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -91,23 +92,23 @@ void MainWindow::on_action_open_triggered()
                     CurrentDir.absoluteFilePath(subbtitleFilename));
 
         QStringList personsList;
-        if (0 == ConverterSyncAPI::ShowPersonList(personsList, subbtitleFilename))
+        ConverterWaiting_ShowPersonList waiting(personsList);
+        waiting.StartProcess( subbtitleFilename);
+        if (0 == waiting.exec() && 0 == waiting.GetProcessStatus())
         {
             m_ModelsMgr->LoadPersons(personsList);
-
             SubbtitleContext* ctx = new SubbtitleContext();
             ctx->FileName = subbtitleFilename;
             m_OpenedSubbtitle = ctx;
         }
         else {
-            QMessageBox::critical(this, "Что-то пошло не так..", "Не удалось сгенерировать список персонажей во временном файле");
+            QMessageBox::critical(this, "Что-то пошло не так..", "Не удалось сгенерировать список персонажей");
         }
     }
 }
 
 void MainWindow::on_action_save_triggered()
 {
-
 }
 
 void MainWindow::on_action_close_triggered()
