@@ -94,15 +94,21 @@ void MainWindow::on_action_open_triggered()
         QStringList personsList;
         ConverterWaiting_ShowPersonList waiting(personsList);
         waiting.StartProcess( subbtitleFilename);
-        if (0 == waiting.exec() && 0 == waiting.GetProcessStatus())
+        int execStatus = waiting.exec();
+        bool isCanceled = waiting.IsCanceledByUser();
+        int procStatus = waiting.GetProcessStatus();
+        if (!isCanceled)
         {
-            m_ModelsMgr->LoadPersons(personsList);
-            SubbtitleContext* ctx = new SubbtitleContext();
-            ctx->FileName = subbtitleFilename;
-            m_OpenedSubbtitle = ctx;
-        }
-        else {
-            QMessageBox::critical(this, "Что-то пошло не так..", "Не удалось сгенерировать список персонажей");
+            if (0 == execStatus && 0 == procStatus)
+            {
+                m_ModelsMgr->LoadPersons(personsList);
+                SubbtitleContext* ctx = new SubbtitleContext();
+                ctx->FileName = subbtitleFilename;
+                m_OpenedSubbtitle = ctx;
+            }
+            else {
+                QMessageBox::critical(this, "Что-то пошло не так..", "Не удалось сгенерировать список персонажей");
+            }
         }
     }
 }

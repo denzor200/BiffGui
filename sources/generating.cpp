@@ -47,7 +47,6 @@ void Generating::slotFinished(int exitCode, QProcess::ExitStatus exitStatus)
 {
     Q_UNUSED(exitStatus);
 
-    // TODO: можно ли это вызывать внутри slotFinished??
     ui->plainTextEdit_Log->appendPlainText(m_Process->readAllStandardOutput());
 
     if (exitCode==0)

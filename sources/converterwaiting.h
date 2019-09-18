@@ -17,6 +17,8 @@ public:
     explicit ConverterWaiting(QWidget *parent = nullptr);
     ~ConverterWaiting();
 
+    bool IsCanceledByUser() const {return m_CanceledByUser;}
+
 private slots:
     void ButtonClicked(bool);
     void slotFinished(int, QProcess::ExitStatus);
@@ -26,7 +28,8 @@ protected:
 
 private:
     Ui::ConverterWaiting *ui;
-    QProcess* m_Process = NULL;
+    bool        m_CanceledByUser = false;
+    QProcess*   m_Process = nullptr;
 };
 
 class ConverterWaiting_ShowPersonList : public ConverterWaiting

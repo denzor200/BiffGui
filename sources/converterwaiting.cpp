@@ -9,6 +9,7 @@
 #include <QFormLayout>
 #include <QProcess>
 #include <QMessageBox>
+#include <QDebug>
 
 ConverterWaiting::ConverterWaiting(QWidget *parent) :
     QDialog(parent),
@@ -16,6 +17,7 @@ ConverterWaiting::ConverterWaiting(QWidget *parent) :
 {
     ui->setupUi(this);
 
+    // TODO: гифка не должна лежать рядом с exe
     QLabel *lbl = new QLabel(this);
     QMovie *movie = new QMovie("ajax-loader.gif");
     lbl->setMovie(movie);
@@ -50,6 +52,7 @@ ConverterWaiting::~ConverterWaiting()
 void ConverterWaiting::ButtonClicked(bool)
 {
     close();
+    m_CanceledByUser = true;
 }
 
 void ConverterWaiting::slotFinished(int, QProcess::ExitStatus)
@@ -91,7 +94,6 @@ void ConverterWaiting_ShowPersonList::slotDataOnStdout()
 
 void ConverterWaiting_ShowPersonList::slotFinished(int Status, QProcess::ExitStatus)
 {
-    // TODO: можно ли вызывать readLine внутри slotFinished???
     while (getProcess()->canReadLine())
     {
         m_Persons << QString::fromUtf8(getProcess()->readLine());
