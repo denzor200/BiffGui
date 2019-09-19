@@ -306,15 +306,15 @@ public:
     MainTableModel_Reversed*            GetModelReversed()          { return m_ModelReversed; }
     const MainTableModel_Reversed*      GetModelReversed() const    { return m_ModelReversed; }
 
-    void OpenPersons(const QString& Path);
-    void LoadPersons(const QStringList& Persons);
-    void SavePersons(const QString& Path) const;
+    bool OpenPersons(const QString& Path);
+    bool SavePersons(const QString& Path) const;
 
-    void OpenTable(const QString& Path);
-    void SaveTable(const QString& Path) const;
+    void LoadPersons(const QStringList& Persons);
+
+    bool OpenTable(const QString& Path);
+    bool SaveTable(const QString& Path) const;
 
     void ClearAll();
-
 protected:
     friend class MainTableModel;
     friend class MainTableModel_Reversed;
@@ -338,14 +338,6 @@ public:
     virtual bool InsertRow() = 0;
     virtual bool RemoveRow(int ID) = 0;
 
-    virtual void OpenPersons(const QString& Path) = 0;
-    virtual void LoadPersons(const QStringList& Persons) = 0;
-    virtual void SavePersons(const QString& Path) const = 0;
-
-    virtual void OpenTable(const QString& Path) = 0;
-    virtual void SaveTable(const QString& Path) const = 0;
-
-    virtual void ClearAll() = 0;
 };
 
 class MainTableModel : public QAbstractTableModel, public IMainTableModel
@@ -359,15 +351,6 @@ public:
     // IMainTableModel interface
     bool InsertRow() override;
     bool RemoveRow(int ID) override;
-
-    void OpenPersons(const QString& Path) override;
-    void LoadPersons(const QStringList& Persons) override;
-    void SavePersons(const QString& Path) const override;
-
-    void OpenTable(const QString& Path) override;
-    void SaveTable(const QString& Path) const override;
-
-    void ClearAll() override;
 
     // QAbstractTableModel override methods
     int rowCount( const QModelIndex& parent = QModelIndex()) const override;
@@ -397,15 +380,6 @@ public:
     // IMainTableModel interface
     bool InsertRow() override;
     bool RemoveRow(int ID) override;
-
-    void OpenPersons(const QString& Path) override;
-    void LoadPersons(const QStringList& Persons) override;
-    void SavePersons(const QString& Path) const override;
-
-    void OpenTable(const QString& Path) override;
-    void SaveTable(const QString& Path) const override;
-
-    void ClearAll() override;
 
     // QAbstractTableModel override methods
     int rowCount( const QModelIndex& parent = QModelIndex()) const override;

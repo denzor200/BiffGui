@@ -145,3 +145,52 @@ void ConverterWaiting_SaveSubbtitle::slotFinished(int Status, QProcess::ExitStat
 }
 
 
+ConverterWaiting_SaveMySubbtitle::ConverterWaiting_SaveMySubbtitle(QWidget *parent) :
+    ConverterWaiting(parent)
+{
+    connect(getProcess(),
+                    SIGNAL(finished(int, QProcess::ExitStatus)),
+                    SLOT(slotFinished(int, QProcess::ExitStatus))
+                   );
+}
+
+void ConverterWaiting_SaveMySubbtitle::StartProcess(
+        const QString &InFile,
+        const QString& SettingsFile,
+        const QString &OutFile)
+{
+    QStringList Arguments;
+    QString Suffix = QFileInfo(OutFile).suffix();
+
+    // TODO: Мы должны передавать параметром имитовставку от SettingsFile, поскольку это временный не залоченный файл
+    if (Suffix == "ass")
+    {
+        Arguments.reserve(4);
+        Arguments.push_back("-make_my_ass");
+        Arguments.push_back(InFile);
+        Arguments.push_back(SettingsFile);
+        Arguments.push_back(OutFile);
+        // TODO: make normal path
+        getProcess()->start("D:\\repos\\subtitles\\Debug\\converter", Arguments);
+    }
+    else if (Suffix == "srt") {
+        Arguments.reserve(4);
+        Arguments.push_back("-make_my_srt");
+        Arguments.push_back(InFile);
+        Arguments.push_back(SettingsFile);
+        Arguments.push_back(OutFile);
+        // TODO: make normal path
+        getProcess()->start("D:\\repos\\subtitles\\Debug\\converter", Arguments);
+    }
+    else {
+        QMessageBox::critical(this, "Ошибка", "Расширение выходного файла не опознано");
+    }
+}
+
+void ConverterWaiting_SaveMySubbtitle::slotFinished(int Status, QProcess::ExitStatus)
+{
+    m_ProcessStatus = Status;
+}
+
+
+

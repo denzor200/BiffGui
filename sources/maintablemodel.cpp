@@ -2,9 +2,9 @@
 #include <algorithm>
 #include <limits>
 #include <QDebug>
-#include <QMessageBox>
 #include <QFile>
 #include <sstream>
+#include <QMessageBox>
 #include <QApplication>
 
 #define CHECK_COND(c) \
@@ -622,36 +622,6 @@ bool MainTableModel::RemoveRow(int row)
     return false;
 }
 
-void MainTableModel::OpenPersons(const QString &Path)
-{
-    m_Mngr->OpenPersons(Path);
-}
-
-void MainTableModel::LoadPersons(const QStringList &Persons)
-{
-    m_Mngr->LoadPersons(Persons);
-}
-
-void MainTableModel::SaveTable(const QString &Path) const
-{
-    m_Mngr->SaveTable(Path);
-}
-
-void MainTableModel::ClearAll()
-{
-    m_Mngr->ClearAll();
-}
-
-void MainTableModel::SavePersons(const QString &Path) const
-{
-    m_Mngr->SavePersons(Path);
-}
-
-void MainTableModel::OpenTable(const QString &Path)
-{
-    m_Mngr->OpenTable(Path);
-}
-
 int MainTableModel::rowCount(const QModelIndex &parent) const
 {
     Q_UNUSED(parent);
@@ -840,36 +810,6 @@ bool MainTableModel_Reversed::RemoveRow(int row)
     return false;
 }
 
-void MainTableModel_Reversed::OpenPersons(const QString &Path)
-{
-    m_Mngr->OpenPersons(Path);
-}
-
-void MainTableModel_Reversed::LoadPersons(const QStringList &Persons)
-{
-    m_Mngr->LoadPersons(Persons);
-}
-
-void MainTableModel_Reversed::SaveTable(const QString &Path) const
-{
-    m_Mngr->SaveTable(Path);
-}
-
-void MainTableModel_Reversed::ClearAll()
-{
-    m_Mngr->ClearAll();
-}
-
-void MainTableModel_Reversed::SavePersons(const QString &Path) const
-{
-    m_Mngr->SavePersons(Path);
-}
-
-void MainTableModel_Reversed::OpenTable(const QString &Path)
-{
-    m_Mngr->OpenTable(Path);
-}
-
 int MainTableModel_Reversed::rowCount(const QModelIndex &parent) const
 {
     Q_UNUSED(parent);
@@ -1033,16 +973,11 @@ MainTableModelsManager::MainTableModelsManager(QObject *parent) :
     m_ModelReversed->SetOther(m_Model);
 }
 
-void MainTableModelsManager::OpenPersons(const QString &Path)
+bool MainTableModelsManager::OpenPersons(const QString &Path)
 {
     QFile file(Path);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
-    {
-        std::stringstream ss;
-        ss << "Не удалось открыть файл '" << Path.toUtf8().data() << "' на чтение";
-        QMessageBox::critical(QApplication::activeWindow(), "Ошибка", ss.str().c_str());
-        return;
-    }
+        return false;
 
     QTextStream in(&file);
     in.setCodec("UTF-8"); // change the file codec to UTF-8.
@@ -1066,6 +1001,7 @@ void MainTableModelsManager::OpenPersons(const QString &Path)
     m_Model->endResetModel();
     m_ModelReversed->endResetModel();
     HandleUnrecognisedPersons(unrecognised);
+    return true;
 }
 
 void MainTableModelsManager::LoadPersons(const QStringList &Persons)
@@ -1090,24 +1026,20 @@ void MainTableModelsManager::LoadPersons(const QStringList &Persons)
     HandleUnrecognisedPersons(unrecognised);
 }
 
-void MainTableModelsManager::SaveTable(const QString &Path) const
+bool MainTableModelsManager::SaveTable(const QString &Path) const
 {
     QFile fileOut(Path);
-    if (!fileOut.open(QIODevice::WriteOnly | QIODevice::Text))
+    if (fileOut.open(QIODevice::WriteOnly | QIODevice::Text))
     {
-        std::stringstream ss;
-        ss << "Не удалось открыть файл '" << Path.toUtf8().data() << "' на запись";
-        QMessageBox::critical(QApplication::activeWindow(), "Ошибка", ss.str().c_str());
-        return;
+        QTextStream streamFileOut(&fileOut);
+        streamFileOut.setCodec("UTF-8");
+        streamFileOut.setGenerateByteOrderMark(true);
+        m_Registry.WriteToStream(streamFileOut);
+        streamFileOut.flush();
+        fileOut.close();
+        return true;
     }
-
-    // Все текстовые файлы мы сохраняем только в UTF-8 with BOM
-    QTextStream streamFileOut(&fileOut);
-    streamFileOut.setCodec("UTF-8");
-    streamFileOut.setGenerateByteOrderMark(true);
-    m_Registry.WriteToStream(streamFileOut);
-    streamFileOut.flush();
-    fileOut.close();
+    return false;
 }
 
 void MainTableModelsManager::ClearAll()
@@ -1140,16 +1072,11 @@ void MainTableModelsManager::HandleUnrecognisedPersons(const QStringList &person
     }
 }
 
-void MainTableModelsManager::SavePersons(const QString &Path) const
+bool MainTableModelsManager::SavePersons(const QString &Path) const
 {
     QFile fileOut(Path);
     if (!fileOut.open(QIODevice::WriteOnly | QIODevice::Text))
-    {
-        std::stringstream ss;
-        ss << "Не удалось открыть файл '" << Path.toUtf8().data() << "' на запись";
-        QMessageBox::critical(QApplication::activeWindow(), "Ошибка", ss.str().c_str());
-        return;
-    }
+        return false;
 
     // Все текстовые файлы мы сохраняем только в UTF-8 with BOM
     QTextStream streamFileOut(&fileOut);
@@ -1169,18 +1096,14 @@ void MainTableModelsManager::SavePersons(const QString &Path) const
     }
     streamFileOut.flush();
     fileOut.close();
+    return true;
 }
 
-void MainTableModelsManager::OpenTable(const QString &Path)
+bool MainTableModelsManager::OpenTable(const QString &Path)
 {
     QFile file(Path);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
-    {
-        std::stringstream ss;
-        ss << "Не удалось открыть файл '" << Path.toUtf8().data() << "' на чтение";
-        QMessageBox::critical(QApplication::activeWindow(), "Ошибка", ss.str().c_str());
-        return;
-    }
+        return false;
 
     QTextStream in(&file);
     in.setCodec("UTF-8"); // change the file codec to UTF-8.
@@ -1235,6 +1158,7 @@ void MainTableModelsManager::OpenTable(const QString &Path)
         }
         QMessageBox::warning(QApplication::activeWindow(), "Предупреждение", ss.str().c_str());
     }
+    return true;
 }
 
 bool MainTableModelUtils::SetPerson(MainTableModelRegistry &R, int ID, const ActorName &Name)

@@ -66,6 +66,22 @@ private:
     int m_ProcessStatus = -1;
 };
 
+class ConverterWaiting_SaveMySubbtitle : public ConverterWaiting
+{
+    Q_OBJECT
+public:
+    explicit ConverterWaiting_SaveMySubbtitle(QWidget *parent = nullptr);
+
+    void StartProcess(const QString& InFile, const QString& SettingsFile, const QString& OutFile);
+    int GetProcessStatus() const {return m_ProcessStatus;}
+
+private slots:
+    void slotFinished(int, QProcess::ExitStatus);
+
+private:
+    int m_ProcessStatus = -1;
+};
+
 
 
 #endif // CONVERTERWAITING_H

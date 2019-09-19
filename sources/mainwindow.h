@@ -20,6 +20,9 @@ public:
     void makeDoc();
     void ReverseTable();
 
+    void showFileOpenRError(const QString& fileName) const;
+    void showFileOpenWError(const QString& fileName) const;
+
 private slots:
     void on_action_open_triggered();
     void on_action_save_triggered();

@@ -8,6 +8,7 @@
 #include <QLineEdit>
 #include <QToolButton>
 #include <QSettings>
+#include <QTemporaryFile>
 
 #include <QFileDialog>
 #include <algorithm>
@@ -96,6 +97,20 @@ void MainWindow::ReverseTable()
     }
 }
 
+void MainWindow::showFileOpenRError(const QString &fileName) const
+{
+    std::stringstream ss;
+    ss << "Не удалось открыть файл '" << fileName.toUtf8().data() << "' на чтение";
+    QMessageBox::critical(QApplication::activeWindow(), "Что-то пошло не так..", ss.str().c_str());
+}
+
+void MainWindow::showFileOpenWError(const QString &fileName) const
+{
+    std::stringstream ss;
+    ss << "Не удалось открыть файл '" << fileName.toUtf8().data() << "' на запись";
+    QMessageBox::critical(QApplication::activeWindow(), "Что-то пошло не так..", ss.str().c_str());
+}
+
 void MainWindow::on_action_open_triggered()
 {
     QSettings Settings;
@@ -170,6 +185,8 @@ void MainWindow::on_action_save_triggered()
 
 void MainWindow::on_action_close_triggered()
 {
+    // TODO: выведи в заголовок название открытого файла
+    // И не забудь здесь его очистить
     delete m_OpenedSubbtitle;
     m_OpenedSubbtitle = nullptr;
 }
@@ -205,7 +222,8 @@ void MainWindow::on_action_save_persons_triggered()
         Settings.setValue(DirectoriesRegistry::PERSONS_OUTDIR,
                     CurrentDir.absoluteFilePath(fileName));
 
-        m_ModelsMgr->SavePersons(fileName);
+        if (!m_ModelsMgr->SavePersons(fileName))
+            showFileOpenWError(fileName);
     }
 }
 
@@ -229,7 +247,8 @@ void MainWindow::on_action_open_table_triggered()
         Settings.setValue(DirectoriesRegistry::TABLE_INDIR,
                     CurrentDir.absoluteFilePath(fileName));
 
-        m_ModelsMgr->OpenTable(fileName);
+        if (!m_ModelsMgr->OpenTable(fileName))
+            showFileOpenRError(fileName);
     }
 }
 
@@ -247,7 +266,60 @@ void MainWindow::on_action_save_table_triggered()
         Settings.setValue(DirectoriesRegistry::TABLE_OUTDIR,
                     CurrentDir.absoluteFilePath(fileName));
 
-        m_ModelsMgr->SaveTable(fileName);
+        if (!m_ModelsMgr->SaveTable(fileName))
+            showFileOpenWError(fileName);
+    }
+}
+
+void MainWindow::on_action_save_individual_triggered()
+{
+    // TODO: блокируем кнопку вообще, если ничего не открыто
+    if (m_OpenedSubbtitle)
+    {
+        QSettings Settings;
+        QString outFileName = QFileDialog::getSaveFileName(this,
+            tr("Сохранить субтитры как индивидуальные"),
+            Settings.value(DirectoriesRegistry::SUBBTITLES_OUTDIR).toString(),
+            tr(SUBBTITLES_EXTENSIONS));
+
+        if (outFileName!="")
+        {
+            QDir CurrentDir;
+            Settings.setValue(DirectoriesRegistry::SUBBTITLES_OUTDIR,
+                        CurrentDir.absoluteFilePath(outFileName));
+
+            const QString& tempFilename = Utils::GetNewTempFilename();
+            if (tempFilename != "") {
+                // Saving to temp file..
+                if (m_ModelsMgr->SaveTable(tempFilename))
+                {
+                    // Using temp file in another child process..
+                    ConverterWaiting_SaveMySubbtitle waiting;
+                    waiting.StartProcess( m_OpenedSubbtitle->FileName,tempFilename, outFileName);
+                    int execStatus = waiting.exec();
+                    bool isCanceled = waiting.IsCanceledByUser();
+                    int procStatus = waiting.GetProcessStatus();
+
+                    if (!isCanceled)
+                    {
+                        if (0 == execStatus && 0 == procStatus)
+                        {
+                        }
+                        else {
+                            QMessageBox::critical(this, "Что-то пошло не так..", "Не удалось сохранить субтитры");
+                        }
+                    }
+                }
+                else
+                {
+                    showFileOpenWError(tempFilename);
+                }
+
+            }
+            else {
+                QMessageBox::critical(this, "Что-то пошло не так..", "Не удалось открыть временный файл для записи главной таблицы");
+            }
+        }
     }
 }
 
@@ -259,11 +331,6 @@ void MainWindow::on_action_close_table_triggered()
 void MainWindow::on_action_generate_doc_triggered()
 {
     this->makeDoc();
-}
-
-void MainWindow::on_action_save_individual_triggered()
-{
-
 }
 
 void MainWindow::on_action_make_shared_flag_triggered()
