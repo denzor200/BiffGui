@@ -80,8 +80,8 @@ public:
     QString PersonGetName(int ID) const;
     QString ActorGetName(int ID) const;
 
-    QPair<QStringList, QList<QVariant>> PersonGetActors(int ID) const;
-    QPair<QStringList, QList<QVariant>> ActorGetPersons(int ID) const;
+    QPair<QStringList, QList<QVariant>> PersonGetActors(int ID, bool DisableDenied) const;
+    QPair<QStringList, QList<QVariant>> ActorGetPersons(int ID, bool DisableDenied) const;
 
     bool PersonIsDenied(int ID) const;
     bool ActorIsDenied(int ID) const;
@@ -307,7 +307,7 @@ public:
     const MainTableModel_Reversed*      GetModelReversed() const    { return m_ModelReversed; }
 
     bool OpenPersons(const QString& Path);
-    bool SavePersons(const QString& Path) const;
+    bool SavePersons(const QString& Path, bool DisableDenied = false) const;
 
     void LoadPersons(const QStringList& Persons);
 

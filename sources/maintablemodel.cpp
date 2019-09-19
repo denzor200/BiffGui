@@ -357,7 +357,7 @@ QString MainTableModelRegistry::ActorGetName(int ID) const
     });
 }
 
-QPair<QStringList, QList<QVariant>> MainTableModelRegistry::PersonGetActors(int ID) const
+QPair<QStringList, QList<QVariant>> MainTableModelRegistry::PersonGetActors(int ID, bool DisableDenied) const
 {
     GETTER_DEBUG() << "[MainTableModelRegistry::PersonGetActors]: " << ID;
     auto Handler = [&](PersonsList::iterator Value) -> QPair<QStringList, QList<QVariant>>
@@ -366,15 +366,20 @@ QPair<QStringList, QList<QVariant>> MainTableModelRegistry::PersonGetActors(int 
         Q_ASSERT(m_Actors_ByID.size() < TO_SZ(std::numeric_limits<int>::max()));
         Actors.first.reserve(static_cast<int>(m_Actors_ByID.size()));
         int index = 0;
+        // Двойной проход по актерам пришлось сделать чтобы рассчитать индексы
         ForeachActors([&](int, ActorsList::iterator actorValue) -> bool
         {
-            Actors.first.push_back(actorValue->name.Get());
-            if (Value != NULL_PERSON)
+            bool EnableDenied = !DisableDenied;
+            if (EnableDenied || !actorValue->deny)
             {
-                for (ActorsList::iterator lit : Value->actors)
+                Actors.first.push_back(actorValue->name.Get());
+                if (Value != NULL_PERSON)
                 {
-                    if (lit==actorValue)
-                        Actors.second.push_back(index);
+                    for (ActorsList::iterator lit : Value->actors)
+                    {
+                        if (lit==actorValue)
+                            Actors.second.push_back(index);
+                    }
                 }
             }
             index++;
@@ -389,7 +394,7 @@ QPair<QStringList, QList<QVariant>> MainTableModelRegistry::PersonGetActors(int 
     }
 }
 
-QPair<QStringList, QList<QVariant>> MainTableModelRegistry::ActorGetPersons(int ID) const
+QPair<QStringList, QList<QVariant>> MainTableModelRegistry::ActorGetPersons(int ID, bool DisableDenied) const
 {
     GETTER_DEBUG() << "[MainTableModelRegistry::ActorGetPersons]: " << ID;
     auto Handler = [&](ActorsList::iterator Value) -> QPair<QStringList, QList<QVariant>>
@@ -400,13 +405,17 @@ QPair<QStringList, QList<QVariant>> MainTableModelRegistry::ActorGetPersons(int 
         int index = 0;
         ForeachPersons([&](int, PersonsList::iterator personValue) -> bool
         {
-            Persons.first.push_back(personValue->name.Get());
-            if (Value != NULL_ACTOR)
+            bool EnableDenied = !DisableDenied;
+            if (EnableDenied || !personValue->deny)
             {
-                for (PersonsList::iterator lit : Value->persons)
+                Persons.first.push_back(personValue->name.Get());
+                if (Value != NULL_ACTOR)
                 {
-                    if (lit==personValue)
-                        Persons.second.push_back(index);
+                    for (PersonsList::iterator lit : Value->persons)
+                    {
+                        if (lit==personValue)
+                            Persons.second.push_back(index);
+                    }
                 }
             }
             index++;
@@ -650,7 +659,7 @@ QVariant MainTableModel::data(const QModelIndex &index, int role) const
             return m_Mngr->GetRegistry()->ActorGetName(index.row());
         case 1:
         {
-            auto p = m_Mngr->GetRegistry()->ActorGetPersons(index.row());
+            auto p = m_Mngr->GetRegistry()->ActorGetPersons(index.row(), false);
             QList<QVariant> list;
             list.reserve(2);
             list.push_back(std::move(p.first));
@@ -838,7 +847,7 @@ QVariant MainTableModel_Reversed::data(const QModelIndex &index, int role) const
             return m_Mngr->GetRegistry()->PersonGetName(index.row());
         case 1:
         {
-            auto p = m_Mngr->GetRegistry()->PersonGetActors(index.row());
+            auto p = m_Mngr->GetRegistry()->PersonGetActors(index.row(), false);
             QList<QVariant> list;
             list.reserve(2);
             list.push_back(std::move(p.first));
@@ -1026,20 +1035,33 @@ void MainTableModelsManager::LoadPersons(const QStringList &Persons)
     HandleUnrecognisedPersons(unrecognised);
 }
 
-bool MainTableModelsManager::SaveTable(const QString &Path) const
+bool MainTableModelsManager::SavePersons(const QString &Path, bool DisableDenied) const
 {
     QFile fileOut(Path);
-    if (fileOut.open(QIODevice::WriteOnly | QIODevice::Text))
+    if (!fileOut.open(QIODevice::WriteOnly | QIODevice::Text))
+        return false;
+
+    // Все текстовые файлы мы сохраняем только в UTF-8 with BOM
+    QTextStream streamFileOut(&fileOut);
+    streamFileOut.setCodec("UTF-8");
+    streamFileOut.setGenerateByteOrderMark(true);
+    QPair<QStringList, QList<QVariant>> pair = m_Registry.ActorGetPersons(-1, DisableDenied);
+    for ( const QString& Value : pair.first)
     {
-        QTextStream streamFileOut(&fileOut);
-        streamFileOut.setCodec("UTF-8");
-        streamFileOut.setGenerateByteOrderMark(true);
-        m_Registry.WriteToStream(streamFileOut);
-        streamFileOut.flush();
-        fileOut.close();
-        return true;
+        if (ActorName::FindForbidenSymbols(Value))
+        {
+            std::stringstream ss;
+            // TODO: объединяй все в одно сообщение..
+            // Не надо грузить пользователя пачкой мессаг
+            ss << "Персонаж с именем '" << Value.toUtf8().data() << "' будет проигнорирован.";
+            ActorName::ShowForbidenSymbolsError(ss.str().c_str());
+            continue;
+        }
+        streamFileOut << Value << endl;
     }
-    return false;
+    streamFileOut.flush();
+    fileOut.close();
+    return true;
 }
 
 void MainTableModelsManager::ClearAll()
@@ -1070,33 +1092,6 @@ void MainTableModelsManager::HandleUnrecognisedPersons(const QStringList &person
         }
         ActorName::ShowForbidenSymbolsError(ss.str().c_str());
     }
-}
-
-bool MainTableModelsManager::SavePersons(const QString &Path) const
-{
-    QFile fileOut(Path);
-    if (!fileOut.open(QIODevice::WriteOnly | QIODevice::Text))
-        return false;
-
-    // Все текстовые файлы мы сохраняем только в UTF-8 with BOM
-    QTextStream streamFileOut(&fileOut);
-    streamFileOut.setCodec("UTF-8");
-    streamFileOut.setGenerateByteOrderMark(true);
-    QPair<QStringList, QList<QVariant>> pair = m_Registry.ActorGetPersons(-1);
-    for ( const QString& Value : pair.first)
-    {
-        if (ActorName::FindForbidenSymbols(Value))
-        {
-            std::stringstream ss;
-            ss << "Персонаж с именем '" << Value.toUtf8().data() << "' будет проигнорирован.";
-            ActorName::ShowForbidenSymbolsError(ss.str().c_str());
-            continue;
-        }
-        streamFileOut << Value << endl;
-    }
-    streamFileOut.flush();
-    fileOut.close();
-    return true;
 }
 
 bool MainTableModelsManager::OpenTable(const QString &Path)
@@ -1159,6 +1154,22 @@ bool MainTableModelsManager::OpenTable(const QString &Path)
         QMessageBox::warning(QApplication::activeWindow(), "Предупреждение", ss.str().c_str());
     }
     return true;
+}
+
+bool MainTableModelsManager::SaveTable(const QString &Path) const
+{
+    QFile fileOut(Path);
+    if (fileOut.open(QIODevice::WriteOnly | QIODevice::Text))
+    {
+        QTextStream streamFileOut(&fileOut);
+        streamFileOut.setCodec("UTF-8");
+        streamFileOut.setGenerateByteOrderMark(true);
+        m_Registry.WriteToStream(streamFileOut);
+        streamFileOut.flush();
+        fileOut.close();
+        return true;
+    }
+    return false;
 }
 
 bool MainTableModelUtils::SetPerson(MainTableModelRegistry &R, int ID, const ActorName &Name)

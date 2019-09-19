@@ -291,7 +291,7 @@ void MainWindow::on_action_save_individual_triggered()
             const QString& tempFilename = Utils::GetNewTempFilename();
             if (tempFilename != "") {
                 // Saving to temp file..
-                if (m_ModelsMgr->SaveTable(tempFilename))
+                if (m_ModelsMgr->SavePersons(tempFilename, true))
                 {
                     // Using temp file in another child process..
                     ConverterWaiting_SaveMySubbtitle waiting;
@@ -315,6 +315,10 @@ void MainWindow::on_action_save_individual_triggered()
                     showFileOpenWError(tempFilename);
                 }
 
+
+                // темповый файл нам больше не нужен..
+                // TODO: потестировать при отсутствии файла, или отсутствии прав
+                QFile::remove(tempFilename);
             }
             else {
                 QMessageBox::critical(this, "Что-то пошло не так..", "Не удалось открыть временный файл для записи главной таблицы");
