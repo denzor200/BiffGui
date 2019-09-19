@@ -18,6 +18,7 @@ public:
     ~MainWindow();
 
     void makeDoc();
+    void ReverseTable();
 
 private slots:
     void on_action_open_triggered();

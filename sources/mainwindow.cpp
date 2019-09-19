@@ -24,6 +24,10 @@
 #include "convertersyncapi.h"
 #include "converterwaiting.h"
 
+static const char* SUBBTITLES_EXTENSIONS = "Все поддерживаемые форматы(*.ass *.srt);;"
+                                           "Advanced SubStation Alpha (*.ass);;"
+                                           "SubRip (*.srt)";
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -46,8 +50,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->tableView->setModel(m_ModelsMgr->GetModel());
     ui->tableView_Reversed->setModel(m_ModelsMgr->GetModelReversed());
 
-    ui->tableView->show();
-    ui->tableView_Reversed->hide();
+    // под конец решили, что перевернутая таблица по умолчанию все же лучше..
+    ReverseTable();
 }
 
 MainWindow::~MainWindow()
@@ -77,13 +81,28 @@ void MainWindow::makeDoc()
     }
 }
 
+void MainWindow::ReverseTable()
+{
+    if (m_IsReversed)
+    {
+        ui->tableView->show();
+        ui->tableView_Reversed->hide();
+        m_IsReversed = false;
+    }
+    else {
+        ui->tableView->hide();
+        ui->tableView_Reversed->show();
+        m_IsReversed = true;
+    }
+}
+
 void MainWindow::on_action_open_triggered()
 {
     QSettings Settings;
     QString subbtitleFilename = QFileDialog::getOpenFileName(this,
         tr("Открыть субтитры"),
         Settings.value(DirectoriesRegistry::SUBBTITLES_INDIR).toString(),
-        tr("Все поддерживаемые форматы(*.ass *.srt);;Advanced SubStation Alpha (*.ass);;SubRip (*.srt)"));
+        tr(SUBBTITLES_EXTENSIONS));
 
     if (subbtitleFilename!="")
     {
@@ -115,11 +134,44 @@ void MainWindow::on_action_open_triggered()
 
 void MainWindow::on_action_save_triggered()
 {
+    // TODO: блокируем кнопку вообще, если ничего не открыто
+    if (m_OpenedSubbtitle)
+    {
+        QSettings Settings;
+        QString outFileName = QFileDialog::getSaveFileName(this,
+            tr("Сохранить субтитры"),
+            Settings.value(DirectoriesRegistry::SUBBTITLES_OUTDIR).toString(),
+            tr(SUBBTITLES_EXTENSIONS));
+
+        if (outFileName!="")
+        {
+            QDir CurrentDir;
+            Settings.setValue(DirectoriesRegistry::SUBBTITLES_OUTDIR,
+                        CurrentDir.absoluteFilePath(outFileName));
+
+            ConverterWaiting_SaveSubbtitle waiting;
+            waiting.StartProcess( m_OpenedSubbtitle->FileName, outFileName);
+            int execStatus = waiting.exec();
+            bool isCanceled = waiting.IsCanceledByUser();
+            int procStatus = waiting.GetProcessStatus();
+
+            if (!isCanceled)
+            {
+                if (0 == execStatus && 0 == procStatus)
+                {
+                }
+                else {
+                    QMessageBox::critical(this, "Что-то пошло не так..", "Не удалось сохранить субтитры");
+                }
+            }
+        }
+    }
 }
 
 void MainWindow::on_action_close_triggered()
 {
-
+    delete m_OpenedSubbtitle;
+    m_OpenedSubbtitle = nullptr;
 }
 
 
@@ -293,17 +345,7 @@ void MainWindow::on_toolButton_Delete_clicked()
 
 void MainWindow::on_toolButton_Reverse_clicked()
 {
-    if (m_IsReversed)
-    {
-        ui->tableView->show();
-        ui->tableView_Reversed->hide();
-        m_IsReversed = false;
-    }
-    else {
-        ui->tableView->hide();
-        ui->tableView_Reversed->show();
-        m_IsReversed = true;
-    }
+    ReverseTable();
 }
 
 void MainWindow::on_commandLinkButton_makeDoc_clicked()

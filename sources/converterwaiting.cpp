@@ -10,6 +10,7 @@
 #include <QProcess>
 #include <QMessageBox>
 #include <QDebug>
+#include <QFileInfo>
 
 ConverterWaiting::ConverterWaiting(QWidget *parent) :
     QDialog(parent),
@@ -102,5 +103,45 @@ void ConverterWaiting_ShowPersonList::slotFinished(int Status, QProcess::ExitSta
 }
 
 
+ConverterWaiting_SaveSubbtitle::ConverterWaiting_SaveSubbtitle(QWidget *parent) :
+    ConverterWaiting(parent)
+{
+    connect(getProcess(),
+                    SIGNAL(finished(int, QProcess::ExitStatus)),
+                    SLOT(slotFinished(int, QProcess::ExitStatus))
+                   );
+}
+
+void ConverterWaiting_SaveSubbtitle::StartProcess(const QString &InFile, const QString &OutFile)
+{
+    QStringList Arguments;
+    QString Suffix = QFileInfo(OutFile).suffix();
+
+    if (Suffix == "ass")
+    {
+        Arguments.reserve(3);
+        Arguments.push_back("-make_ass");
+        Arguments.push_back(InFile);
+        Arguments.push_back(OutFile);
+        // TODO: make normal path
+        getProcess()->start("D:\\repos\\subtitles\\Debug\\converter", Arguments);
+    }
+    else if (Suffix == "srt") {
+        Arguments.reserve(3);
+        Arguments.push_back("-make_srt");
+        Arguments.push_back(InFile);
+        Arguments.push_back(OutFile);
+        // TODO: make normal path
+        getProcess()->start("D:\\repos\\subtitles\\Debug\\converter", Arguments);
+    }
+    else {
+        QMessageBox::critical(this, "Ошибка", "Расширение выходного файла не опознано");
+    }
+}
+
+void ConverterWaiting_SaveSubbtitle::slotFinished(int Status, QProcess::ExitStatus)
+{
+    m_ProcessStatus = Status;
+}
 
 
