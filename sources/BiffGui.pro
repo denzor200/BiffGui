@@ -28,6 +28,7 @@ SOURCES += \
         ActorName.cpp \
         convertersyncapi.cpp \
         converterwaiting.cpp \
+        crc32.c \
         generating.cpp \
         libqxt/core/qxtglobal.cpp \
         libqxt/gui/qxtcheckcombobox.cpp \
