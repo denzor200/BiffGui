@@ -18,7 +18,9 @@ public:
     void StartProcess(const QString& InFile, const QString& ConfigFile, const QString& OutDir);
 
 private:
-    void ReadLines();
+    void StdoutReadLines();
+    void StderrReadLines();
+    void HandleCommandFromConverter(int argc, char** argv);
 
 private slots:
     void slotDataOnStdout();

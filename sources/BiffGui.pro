@@ -26,6 +26,7 @@ CONFIG += c++11
 
 SOURCES += \
         ActorName.cpp \
+        commandlineparser.cpp \
         convertersyncapi.cpp \
         converterwaiting.cpp \
         crc32.c \
@@ -41,6 +42,7 @@ SOURCES += \
 
 HEADERS += \
         ActorName.h \
+        commandlineparser.h \
         convertersyncapi.h \
         converterwaiting.h \
         directoriesregistry.h \

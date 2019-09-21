@@ -2,6 +2,8 @@
 #include <QProcess>
 #include <QDebug>
 
+// не используется..
+
 int ConverterSyncAPI::ShowPersonList(QStringList& PersonsList,const QString &SubbtitlePath)
 {
     QProcess process;

@@ -2,6 +2,9 @@
 #include "ui_generating.h"
 #include <QProcess>
 #include <sstream>
+#include "CommandLineParser.h"
+
+#define MAX_PATH 260
 
 Generating::Generating(QWidget *parent) :
     QDialog(parent),
@@ -43,8 +46,24 @@ void Generating::StartProcess(const QString &InFile, const QString& ConfigFile, 
     m_Process->start("D:\\repos\\subtitles\\Debug\\converter", Arguments);
 }
 
-void Generating::ReadLines()
+void Generating::StdoutReadLines()
 {
+    m_Process->setReadChannel(QProcess::StandardOutput);
+    while (m_Process->canReadLine())
+    {
+        QString Value = QString::fromUtf8(m_Process->readLine());
+        Value.remove("\r\n");
+        Value.remove('\r');
+        Value.remove('\n');
+        CommandLineParser P(Value);
+        HandleCommandFromConverter(P.argc(), P.argv());
+
+    }
+}
+
+void Generating::StderrReadLines()
+{
+    m_Process->setReadChannel(QProcess::StandardError);
     while (m_Process->canReadLine())
     {
         QString Value = QString::fromUtf8(m_Process->readLine());
@@ -55,26 +74,59 @@ void Generating::ReadLines()
     }
 }
 
+void Generating::HandleCommandFromConverter(int argc, char **argv)
+{
+    if (argc > 0)
+    {
+        if (strcmp(argv[0], "start_generating")==0)
+        {
+            // TODO: implement this
+        }
+        else if (strcmp(argv[0], "make_docx_begin")==0)
+        {
+            if (argc > 1)
+            {
+                char Buffer[MAX_PATH+64] = {0};
+                strcat_s(Buffer, sizeof(Buffer), "----------");
+                strcat_s(Buffer, sizeof(Buffer), argv[1]);
+                //strcat_s(Buffer, sizeof(Buffer), "----------");
+                ui->plainTextEdit_Log->appendPlainText(Buffer);
+            }
+            else {
+                char Buffer[MAX_PATH+64] = {0};
+                strcat_s(Buffer, sizeof(Buffer), "----------");
+                //strcat_s(Buffer, sizeof(Buffer), "----------");
+                ui->plainTextEdit_Log->appendPlainText(Buffer);
+            }
+        }
+        else if (strcmp(argv[0], "make_docx_end")==0)
+        {
+            // TODO: implement this
+        }
+        else if (strcmp(argv[0], "info")==0)
+        {
+            for (int i=1;i<argc;++i)
+                ui->plainTextEdit_Log->appendPlainText(argv[i]);
+        }
+    }
+}
+
 void Generating::slotDataOnStdout()
 {
-    m_Process->setReadChannel(QProcess::StandardOutput);
-    ReadLines();
+    StdoutReadLines();
 }
 
 void Generating::slotDataOnStderr()
 {
-    m_Process->setReadChannel(QProcess::StandardError);
-    ReadLines();
+    StderrReadLines();
 }
 
 void Generating::slotFinished(int exitCode, QProcess::ExitStatus exitStatus)
 {
     Q_UNUSED(exitStatus);
 
-    m_Process->setReadChannel(QProcess::StandardOutput);
-    ReadLines();
-    m_Process->setReadChannel(QProcess::StandardError);
-    ReadLines();
+    StdoutReadLines();
+    StderrReadLines();
 
     if (exitCode==0)
     {
