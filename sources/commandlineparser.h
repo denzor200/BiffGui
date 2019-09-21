@@ -16,11 +16,19 @@ public:
     char** argv() const {return m_Argv;}
 
 private:
-    void Initialize(const char* Value, int Size);
+    enum class ParseStatus
+    {
+        SUCCESS = 0,
+        OUT_OF_MEMORY
+    };
 
-    static void ParseTo(char** ArgvOut, int& ArgcOut, const char* CL, int CL_Size);
-    static int ParseArgumentTo(char** ArgOut, const char* CL, int CL_Size);
+    ParseStatus Initialize(const char* Value, int Size);
+
+    static ParseStatus ParseTo(char** ArgvOut, int& ArgcOut, const char* CL, int CL_Size);
+    static ParseStatus ParseArgumentTo(int& StrSizeOut,char** ArgOut, const char* CL, int CL_Size);
     static void TryFreeAll(char** Argv, int Argc);
+
+    static void HandleStatus(ParseStatus Status);
 };
 
 #endif // COMMANDLINEPARSER_H

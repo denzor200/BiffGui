@@ -6,18 +6,23 @@
 
 #define CHK_ALLOCATED(p) \
     if (!p) \
-        throw std::bad_alloc();
+        return ParseStatus::OUT_OF_MEMORY;
+
+#define PS_SUCCESS(S) (S == ParseStatus::SUCCESS)
+#define PS_FAILED(S) (S != ParseStatus::SUCCESS)
 
 // TODO: потестировать на пустой строке
 CommandLineParser::CommandLineParser(const QString& Value)
 {
     QByteArray utf8Value = Value.toUtf8();
-    Initialize(utf8Value.data(), utf8Value.size());
+    auto Status = Initialize(utf8Value.data(), utf8Value.size());
+    HandleStatus(Status);
 }
 
 CommandLineParser::CommandLineParser(const char *Value, int Size)
 {
-    Initialize(Value, Size);
+    auto Status = Initialize(Value, Size);
+    HandleStatus(Status);
 }
 
 CommandLineParser::~CommandLineParser()
@@ -30,13 +35,16 @@ CommandLineParser::~CommandLineParser()
     }
 }
 
-void CommandLineParser::Initialize(const char *Value, int Size)
+CommandLineParser::ParseStatus CommandLineParser::Initialize(const char *Value, int Size)
 {
+    ParseStatus Status = ParseStatus::SUCCESS;
     int ArgcTemp = 0;
     char** ArgvTemp = nullptr;
 
     // Просто узнаем размер массива строк..
-    ParseTo(nullptr, ArgcTemp, Value, Size);
+    Status = ParseTo(nullptr, ArgcTemp, Value, Size);
+    Q_ASSERT(PS_SUCCESS(Status));   // мы ничего не трогали!
+                                    // всегда должен быть SUCCESS
     Q_ASSERT(ArgcTemp>=0);
     if (ArgcTemp > 0)
     {
@@ -46,25 +54,26 @@ void CommandLineParser::Initialize(const char *Value, int Size)
         CHK_ALLOCATED(ArgvTemp);
 
         // Заполняем массив строк вторим вызовом
-        try {
-            ParseTo(ArgvTemp, ArgcTemp, Value, Size);
-        } catch (...) {
+        Status = ParseTo(ArgvTemp, ArgcTemp, Value, Size);
+        if (PS_FAILED(Status))
+        {
             free(reinterpret_cast<void*>(ArgvTemp));
-            throw;
+            return Status;
         }
 
         // ..
         m_Argc = ArgcTemp;
         m_Argv = ArgvTemp;
     }
-
+    return Status;
 }
 
 // Функция выполняет два действия..
 // 1. Просто узнаем размер массива строк, ничего-ничего не трогая
 // 2. Заполняем переданный свыше неинициализированный массив строк
-void CommandLineParser::ParseTo(char ** ArgvOut, int &ArgcOut, const char *CL, int CL_Size)
+CommandLineParser::ParseStatus CommandLineParser::ParseTo(char ** ArgvOut, int &ArgcOut, const char *CL, int CL_Size)
 {
+    ParseStatus Status = ParseStatus::SUCCESS;
     int TempArgc = 0;
 
     // Временная мера - все аргументы приходят заключенными в кавычки
@@ -75,13 +84,17 @@ void CommandLineParser::ParseTo(char ** ArgvOut, int &ArgcOut, const char *CL, i
         {
             char* Arg = nullptr;
             int Size = 0;
-            try {
-                Size = ParseArgumentTo((ArgvOut != nullptr) ? &Arg : nullptr, &CL[i+1], CL_Size - i - 1);
-            } catch (...) {
+            Status = ParseArgumentTo(
+                        Size,
+                        (ArgvOut != nullptr) ? &Arg : nullptr,
+                        &CL[i+1], CL_Size - i - 1);
+            if (PS_FAILED(Status))
+            {
                 if (ArgvOut)
                     TryFreeAll(ArgvOut, TempArgc);
-                throw;
+                return Status;
             }
+
             if (Size==-1)
                 break; // если not found, то продолжать нет смысла
             if (ArgvOut != nullptr)
@@ -97,9 +110,11 @@ void CommandLineParser::ParseTo(char ** ArgvOut, int &ArgcOut, const char *CL, i
         Q_ASSERT(ArgcOut == TempArgc);
     }
     ArgcOut = TempArgc;
+
+    return Status;
 }
 
-int CommandLineParser::ParseArgumentTo(char** ArgOut, const char *CL, int CL_Size)
+CommandLineParser::ParseStatus CommandLineParser::ParseArgumentTo(int &StrSizeOut, char **ArgOut, const char *CL, int CL_Size)
 {
     int Size = -1;
 
@@ -114,19 +129,24 @@ int CommandLineParser::ParseArgumentTo(char** ArgOut, const char *CL, int CL_Siz
     }
 
     if (Size == -1)
-        return -1; // not found..
+    {
+        StrSizeOut = -1; // not found..
+        return ParseStatus::SUCCESS;
+    }
 
     // Если требуется, то аллоцируем память под строку и копируем данные..
     if (ArgOut != nullptr)
     {
-        *ArgOut = reinterpret_cast<char*>(malloc(static_cast<size_t>(Size + 1) * sizeof(char)));
+        *ArgOut = reinterpret_cast<char*>(
+                    malloc(static_cast<size_t>(Size + 1) * sizeof(char)));
         CHK_ALLOCATED(*ArgOut);
         memcpy(*ArgOut, CL, static_cast<size_t>(Size));
         *((*ArgOut)+Size) = '\0';
     }
 
     // ..Или просто возвращаем размер..
-    return Size;
+    StrSizeOut = Size;
+    return ParseStatus::SUCCESS;
 }
 
 void CommandLineParser::TryFreeAll(char **Argv, int Argc)
@@ -136,5 +156,19 @@ void CommandLineParser::TryFreeAll(char **Argv, int Argc)
         Q_ASSERT(Argv);
         Q_ASSERT(Argv[i]);
         free(reinterpret_cast<void*>(Argv[i]));
+    }
+}
+
+void CommandLineParser::HandleStatus(CommandLineParser::ParseStatus Status)
+{
+    if (PS_FAILED(Status))
+    {
+        switch (Status)
+        {
+        case ParseStatus::OUT_OF_MEMORY:
+            throw std::bad_alloc();
+        }
+        qFatal("Invalid ParseStatus");
+        Q_ASSERT(0);
     }
 }
