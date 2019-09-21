@@ -17,8 +17,12 @@ public:
 
     void StartProcess(const QString& InFile, const QString& ConfigFile, const QString& OutDir);
 
+private:
+    void ReadLines();
+
 private slots:
     void slotDataOnStdout();
+    void slotDataOnStderr();
     void slotFinished(int, QProcess::ExitStatus);
     void on_pushButton_OK_clicked();
     void on_pushButton_Cancel_clicked();

@@ -15,6 +15,10 @@ Generating::Generating(QWidget *parent) :
                     SLOT(slotDataOnStdout())
                    );
     connect(m_Process,
+                    SIGNAL(readyReadStandardError()),
+                    SLOT(slotDataOnStderr())
+                   );
+    connect(m_Process,
                     SIGNAL(finished(int, QProcess::ExitStatus)),
                     SLOT(slotFinished(int, QProcess::ExitStatus))
                    );
@@ -39,16 +43,38 @@ void Generating::StartProcess(const QString &InFile, const QString& ConfigFile, 
     m_Process->start("D:\\repos\\subtitles\\Debug\\converter", Arguments);
 }
 
+void Generating::ReadLines()
+{
+    while (m_Process->canReadLine())
+    {
+        QString Value = QString::fromUtf8(m_Process->readLine());
+        Value.remove("\r\n");
+        Value.remove('\r');
+        Value.remove('\n');
+        ui->plainTextEdit_Log->appendPlainText(Value);
+    }
+}
+
 void Generating::slotDataOnStdout()
 {
-    ui->plainTextEdit_Log->appendPlainText(m_Process->readAllStandardOutput());
+    m_Process->setReadChannel(QProcess::StandardOutput);
+    ReadLines();
+}
+
+void Generating::slotDataOnStderr()
+{
+    m_Process->setReadChannel(QProcess::StandardError);
+    ReadLines();
 }
 
 void Generating::slotFinished(int exitCode, QProcess::ExitStatus exitStatus)
 {
     Q_UNUSED(exitStatus);
 
-    ui->plainTextEdit_Log->appendPlainText(m_Process->readAllStandardOutput());
+    m_Process->setReadChannel(QProcess::StandardOutput);
+    ReadLines();
+    m_Process->setReadChannel(QProcess::StandardError);
+    ReadLines();
 
     if (exitCode==0)
     {
