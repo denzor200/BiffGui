@@ -25,15 +25,16 @@ Generating::~Generating()
     delete ui;
 }
 
-void Generating::StartProcess(const QString &InFile, const QString &OutDir)
+void Generating::StartProcess(const QString &InFile, const QString& ConfigFile, const QString &OutDir)
 {
     // TODO: make normal command line
     // TODO: потестить на путях с пробелами и кириллицей
+    // TODO: темповому файлу ConfigFile нужна имитозащита
     QStringList Arguments;
     Arguments.reserve(4);
     Arguments.push_back("-make_docx");
     Arguments.push_back(InFile);
-    Arguments.push_back("D:\\repos\\subtitles\\Debug\\actors.cfg");
+    Arguments.push_back(ConfigFile);
     Arguments.push_back(OutDir);
     m_Process->start("D:\\repos\\subtitles\\Debug\\converter", Arguments);
 }

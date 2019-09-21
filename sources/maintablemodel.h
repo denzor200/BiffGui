@@ -102,7 +102,7 @@ public:
         QStringList UnrecognisedActors;
     };
     ReadingStats ReadInStream( QTextStream& In);
-    void WriteToStream( QTextStream& Out) const;
+    void WriteToStream( QTextStream& Out, bool DisableDenied) const;
 
 private:
     bool Person_ChangeRelation(PersonsList::iterator personIt, ActorsList::iterator actorIt, bool State);
@@ -312,7 +312,7 @@ public:
     void LoadPersons(const QStringList& Persons);
 
     bool OpenTable(const QString& Path);
-    bool SaveTable(const QString& Path) const;
+    bool SaveTable(const QString& Path, bool DisableDenied = false) const;
 
     void ClearAll();
 protected:

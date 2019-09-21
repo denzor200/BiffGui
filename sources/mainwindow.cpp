@@ -76,9 +76,23 @@ void MainWindow::makeDoc()
         Settings.setValue(DirectoriesRegistry::DOC_OUTDIR,
             CurrentDir.absoluteFilePath(OutDir));
 
-        Generating w(this);
-        w.StartProcess(InFile, OutDir);
-        w.exec();
+        const QString& tempFilename = Utils::GetNewTempFilename();
+        if (tempFilename != "") {
+            // Saving to temp file..
+            if (m_ModelsMgr->SaveTable(tempFilename, true))
+            {
+                // Using temp file in another child process..
+                Generating w(this);
+                w.StartProcess(InFile, tempFilename, OutDir);
+                w.exec();
+            }
+            else {
+                showFileOpenWError(tempFilename);
+            }
+        }
+        else {
+            showMainTableWError();
+        }
     }
 }
 
@@ -109,6 +123,11 @@ void MainWindow::showFileOpenWError(const QString &fileName) const
     std::stringstream ss;
     ss << "Не удалось открыть файл '" << fileName.toUtf8().data() << "' на запись";
     QMessageBox::critical(QApplication::activeWindow(), "Что-то пошло не так..", ss.str().c_str());
+}
+
+void MainWindow::showMainTableWError() const
+{
+    QMessageBox::critical(QApplication::activeWindow(), "Что-то пошло не так..", "Не удалось открыть временный файл для записи главной таблицы");
 }
 
 void MainWindow::on_action_open_triggered()
@@ -321,7 +340,7 @@ void MainWindow::on_action_save_individual_triggered()
                 QFile::remove(tempFilename);
             }
             else {
-                QMessageBox::critical(this, "Что-то пошло не так..", "Не удалось открыть временный файл для записи главной таблицы");
+                showMainTableWError();
             }
         }
     }

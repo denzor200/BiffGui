@@ -22,6 +22,7 @@ public:
 
     void showFileOpenRError(const QString& fileName) const;
     void showFileOpenWError(const QString& fileName) const;
+    void showMainTableWError() const;
 
 private slots:
     void on_action_open_triggered();

@@ -577,15 +577,19 @@ MainTableModelRegistry::ReadingStats MainTableModelRegistry::ReadInStream(QTextS
     return Stats;
 }
 
-void MainTableModelRegistry::WriteToStream(QTextStream &Out) const
+void MainTableModelRegistry::WriteToStream(QTextStream &Out, bool DisableDenied) const
 {
     qDebug() << "[MainTableModelRegistry::WriteToStream]";
     for (const Actor& Value : m_Actors)
     {
+        if (DisableDenied && Value.deny)
+            continue;
         Out << Value.name.Get();
         QString Persons;
         for (PersonsList::iterator personIt : Value.persons)
         {
+            if (DisableDenied && personIt->deny)
+                continue;
             if (Persons.size() == 0)
                 Persons += " - ";
             else {
@@ -1156,7 +1160,7 @@ bool MainTableModelsManager::OpenTable(const QString &Path)
     return true;
 }
 
-bool MainTableModelsManager::SaveTable(const QString &Path) const
+bool MainTableModelsManager::SaveTable(const QString &Path, bool DisableDenied) const
 {
     QFile fileOut(Path);
     if (fileOut.open(QIODevice::WriteOnly | QIODevice::Text))
@@ -1164,7 +1168,7 @@ bool MainTableModelsManager::SaveTable(const QString &Path) const
         QTextStream streamFileOut(&fileOut);
         streamFileOut.setCodec("UTF-8");
         streamFileOut.setGenerateByteOrderMark(true);
-        m_Registry.WriteToStream(streamFileOut);
+        m_Registry.WriteToStream(streamFileOut, DisableDenied);
         streamFileOut.flush();
         fileOut.close();
         return true;
