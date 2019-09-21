@@ -32,6 +32,9 @@ private slots:
 private:
     Ui::Generating* ui;
     QProcess* m_Process;
+
+    unsigned long m_CurDocumentCount = 0;
+    unsigned long m_MaxDocumentsCount = 0;
 };
 
 #endif // GENERATING_H

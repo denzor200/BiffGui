@@ -3,6 +3,7 @@
 #include <QProcess>
 #include <sstream>
 #include "CommandLineParser.h"
+#include <QDebug>
 
 #define MAX_PATH 260
 
@@ -80,7 +81,11 @@ void Generating::HandleCommandFromConverter(int argc, char **argv)
     {
         if (strcmp(argv[0], "start_generating")==0)
         {
-            // TODO: implement this
+            if (argc > 1)
+            {
+                char* dummyEnd;
+                m_MaxDocumentsCount = std::strtoul(argv[1], &dummyEnd, 10);
+            }
         }
         else if (strcmp(argv[0], "make_docx_begin")==0)
         {
@@ -98,10 +103,29 @@ void Generating::HandleCommandFromConverter(int argc, char **argv)
                 //strcat_s(Buffer, sizeof(Buffer), "----------");
                 ui->plainTextEdit_Log->appendPlainText(Buffer);
             }
+
+            if (argc > 1)
+            {
+                char Buffer[MAX_PATH+64] = {0};
+                strcat_s(Buffer, sizeof(Buffer), "--:--:-- * ");
+                strcat_s(Buffer, sizeof(Buffer), argv[1]);
+                ui->plainTextEdit_Stages->textCursor();
+                ui->plainTextEdit_Stages->appendPlainText(Buffer);
+            }
         }
         else if (strcmp(argv[0], "make_docx_end")==0)
         {
-            // TODO: implement this
+            if (argc > 1)
+            {
+                if (m_MaxDocumentsCount==0)
+                    ui->progressBar->setValue(0);
+                else
+                {
+                    m_CurDocumentCount++;
+                    ui->progressBar->setValue(100.0 * (m_CurDocumentCount / static_cast<double>(m_MaxDocumentsCount)));
+                }
+
+            }
         }
         else if (strcmp(argv[0], "info")==0)
         {
