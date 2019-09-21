@@ -2,6 +2,7 @@
 #include "ui_generating.h"
 #include <QProcess>
 #include <sstream>
+#include <ctime>
 #include "CommandLineParser.h"
 #include <QDebug>
 
@@ -71,7 +72,7 @@ void Generating::StderrReadLines()
         Value.remove("\r\n");
         Value.remove('\r');
         Value.remove('\n');
-        ui->plainTextEdit_Log->appendPlainText(Value);
+        ui->listWidget_Log->addItem(Value);
     }
 }
 
@@ -95,13 +96,13 @@ void Generating::HandleCommandFromConverter(int argc, char **argv)
                 strcat_s(Buffer, sizeof(Buffer), "----------");
                 strcat_s(Buffer, sizeof(Buffer), argv[1]);
                 //strcat_s(Buffer, sizeof(Buffer), "----------");
-                ui->plainTextEdit_Log->appendPlainText(Buffer);
+                ui->listWidget_Log->addItem(Buffer);
             }
             else {
                 char Buffer[MAX_PATH+64] = {0};
                 strcat_s(Buffer, sizeof(Buffer), "----------");
                 //strcat_s(Buffer, sizeof(Buffer), "----------");
-                ui->plainTextEdit_Log->appendPlainText(Buffer);
+                ui->listWidget_Log->addItem(Buffer);
             }
 
             if (argc > 1)
@@ -109,8 +110,9 @@ void Generating::HandleCommandFromConverter(int argc, char **argv)
                 char Buffer[MAX_PATH+64] = {0};
                 strcat_s(Buffer, sizeof(Buffer), "--:--:-- * ");
                 strcat_s(Buffer, sizeof(Buffer), argv[1]);
-                ui->plainTextEdit_Stages->textCursor();
-                ui->plainTextEdit_Stages->appendPlainText(Buffer);
+                int DocumentID = ui->listWidget_Stages->count();
+                ui->listWidget_Stages->addItem(Buffer);
+                m_DomentIds[argv[1]] = DocumentID;
             }
         }
         else if (strcmp(argv[0], "make_docx_end")==0)
@@ -122,15 +124,34 @@ void Generating::HandleCommandFromConverter(int argc, char **argv)
                 else
                 {
                     m_CurDocumentCount++;
-                    ui->progressBar->setValue(100.0 * (m_CurDocumentCount / static_cast<double>(m_MaxDocumentsCount)));
+                    ui->progressBar->setValue(
+                                static_cast<int>(
+                                    100.0 * (m_CurDocumentCount / static_cast<double>(m_MaxDocumentsCount))));
                 }
-
+                auto it = m_DomentIds.find(argv[1]);
+                if (it != m_DomentIds.end())
+                {
+                    char Buffer[MAX_PATH+64] = {0};
+                    struct tm newtime;
+                    __time64_t long_time;
+                    errno_t err;
+                    _time64( &long_time );
+                    err = _localtime64_s( &newtime, &long_time );
+                    if (!err)
+                    {
+                        sprintf_s(Buffer, sizeof(Buffer), "%02d:%02d:%02d : ", newtime.tm_hour, newtime.tm_min, newtime.tm_sec);
+                        strcat_s(Buffer, sizeof(Buffer), argv[1]);
+                        auto item = ui->listWidget_Stages->item(it.value());
+                        if (item)
+                            item->setText(Buffer);
+                    }
+                }
             }
         }
         else if (strcmp(argv[0], "info")==0)
         {
             for (int i=1;i<argc;++i)
-                ui->plainTextEdit_Log->appendPlainText(argv[i]);
+                ui->listWidget_Log->addItem(argv[i]);
         }
     }
 }
@@ -158,7 +179,7 @@ void Generating::slotFinished(int exitCode, QProcess::ExitStatus exitStatus)
         ui->progressBar->setEnabled(false);
         ui->pushButton_OK->setEnabled(true);
         ui->pushButton_Cancel->setEnabled(false);
-        ui->plainTextEdit_Log->appendPlainText("Создание монтажных листов успешно завершено\n");
+        ui->listWidget_Log->addItem("Создание монтажных листов успешно завершено\n");
         ui->label_Status->setText("Успешно");
     }
     else {
@@ -168,7 +189,7 @@ void Generating::slotFinished(int exitCode, QProcess::ExitStatus exitStatus)
         ui->pushButton_Cancel->setEnabled(false);
         std::stringstream ss;
         ss << "Создание монтажных листов было завершено с ошибкой (код ошибки: " << exitCode << ")\n";
-        ui->plainTextEdit_Log->appendPlainText(ss.str().c_str());
+        ui->listWidget_Log->addItem(ss.str().c_str());
         ui->label_Status->setText("Что-то пошло не так..");
     }
 }

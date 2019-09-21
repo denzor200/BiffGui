@@ -33,6 +33,7 @@ private:
     Ui::Generating* ui;
     QProcess* m_Process;
 
+    QHash<QString, int> m_DomentIds;
     unsigned long m_CurDocumentCount = 0;
     unsigned long m_MaxDocumentsCount = 0;
 };
