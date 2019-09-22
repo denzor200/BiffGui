@@ -267,7 +267,6 @@ void MainTableModelRegistry::RemoveAllLinksToPerson(PersonsList::iterator person
     for (ActorsList::iterator actorIt : personIt->actors)
     {
         Q_ASSERT(actorIt != m_Actors.end());
-        // TODO: можно ли вызывать std::remove на std::set??
         actorIt->persons.erase(
                     std::remove(actorIt->persons.begin(), actorIt->persons.end(), personIt),
                     actorIt->persons.end());
@@ -284,6 +283,50 @@ void MainTableModelRegistry::RemoveAllLinksToActor(ActorsList::iterator actorIt)
                     std::remove(personIt->actors.begin(), personIt->actors.end(), actorIt),
                     personIt->actors.end());
     }
+}
+
+// internal method
+bool MainTableModelRegistry::PersonHasLink(PersonsList::iterator personIt, ActorsList::iterator actorIt) const
+{
+    for (ActorsList::iterator it : personIt->actors)
+    {
+        if (it==actorIt)
+            return true;
+    }
+    return false;
+}
+
+// internal method
+bool MainTableModelRegistry::ActorHasLink(ActorsList::iterator actorIt, PersonsList::iterator personIt) const
+{
+    for (PersonsList::iterator it : actorIt->persons)
+    {
+        if (it==personIt)
+            return true;
+    }
+    return false;
+}
+
+// internal method
+bool MainTableModelRegistry::PersonHasOtherLink(PersonsList::iterator personIt, ActorsList::iterator actorIt) const
+{
+    for (ActorsList::iterator it : personIt->actors)
+    {
+        if (it!=actorIt)
+            return true;
+    }
+    return false;
+}
+
+// internal method
+bool MainTableModelRegistry::ActorHasOtherLink(ActorsList::iterator actorIt, PersonsList::iterator personIt) const
+{
+    for (PersonsList::iterator it : actorIt->persons)
+    {
+        if (it!=personIt)
+            return true;
+    }
+    return false;
 }
 
 
@@ -376,10 +419,10 @@ MainTableModelRegistry::PersonsInfo
                 Actors.Names.push_back(actorValue->name.Get());
                 if (Value != NULL_PERSON)
                 {
-                    for (ActorsList::iterator lit : Value->actors)
-                    {
-                        if (lit==actorValue)
-                            Actors.SelectedIds.push_back(index);
+                    if (ActorHasLink(actorValue, Value))
+                        Actors.SelectedIds.push_back(index);
+                    if (ActorHasOtherLink(actorValue, Value)) {
+                        Actors.SelectedOtherIds.push_back(index);
                     }
                 }
             }
@@ -413,10 +456,10 @@ MainTableModelRegistry::PersonsInfo
                 Persons.Names.push_back(personValue->name.Get());
                 if (Value != NULL_ACTOR)
                 {
-                    for (PersonsList::iterator lit : Value->persons)
-                    {
-                        if (lit==personValue)
-                            Persons.SelectedIds.push_back(index);
+                    if (PersonHasLink(personValue, Value))
+                        Persons.SelectedIds.push_back(index);
+                    if (PersonHasOtherLink(personValue, Value)) {
+                        Persons.SelectedOtherIds.push_back(index);
                     }
                 }
             }

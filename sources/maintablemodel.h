@@ -118,6 +118,12 @@ private:
     void RemoveAllLinksToPerson(PersonsList::iterator personIt);
     void RemoveAllLinksToActor(ActorsList::iterator actorIt);
 
+    bool PersonHasLink(PersonsList::iterator personIt, ActorsList::iterator actorIt) const;
+    bool ActorHasLink(ActorsList::iterator actorIt, PersonsList::iterator personIt) const;
+
+    bool PersonHasOtherLink(PersonsList::iterator personIt, ActorsList::iterator actorIt) const;
+    bool ActorHasOtherLink(ActorsList::iterator actorIt, PersonsList::iterator personIt) const;
+
     enum class SETTER_FLAGS
     {
         NONE = 0x0,

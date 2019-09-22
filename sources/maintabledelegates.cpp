@@ -61,12 +61,21 @@ void CChoiceLinksDelegate::setEditorData(QWidget *editor, const QModelIndex &ind
     {
         QList<QVariant> pair = Data.toList();
         QList<QVariant> CheckedList = pair[1].toList();
+        QList<QVariant> CheckedOtherList = pair[2].toList();
 
         ccBox->clear();
         ccBox->addItems(pair[0].toStringList());
         for (const QVariant& variantIndex : CheckedList)
         {
             ccBox->setItemCheckState(variantIndex.toInt(), Qt::Checked);
+        }
+        for (const QVariant& variantIndex : CheckedOtherList)
+        {
+            QFont font;
+            font.setItalic(true);
+            font.setBold(true);
+            ccBox->setItemData(variantIndex.toInt(), font, Qt::FontRole);
+            ccBox->setItemData(variantIndex.toInt(), QBrush(Qt::blue), Qt::TextColorRole);
         }
     }
     else {
