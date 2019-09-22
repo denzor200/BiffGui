@@ -5,6 +5,7 @@
 #include <QComboBox>
 #include "libqxt\gui\qxtcheckcombobox.h"
 #include <QLineEdit>
+#include <QStandardItemModel>
 
 #define RU_YES_TEXT "Да"
 #define RU_NO_TEXT "Нет"
@@ -64,18 +65,31 @@ void CChoiceLinksDelegate::setEditorData(QWidget *editor, const QModelIndex &ind
         QList<QVariant> CheckedOtherList = pair[2].toList();
 
         ccBox->clear();
+
+        // Первый итем
+        // Всегда комом..
+        // Такой вот костыль..
+        //////////////////////////////////////////////////////
+        ccBox->addItem("");
+        QStandardItemModel *model =
+              qobject_cast<QStandardItemModel *>(ccBox->model());
+          Q_ASSERT(model != nullptr);
+          QStandardItem *item = model->item(0);
+          item->setFlags(item->flags() & ~Qt::ItemIsEnabled);
+        //////////////////////////////////////////////////////
+
         ccBox->addItems(pair[0].toStringList());
         for (const QVariant& variantIndex : CheckedList)
         {
-            ccBox->setItemCheckState(variantIndex.toInt(), Qt::Checked);
+            ccBox->setItemCheckState(variantIndex.toInt()+1, Qt::Checked);
         }
         for (const QVariant& variantIndex : CheckedOtherList)
         {
             QFont font;
             font.setItalic(true);
             font.setBold(true);
-            ccBox->setItemData(variantIndex.toInt(), font, Qt::FontRole);
-            ccBox->setItemData(variantIndex.toInt(), QBrush(Qt::blue), Qt::TextColorRole);
+            ccBox->setItemData(variantIndex.toInt()+1, font, Qt::FontRole);
+            ccBox->setItemData(variantIndex.toInt()+1, QBrush(Qt::blue), Qt::TextColorRole);
         }
     }
     else {
