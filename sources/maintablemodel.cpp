@@ -357,14 +357,15 @@ QString MainTableModelRegistry::ActorGetName(int ID) const
     });
 }
 
-QPair<QStringList, QList<QVariant>> MainTableModelRegistry::PersonGetActors(int ID, bool DisableDenied) const
+MainTableModelRegistry::PersonsInfo
+    MainTableModelRegistry::PersonGetActors(int ID, bool DisableDenied) const
 {
     GETTER_DEBUG() << "[MainTableModelRegistry::PersonGetActors]: " << ID;
-    auto Handler = [&](PersonsList::iterator Value) -> QPair<QStringList, QList<QVariant>>
+    auto Handler = [&](PersonsList::iterator Value) -> PersonsInfo
     {
-        QPair<QStringList, QList<QVariant>> Actors;
+        PersonsInfo Actors;
         Q_ASSERT(m_Actors_ByID.size() < TO_SZ(std::numeric_limits<int>::max()));
-        Actors.first.reserve(static_cast<int>(m_Actors_ByID.size()));
+        Actors.Names.reserve(static_cast<int>(m_Actors_ByID.size()));
         int index = 0;
         // Двойной проход по актерам пришлось сделать чтобы рассчитать индексы
         ForeachActors([&](int, ActorsList::iterator actorValue) -> bool
@@ -372,13 +373,13 @@ QPair<QStringList, QList<QVariant>> MainTableModelRegistry::PersonGetActors(int 
             bool EnableDenied = !DisableDenied;
             if (EnableDenied || !actorValue->deny)
             {
-                Actors.first.push_back(actorValue->name.Get());
+                Actors.Names.push_back(actorValue->name.Get());
                 if (Value != NULL_PERSON)
                 {
                     for (ActorsList::iterator lit : Value->actors)
                     {
                         if (lit==actorValue)
-                            Actors.second.push_back(index);
+                            Actors.SelectedIds.push_back(index);
                     }
                 }
             }
@@ -388,33 +389,34 @@ QPair<QStringList, QList<QVariant>> MainTableModelRegistry::PersonGetActors(int 
         return Actors;
     };
     if (ID >= 0)
-        return PersonsBaseGetter<QPair<QStringList, QList<QVariant>>>(ID,Handler);
+        return PersonsBaseGetter<PersonsInfo>(ID,Handler);
     else {
         return Handler(NULL_PERSON);
     }
 }
 
-QPair<QStringList, QList<QVariant>> MainTableModelRegistry::ActorGetPersons(int ID, bool DisableDenied) const
+MainTableModelRegistry::PersonsInfo
+    MainTableModelRegistry::ActorGetPersons(int ID, bool DisableDenied) const
 {
     GETTER_DEBUG() << "[MainTableModelRegistry::ActorGetPersons]: " << ID;
-    auto Handler = [&](ActorsList::iterator Value) -> QPair<QStringList, QList<QVariant>>
+    auto Handler = [&](ActorsList::iterator Value) -> PersonsInfo
     {
-        QPair<QStringList, QList<QVariant>> Persons;
+        PersonsInfo Persons;
         Q_ASSERT(m_Persons_ByID.size() < TO_SZ(std::numeric_limits<int>::max()));
-        Persons.first.reserve(static_cast<int>(m_Persons_ByID.size()));
+        Persons.Names.reserve(static_cast<int>(m_Persons_ByID.size()));
         int index = 0;
         ForeachPersons([&](int, PersonsList::iterator personValue) -> bool
         {
             bool EnableDenied = !DisableDenied;
             if (EnableDenied || !personValue->deny)
             {
-                Persons.first.push_back(personValue->name.Get());
+                Persons.Names.push_back(personValue->name.Get());
                 if (Value != NULL_ACTOR)
                 {
                     for (PersonsList::iterator lit : Value->persons)
                     {
                         if (lit==personValue)
-                            Persons.second.push_back(index);
+                            Persons.SelectedIds.push_back(index);
                     }
                 }
             }
@@ -424,7 +426,7 @@ QPair<QStringList, QList<QVariant>> MainTableModelRegistry::ActorGetPersons(int 
        return Persons;
     };
     if (ID >= 0)
-        return ActorsBaseGetter<QPair<QStringList, QList<QVariant>>>(ID,Handler);
+        return ActorsBaseGetter<PersonsInfo>(ID,Handler);
     else {
         return Handler(NULL_ACTOR);
     }
@@ -665,9 +667,10 @@ QVariant MainTableModel::data(const QModelIndex &index, int role) const
         {
             auto p = m_Mngr->GetRegistry()->ActorGetPersons(index.row(), false);
             QList<QVariant> list;
-            list.reserve(2);
-            list.push_back(std::move(p.first));
-            list.push_back(std::move(p.second));
+            list.reserve(3);
+            list.push_back(std::move(p.Names));
+            list.push_back(std::move(p.SelectedIds));
+            list.push_back(std::move(p.SelectedOtherIds));
             return list;
         }
         case 2:
@@ -853,9 +856,10 @@ QVariant MainTableModel_Reversed::data(const QModelIndex &index, int role) const
         {
             auto p = m_Mngr->GetRegistry()->PersonGetActors(index.row(), false);
             QList<QVariant> list;
-            list.reserve(2);
-            list.push_back(std::move(p.first));
-            list.push_back(std::move(p.second));
+            list.reserve(3);
+            list.push_back(std::move(p.Names));
+            list.push_back(std::move(p.SelectedIds));
+            list.push_back(std::move(p.SelectedOtherIds));
             return list;
         }
         case 2:
@@ -1049,8 +1053,8 @@ bool MainTableModelsManager::SavePersons(const QString &Path, bool DisableDenied
     QTextStream streamFileOut(&fileOut);
     streamFileOut.setCodec("UTF-8");
     streamFileOut.setGenerateByteOrderMark(true);
-    QPair<QStringList, QList<QVariant>> pair = m_Registry.ActorGetPersons(-1, DisableDenied);
-    for ( const QString& Value : pair.first)
+    auto data = m_Registry.ActorGetPersons(-1, DisableDenied);
+    for ( const QString& Value : data.Names)
     {
         if (ActorName::FindForbidenSymbols(Value))
         {

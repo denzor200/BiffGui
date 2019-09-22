@@ -80,8 +80,15 @@ public:
     QString PersonGetName(int ID) const;
     QString ActorGetName(int ID) const;
 
-    QPair<QStringList, QList<QVariant>> PersonGetActors(int ID, bool DisableDenied) const;
-    QPair<QStringList, QList<QVariant>> ActorGetPersons(int ID, bool DisableDenied) const;
+    // Действует как для актеров, так и для пресонажей
+    struct PersonsInfo
+    {
+        QStringList     Names;
+        QList<QVariant> SelectedIds;
+        QList<QVariant> SelectedOtherIds;
+    };
+    PersonsInfo PersonGetActors(int ID, bool DisableDenied) const;
+    PersonsInfo ActorGetPersons(int ID, bool DisableDenied) const;
 
     bool PersonIsDenied(int ID) const;
     bool ActorIsDenied(int ID) const;
