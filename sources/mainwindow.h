@@ -36,11 +36,8 @@ private slots:
 
     void on_action_save_persons_triggered();
 
-    void on_action_close_all_triggered();
-
     void on_action_open_table_triggered();
     void on_action_save_table_triggered();
-    void on_action_close_table_triggered();
 
     void on_action_generate_doc_triggered();
 

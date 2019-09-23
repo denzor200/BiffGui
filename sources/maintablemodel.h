@@ -26,7 +26,36 @@ public:
     }
 };
 
-class MainTableModelRegistry
+// Интерфейс MainTableModelRegistry, содержащий только константные вызовы
+class IMainTableModelRegistryConst
+{
+public:
+    virtual ~IMainTableModelRegistryConst() = default;
+
+    virtual bool PersonIndexIsReserved(int ID) const = 0;
+    virtual bool ActorIndexIsReserved(int ID) const = 0;
+
+    virtual QString PersonGetName(int ID) const = 0;
+    virtual QString ActorGetName(int ID) const = 0;
+
+    // Действует как для актеров, так и для пресонажей
+    struct PersonsInfo
+    {
+        QStringList     Names;
+        QList<QVariant> SelectedIds;
+        QList<QVariant> SelectedOtherIds;
+    };
+    virtual PersonsInfo PersonGetActors(int ID, bool DisableDenied) const = 0;
+    virtual PersonsInfo ActorGetPersons(int ID, bool DisableDenied) const = 0;
+
+    virtual bool PersonIsDenied(int ID) const = 0;
+    virtual bool ActorIsDenied(int ID) const = 0;
+
+    virtual int getPersonsCount() const = 0;
+    virtual int getActorsCount() const = 0;
+};
+
+class MainTableModelRegistry : public IMainTableModelRegistryConst
 {
     struct Actor;
     struct Person;
@@ -56,8 +85,8 @@ public:
     bool ReserveNewPersonIndex();
     bool ReserveNewActorIndex();
 
-    bool PersonIndexIsReserved(int ID) const;
-    bool ActorIndexIsReserved(int ID) const;
+    bool PersonIndexIsReserved(int ID) const override;
+    bool ActorIndexIsReserved(int ID) const override;
 
     bool AddPerson(const ActorName& person, int ID = -1);
     bool AddActor(const ActorName& actor, int ID = -1);
@@ -77,21 +106,14 @@ public:
     bool Person_ChangeRelation(const ActorName& person, const ActorName& actor, bool State);
     bool Actor_ChangeRelation(const ActorName& actor, const ActorName& person, bool State);
 
-    QString PersonGetName(int ID) const;
-    QString ActorGetName(int ID) const;
+    QString PersonGetName(int ID) const override;
+    QString ActorGetName(int ID) const override;
 
-    // Действует как для актеров, так и для пресонажей
-    struct PersonsInfo
-    {
-        QStringList     Names;
-        QList<QVariant> SelectedIds;
-        QList<QVariant> SelectedOtherIds;
-    };
-    PersonsInfo PersonGetActors(int ID, bool DisableDenied) const;
-    PersonsInfo ActorGetPersons(int ID, bool DisableDenied) const;
+    PersonsInfo PersonGetActors(int ID, bool DisableDenied) const override;
+    PersonsInfo ActorGetPersons(int ID, bool DisableDenied) const override;
 
-    bool PersonIsDenied(int ID) const;
-    bool ActorIsDenied(int ID) const;
+    bool PersonIsDenied(int ID) const override;
+    bool ActorIsDenied(int ID) const override;
 
     bool RemovePerson(int ID) noexcept;
     bool RemoveActor(int ID) noexcept;
@@ -99,8 +121,8 @@ public:
     void ClearAllPersons() noexcept;
     void ClearAllActors() noexcept;
 
-    int getPersonsCount() const noexcept { return static_cast<int>(m_Persons_ByID.size()); }
-    int getActorsCount() const noexcept { return static_cast<int>(m_Actors_ByID.size()); }
+    int getPersonsCount() const noexcept override { return static_cast<int>(m_Persons_ByID.size()); }
+    int getActorsCount() const noexcept override { return static_cast<int>(m_Actors_ByID.size()); }
 
     struct ReadingStats
     {
@@ -328,6 +350,9 @@ public:
     bool SaveTable(const QString& Path, bool DisableDenied = false) const;
 
     void ClearAll();
+
+    const IMainTableModelRegistryConst* constRegistryAPI() const {return &m_Registry;}
+
 protected:
     friend class MainTableModel;
     friend class MainTableModel_Reversed;

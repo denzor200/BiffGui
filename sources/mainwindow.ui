@@ -159,13 +159,11 @@
     <addaction name="separator"/>
     <addaction name="action_open_table"/>
     <addaction name="action_save_table"/>
-    <addaction name="action_close_table"/>
     <addaction name="separator"/>
     <addaction name="action_save_persons"/>
     <addaction name="separator"/>
     <addaction name="action_generate_doc"/>
     <addaction name="separator"/>
-    <addaction name="action_close_all"/>
     <addaction name="separator"/>
     <addaction name="action_exit"/>
     <addaction name="separator"/>
@@ -236,11 +234,6 @@
     <string>Закрыть субтитру</string>
    </property>
   </action>
-  <action name="action_close_all">
-   <property name="text">
-    <string>Закрыть все</string>
-   </property>
-  </action>
   <action name="action_open_table">
    <property name="text">
     <string>Открыть таблицу</string>
@@ -249,11 +242,6 @@
   <action name="action_save_table">
    <property name="text">
     <string>Сохранить таблицу</string>
-   </property>
-  </action>
-  <action name="action_close_table">
-   <property name="text">
-    <string>Закрыть таблицу</string>
    </property>
   </action>
   <action name="action_generate_doc">

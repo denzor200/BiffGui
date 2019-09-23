@@ -63,6 +63,25 @@ MainWindow::~MainWindow()
 
 void MainWindow::makeDoc()
 {
+    const int actorsCount = m_ModelsMgr->constRegistryAPI()->getActorsCount();
+    const int personsCount = m_ModelsMgr->constRegistryAPI()->getPersonsCount();
+
+    if (actorsCount <= 0 && personsCount <= 0)
+    {
+        QMessageBox::critical(this, "Ошибка", "Таблица пуста");
+        return;
+    }
+    if (actorsCount <= 0)
+    {
+        QMessageBox::critical(this, "Ошибка", "Список актеров пуст");
+        return;
+    }
+    if (personsCount <= 0)
+    {
+        QMessageBox::critical(this, "Ошибка", "Список персонажей пуст");
+        return;
+    }
+
     QString InFile, OutDir;
 
     // TODO: Сделать нормальную выборку InFile
@@ -206,8 +225,26 @@ void MainWindow::on_action_close_triggered()
 {
     // TODO: выведи в заголовок название открытого файла
     // И не забудь здесь его очистить
-    delete m_OpenedSubbtitle;
-    m_OpenedSubbtitle = nullptr;
+
+    // Выполняет операцию только если есть что закрывать..
+    // И только если пользователь дал согласие
+    bool doIt = false;
+    if (
+            m_OpenedSubbtitle != nullptr ||
+            m_ModelsMgr->constRegistryAPI()->getActorsCount() > 0 ||
+            m_ModelsMgr->constRegistryAPI()->getPersonsCount() > 0)
+    {
+        auto reply = QMessageBox::question(this, "Подтверждение действия", "Вы действительно хотите закрыть текущую сессию? Все несохраненные данные будут утеряны.",
+                                        QMessageBox::Yes|QMessageBox::No);
+        if (reply==QMessageBox::Yes)
+            doIt = true;
+    }
+    if (doIt)
+    {
+        delete m_OpenedSubbtitle;
+        m_OpenedSubbtitle = nullptr;
+        m_ModelsMgr->ClearAll();
+    }
 }
 
 
@@ -229,64 +266,82 @@ void MainWindow::on_action_settings_triggered()
 
 void MainWindow::on_action_save_persons_triggered()
 {
-    QSettings Settings;
-    QString fileName = QFileDialog::getSaveFileName(this,
-        tr("Сохранить список персонажей"),
-        Settings.value(DirectoriesRegistry::PERSONS_OUTDIR).toString(),
-        tr("Text files (*.txt)"));
-
-    if (fileName!="")
+    const int personsCount = m_ModelsMgr->constRegistryAPI()->getPersonsCount();
+    if (personsCount > 0)
     {
-        QDir CurrentDir;
-        Settings.setValue(DirectoriesRegistry::PERSONS_OUTDIR,
-                    CurrentDir.absoluteFilePath(fileName));
+        QSettings Settings;
+        QString fileName = QFileDialog::getSaveFileName(this,
+            tr("Сохранить список персонажей"),
+            Settings.value(DirectoriesRegistry::PERSONS_OUTDIR).toString(),
+            tr("Text files (*.txt)"));
 
-        if (!m_ModelsMgr->SavePersons(fileName))
-            showFileOpenWError(fileName);
+        if (fileName!="")
+        {
+            QDir CurrentDir;
+            Settings.setValue(DirectoriesRegistry::PERSONS_OUTDIR,
+                        CurrentDir.absoluteFilePath(fileName));
+
+            if (!m_ModelsMgr->SavePersons(fileName))
+                showFileOpenWError(fileName);
+        }
     }
-}
-
-void MainWindow::on_action_close_all_triggered()
-{
-    m_ModelsMgr->ClearAll();
-    // TODO: the next..
 }
 
 void MainWindow::on_action_open_table_triggered()
 {
-    QSettings Settings;
-    QString fileName = QFileDialog::getOpenFileName(this,
-        tr("Открыть таблицу"),
-        Settings.value(DirectoriesRegistry::TABLE_INDIR).toString(),
-        tr("Config files (*.cfg)"));
-
-    if (fileName!="")
+    if (m_OpenedSubbtitle == nullptr)
     {
-        QDir CurrentDir;
-        Settings.setValue(DirectoriesRegistry::TABLE_INDIR,
-                    CurrentDir.absoluteFilePath(fileName));
+        QMessageBox::critical(this, "Ошибка", "Нельзя открывать таблицу без субтитров");
+        return ;
+    }
 
-        if (!m_ModelsMgr->OpenTable(fileName))
-            showFileOpenRError(fileName);
+    {
+        QSettings Settings;
+        QString fileName = QFileDialog::getOpenFileName(this,
+            tr("Открыть таблицу"),
+            Settings.value(DirectoriesRegistry::TABLE_INDIR).toString(),
+            tr("Config files (*.cfg)"));
+
+        if (fileName!="")
+        {
+            QDir CurrentDir;
+            Settings.setValue(DirectoriesRegistry::TABLE_INDIR,
+                        CurrentDir.absoluteFilePath(fileName));
+
+            if (!m_ModelsMgr->OpenTable(fileName))
+                showFileOpenRError(fileName);
+        }
     }
 }
 
 void MainWindow::on_action_save_table_triggered()
 {
-    QSettings Settings;
-    QString fileName = QFileDialog::getSaveFileName(this,
-        tr("Сохранить таблицу"),
-        Settings.value(DirectoriesRegistry::TABLE_OUTDIR).toString(),
-        tr("Config files (*.cfg)"));
-
-    if (fileName!="")
+    // Игнорируем, если сохранять нечего
+    const int actorsCount = m_ModelsMgr->constRegistryAPI()->getActorsCount();
+    const int personsCount = m_ModelsMgr->constRegistryAPI()->getPersonsCount();
+    if (actorsCount > 0 || personsCount > 0)
     {
-        QDir CurrentDir;
-        Settings.setValue(DirectoriesRegistry::TABLE_OUTDIR,
-                    CurrentDir.absoluteFilePath(fileName));
+        if (actorsCount > 0)
+        {
+            QSettings Settings;
+            QString fileName = QFileDialog::getSaveFileName(this,
+                tr("Сохранить таблицу"),
+                Settings.value(DirectoriesRegistry::TABLE_OUTDIR).toString(),
+                tr("Config files (*.cfg)"));
 
-        if (!m_ModelsMgr->SaveTable(fileName))
-            showFileOpenWError(fileName);
+            if (fileName!="")
+            {
+                QDir CurrentDir;
+                Settings.setValue(DirectoriesRegistry::TABLE_OUTDIR,
+                            CurrentDir.absoluteFilePath(fileName));
+
+                if (!m_ModelsMgr->SaveTable(fileName))
+                    showFileOpenWError(fileName);
+            }
+        }
+        else {
+            QMessageBox::critical(this, "Что-то пошло не так..", "Вы не можете сохранить таблицу, поскольку не прописали в ней ни одного актера");
+        }
     }
 }
 
@@ -344,11 +399,6 @@ void MainWindow::on_action_save_individual_triggered()
             }
         }
     }
-}
-
-void MainWindow::on_action_close_table_triggered()
-{
-    m_ModelsMgr->ClearAll();
 }
 
 void MainWindow::on_action_generate_doc_triggered()
