@@ -58,42 +58,44 @@ void CChoiceLinksDelegate::setEditorData(QWidget *editor, const QModelIndex &ind
 {
     const QVariant& Data = index.model()->data(index);
     QxtCheckComboBox *ccBox = qobject_cast<QxtCheckComboBox*> (editor);
+    ccBox->clear();
     if (Data.canConvert<QList<QVariant>>())
     {
         QList<QVariant> pair = Data.toList();
+        QStringList List = pair[0].toStringList();
         QList<QVariant> CheckedList = pair[1].toList();
         QList<QVariant> CheckedOtherList = pair[2].toList();
+        int offset = 0;
 
-        ccBox->clear();
-
-        // Первый итем
-        // Всегда комом..
-        // Такой вот костыль..
-        //////////////////////////////////////////////////////
-        ccBox->addItem("");
-        QStandardItemModel *model =
-              qobject_cast<QStandardItemModel *>(ccBox->model());
-          Q_ASSERT(model != nullptr);
-          QStandardItem *item = model->item(0);
-          item->setFlags(item->flags() & ~Qt::ItemIsEnabled);
-        //////////////////////////////////////////////////////
-
-        ccBox->addItems(pair[0].toStringList());
-        for (const QVariant& variantIndex : CheckedList)
+        if (!List.empty())
         {
-            ccBox->setItemCheckState(variantIndex.toInt()+1, Qt::Checked);
+            // Первый итем
+            // Всегда комом..
+            // Такой вот костыль..
+            //////////////////////////////////////////////////////
+            ccBox->addItem("");
+            QStandardItemModel *model =
+                  qobject_cast<QStandardItemModel *>(ccBox->model());
+            Q_ASSERT(model != nullptr);
+            QStandardItem *item = model->item(0);
+            item->setFlags(item->flags() & ~Qt::ItemIsEnabled);
+            offset = 1;
+            //////////////////////////////////////////////////////
+
+            ccBox->addItems(List);
+            for (const QVariant& variantIndex : CheckedList)
+            {
+                ccBox->setItemCheckState(variantIndex.toInt()+offset, Qt::Checked);
+            }
+            for (const QVariant& variantIndex : CheckedOtherList)
+            {
+                QFont font;
+                font.setItalic(true);
+                font.setBold(true);
+                ccBox->setItemData(variantIndex.toInt()+offset, font, Qt::FontRole);
+                ccBox->setItemData(variantIndex.toInt()+offset, QBrush(Qt::blue), Qt::TextColorRole);
+            }
         }
-        for (const QVariant& variantIndex : CheckedOtherList)
-        {
-            QFont font;
-            font.setItalic(true);
-            font.setBold(true);
-            ccBox->setItemData(variantIndex.toInt()+1, font, Qt::FontRole);
-            ccBox->setItemData(variantIndex.toInt()+1, QBrush(Qt::blue), Qt::TextColorRole);
-        }
-    }
-    else {
-         ccBox->clear();
     }
 }
 
