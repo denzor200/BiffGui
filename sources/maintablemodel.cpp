@@ -1121,7 +1121,11 @@ bool MainTableModelsManager::OpenTable(const QString &Path)
     m_Model->endResetModel();
     m_ModelReversed->endResetModel();
 
-    if (!Stats.UnrecognisedLines.empty() || !Stats.UnrecognisedActors.empty() || !Stats.UnrecognisedPersons.empty())
+    if (
+            !Stats.UnrecognisedLines.empty() ||
+            !Stats.UnrecognisedActors.empty() ||
+            !Stats.UnrecognisedPersons.empty() ||
+            !Stats.IgnoredPersons.empty())
     {
         std::stringstream ss;
         ss << "В ходе открытия таблицы из файла произошли некоторые ошибки." << std::endl;
@@ -1161,6 +1165,20 @@ bool MainTableModelsManager::OpenTable(const QString &Path)
             }
             ss << Persons.toUtf8().data() << std::endl;
             ss << "Возможно они содержат неразрешенные символы" << std::endl;
+            index++;
+        }
+        if (!Stats.IgnoredPersons.empty())
+        {
+            ss << index << ". Следующие имена персонажей были проигнорированы:" << std::endl;
+            QString Persons;
+            for (const QString& Value : Stats.IgnoredPersons)
+            {
+                if (Persons.size()!=0)
+                    Persons += ", ";
+                Persons += Value;
+            }
+            ss << Persons.toUtf8().data() << std::endl;
+            ss << "Возможно они не были найдены в субтитрах" << std::endl;
             index++;
         }
         QMessageBox::warning(QApplication::activeWindow(), "Предупреждение", ss.str().c_str());
