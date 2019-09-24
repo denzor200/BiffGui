@@ -32,7 +32,6 @@ class ActorName
 {
     QString m_Name;
 public:
-	ActorName() = default;
     explicit ActorName(const QString& Name);
 
 	bool operator==(const ActorName& Other) const;

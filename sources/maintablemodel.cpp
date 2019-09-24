@@ -62,9 +62,7 @@ bool MainTableModelRegistry::AddPerson(const ActorName& person, int ID)
     CHECK_COND(m_Persons_ByID.size() < TO_SZ(std::numeric_limits<int>::max()));
     if (m_Persons_ByName.find(person) == m_Persons_ByName.end())
     {
-        Person NewObj;
-        NewObj.name = person;
-        m_Persons.push_front(std::move(NewObj));
+        m_Persons.emplace_front(person);
 
         if (ID < 0)
         {
@@ -106,9 +104,7 @@ bool MainTableModelRegistry::AddActor(const ActorName& actor, int ID)
     CHECK_COND(m_Actors_ByID.size() < TO_SZ(std::numeric_limits<int>::max()));
     if (m_Actors_ByName.find(actor) == m_Actors_ByName.end())
     {
-        Actor NewObj;
-        NewObj.name = actor;
-        m_Actors.push_front(std::move(NewObj));
+        m_Actors.emplace_front(actor);
 
         if (ID < 0)
         {
@@ -574,10 +570,38 @@ MainTableModelRegistry::ReadingStats MainTableModelRegistry::ReadInStream(QTextS
         if (pair.size()==0)
             continue;
 
-        // Оборачиваем имя актера в объект..
-        ActorName actorObj;
         try {
-            actorObj = ActorName(pair[0]);
+            auto actorObj = ActorName(pair[0]);
+
+            // Что мы можем извлечь: актер и несколько персонажей
+            if (pair.size()==2)
+            {
+                QStringList persons = pair[1].split(",", QString::SkipEmptyParts);
+                AddActor(actorObj);
+                for (const QString& person : persons)
+                {
+                    // Оборачиваем имя персонажа в объект..
+                    try {
+                        auto personObj = ActorName(person);
+                        AddPerson(personObj);
+                        Actor_ChangeRelation(actorObj, personObj, true);
+                    }
+                    catch (const ActorNameStringEmpty&)
+                    {
+                    }
+                    catch (const ActorNameForbiddenSymbols&)
+                    {
+                        Stats.UnrecognisedPersons += person;
+                    }
+                }
+            }
+
+            // Что мы можем извлечь: только актер
+            else if (pair.size()==1)
+            {
+                // TODO: exception
+                AddActor(actorObj);
+            }
         }
         catch (const ActorNameStringEmpty&)
         {
@@ -585,38 +609,6 @@ MainTableModelRegistry::ReadingStats MainTableModelRegistry::ReadInStream(QTextS
         catch (const ActorNameForbiddenSymbols&)
         {
             Stats.UnrecognisedActors += pair[0];
-        }
-
-        // Можем извлечь: актер и несколько персонажей
-        if (pair.size()==2)
-        {
-            QStringList persons = pair[1].split(",", QString::SkipEmptyParts);
-            AddActor(actorObj);
-            for (const QString& person : persons)
-            {
-                // Оборачиваем имя персонажа в объект..
-                ActorName personObj;
-                try {
-                    personObj = ActorName(person);
-                }
-                catch (const ActorNameStringEmpty&)
-                {
-                }
-                catch (const ActorNameForbiddenSymbols&)
-                {
-                    Stats.UnrecognisedPersons += person;
-                }
-
-                AddPerson(personObj);
-                Actor_ChangeRelation(actorObj, personObj, true);
-            }
-        }
-
-        // Можем извлечь: только актер
-        else if (pair.size()==1)
-        {
-            // TODO: exception
-            AddActor(actorObj);
         }
     }
     return Stats;

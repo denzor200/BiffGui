@@ -65,12 +65,14 @@ class MainTableModelRegistry : public IMainTableModelRegistryConst
 
     struct Actor
     {
+        Actor(const ActorName& _name) : name(_name){}
         std::vector<PersonsList::iterator> persons;
         ActorName name;
         bool deny = false;
     };
     struct Person
     {
+        Person(const ActorName& _name) : name(_name){}
         std::vector<ActorsList::iterator> actors;
         ActorName name;
         bool deny = false;
@@ -128,6 +130,7 @@ public:
     {
         QStringList UnrecognisedLines;
         QStringList UnrecognisedPersons;
+        QStringList IgnoredPersons;
         QStringList UnrecognisedActors;
     };
     ReadingStats ReadInStream( QTextStream& In);
