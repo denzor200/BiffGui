@@ -7,6 +7,8 @@
 #include <QMessageBox>
 #include <QApplication>
 
+using Status = MainTableModelRegistry::Status;
+
 #define CHECK_COND(c) \
     if (!(c)) \
         return false;
@@ -227,13 +229,13 @@ bool MainTableModelRegistry::ActorClearAllRelations(int ID)
 
 
 // internal method
-bool MainTableModelRegistry::Person_ChangeRelation(PersonsList::iterator personIt, ActorsList::iterator actorIt, bool State)
+void MainTableModelRegistry::Person_ChangeRelationMaster(PersonsList::iterator personIt, ActorsList::iterator actorIt, bool State)
 {
-    return Actor_ChangeRelation(actorIt, personIt, State);
+    Actor_ChangeRelationMaster(actorIt, personIt, State);
 }
 
 // internal method
-bool MainTableModelRegistry::Actor_ChangeRelation(ActorsList::iterator actorIt, PersonsList::iterator personIt, bool State)
+void MainTableModelRegistry::Actor_ChangeRelationMaster(ActorsList::iterator actorIt, PersonsList::iterator personIt, bool State)
 {
     if (State)
     {
@@ -254,7 +256,6 @@ bool MainTableModelRegistry::Actor_ChangeRelation(ActorsList::iterator actorIt, 
                     std::remove(personIt->actors.begin(), personIt->actors.end(), actorIt),
                     personIt->actors.end());
     }
-    return true;
 }
 
 // internal method
@@ -333,7 +334,10 @@ bool MainTableModelRegistry::Person_ChangeRelation(int personID, const ActorName
     {
         auto actorIt = m_Actors_ByName.find(actor);
         if (actorIt != m_Actors_ByName.end())
-            return Person_ChangeRelation(Value, actorIt->second, State);
+        {
+            Person_ChangeRelationMaster(Value, actorIt->second, State);
+            return true;
+        }
         return false;
     });
 }
@@ -344,29 +348,42 @@ bool MainTableModelRegistry::Actor_ChangeRelation(int actorID, const ActorName& 
     {
         auto personIt = m_Persons_ByName.find(person);
         if (personIt != m_Persons_ByName.end())
-            return Actor_ChangeRelation(Value, personIt->second, State);
+        {
+            Actor_ChangeRelationMaster(Value, personIt->second, State);
+            return true;
+        }
         return false;
     });
 }
 
-bool MainTableModelRegistry::Person_ChangeRelation(const ActorName &person, const ActorName &actor, bool State)
+Status MainTableModelRegistry::Person_ChangeRelation(const ActorName &person, const ActorName &actor, bool State)
 {
     qDebug() << "[MainTableModelRegistry::Person_ChangeRelation]: " << person << ", " << actor << ", " << State;
     auto personIt = m_Persons_ByName.find(person);
     auto actorIt = m_Actors_ByName.find(actor);
-    if (personIt != m_Persons_ByName.end() && actorIt != m_Actors_ByName.end() )
-        return Person_ChangeRelation(personIt->second, actorIt->second, State);
-    return false;
+
+    if (personIt == m_Persons_ByName.end())
+        return Status::PERSON_NOT_FOUND;
+    if (actorIt == m_Actors_ByName.end())
+        return Status::ACTOR_NOT_FOUND;
+
+    Person_ChangeRelationMaster(personIt->second, actorIt->second, State);
+    return Status::SUCCESS;
 }
 
-bool MainTableModelRegistry::Actor_ChangeRelation(const ActorName &actor, const ActorName &person, bool State)
+Status MainTableModelRegistry::Actor_ChangeRelation(const ActorName &actor, const ActorName &person, bool State)
 {
     qDebug() << "[MainTableModelRegistry::Actor_ChangeRelation]: " << actor << ", " << person << ", " << State;
     auto personIt = m_Persons_ByName.find(person);
     auto actorIt = m_Actors_ByName.find(actor);
-    if (personIt != m_Persons_ByName.end() && actorIt != m_Actors_ByName.end() )
-        return Actor_ChangeRelation(actorIt->second, personIt->second, State);
-    return false;
+
+    if (personIt == m_Persons_ByName.end())
+        return Status::PERSON_NOT_FOUND;
+    if (actorIt == m_Actors_ByName.end())
+        return Status::ACTOR_NOT_FOUND;
+
+    Actor_ChangeRelationMaster(actorIt->second, personIt->second, State);
+    return Status::SUCCESS;
 }
 
 #define DISABLE_DEBUG_GETTERS
@@ -573,18 +590,18 @@ MainTableModelRegistry::ReadingStats MainTableModelRegistry::ReadInStream(QTextS
         try {
             auto actorObj = ActorName(pair[0]);
 
-            // Что мы можем извлечь: актер и несколько персонажей
+            // 1. Что мы можем извлечь: актер и несколько персонажей
             if (pair.size()==2)
             {
                 QStringList persons = pair[1].split(",", QString::SkipEmptyParts);
                 AddActor(actorObj);
                 for (const QString& person : persons)
                 {
-                    // Оборачиваем имя персонажа в объект..
                     try {
-                        auto personObj = ActorName(person);
-                        AddPerson(personObj);
-                        Actor_ChangeRelation(actorObj, personObj, true);
+                        if (Status::PERSON_NOT_FOUND == Actor_ChangeRelation(actorObj, ActorName(person), true))
+                        {
+                            Stats.IgnoredPersons += person;
+                        }
                     }
                     catch (const ActorNameStringEmpty&)
                     {
@@ -596,7 +613,7 @@ MainTableModelRegistry::ReadingStats MainTableModelRegistry::ReadInStream(QTextS
                 }
             }
 
-            // Что мы можем извлечь: только актер
+            // 2. Что мы можем извлечь: только актер
             else if (pair.size()==1)
             {
                 // TODO: exception

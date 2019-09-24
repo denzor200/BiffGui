@@ -57,6 +57,13 @@ public:
 
 class MainTableModelRegistry : public IMainTableModelRegistryConst
 {
+public:
+    enum class Status{
+        SUCCESS = 0x00,
+        PERSON_NOT_FOUND,
+        ACTOR_NOT_FOUND
+    };
+private:
     struct Actor;
     struct Person;
 
@@ -105,8 +112,8 @@ public:
     bool Person_ChangeRelation(int personID, const ActorName& actor, bool State);
     bool Actor_ChangeRelation(int actorID, const ActorName& person, bool State);
 
-    bool Person_ChangeRelation(const ActorName& person, const ActorName& actor, bool State);
-    bool Actor_ChangeRelation(const ActorName& actor, const ActorName& person, bool State);
+    Status Person_ChangeRelation(const ActorName& person, const ActorName& actor, bool State);
+    Status Actor_ChangeRelation(const ActorName& actor, const ActorName& person, bool State);
 
     QString PersonGetName(int ID) const override;
     QString ActorGetName(int ID) const override;
@@ -137,8 +144,8 @@ public:
     void WriteToStream( QTextStream& Out, bool DisableDenied) const;
 
 private:
-    bool Person_ChangeRelation(PersonsList::iterator personIt, ActorsList::iterator actorIt, bool State);
-    bool Actor_ChangeRelation(ActorsList::iterator actorIt, PersonsList::iterator personIt, bool State);
+    void Person_ChangeRelationMaster(PersonsList::iterator personIt, ActorsList::iterator actorIt, bool State);
+    void Actor_ChangeRelationMaster(ActorsList::iterator actorIt, PersonsList::iterator personIt, bool State);
 
     void RemoveAllLinksToPerson(PersonsList::iterator personIt);
     void RemoveAllLinksToActor(ActorsList::iterator actorIt);
