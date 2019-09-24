@@ -1025,37 +1025,6 @@ MainTableModelsManager::MainTableModelsManager(QObject *parent) :
     m_ModelReversed->SetOther(m_Model);
 }
 
-bool MainTableModelsManager::OpenPersons(const QString &Path)
-{
-    QFile file(Path);
-    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
-        return false;
-
-    QTextStream in(&file);
-    in.setCodec("UTF-8"); // change the file codec to UTF-8.
-
-    QStringList unrecognised;
-
-    m_Model->beginResetModel();
-    m_ModelReversed->beginResetModel();
-    while (!in.atEnd()) {
-        QString line = in.readLine();
-        try {
-            m_Registry.AddPerson(ActorName(line));
-        }
-        catch (const ActorNameStringEmpty&) {
-        }
-        catch (const ActorNameForbiddenSymbols&)
-        {
-            unrecognised.push_back(line);
-        }
-    }
-    m_Model->endResetModel();
-    m_ModelReversed->endResetModel();
-    HandleUnrecognisedPersons(unrecognised);
-    return true;
-}
-
 void MainTableModelsManager::LoadPersons(const QStringList &Persons)
 {
     QStringList unrecognised;

@@ -344,9 +344,7 @@ public:
     MainTableModel_Reversed*            GetModelReversed()          { return m_ModelReversed; }
     const MainTableModel_Reversed*      GetModelReversed() const    { return m_ModelReversed; }
 
-    bool OpenPersons(const QString& Path);
     bool SavePersons(const QString& Path, bool DisableDenied = false) const;
-
     void LoadPersons(const QStringList& Persons);
 
     bool OpenTable(const QString& Path);
