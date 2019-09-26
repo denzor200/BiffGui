@@ -221,7 +221,11 @@
            </widget>
           </item>
           <item row="0" column="1">
-           <widget class="QSpinBox" name="spinBox_RoundValue"/>
+           <widget class="QSpinBox" name="spinBox_RoundValue">
+            <property name="maximum">
+             <number>600000</number>
+            </property>
+           </widget>
           </item>
           <item row="1" column="0">
            <spacer name="horizontalSpacer_DisableIntervals">
@@ -263,7 +267,11 @@
            </widget>
           </item>
           <item row="2" column="1">
-           <widget class="QSpinBox" name="spinBox_SmallInterval"/>
+           <widget class="QSpinBox" name="spinBox_SmallInterval">
+            <property name="maximum">
+             <number>600000</number>
+            </property>
+           </widget>
           </item>
           <item row="3" column="0">
            <widget class="QLabel" name="label_NormalInterval">
@@ -306,16 +314,32 @@
            </widget>
           </item>
           <item row="3" column="1">
-           <widget class="QSpinBox" name="spinBox_NormalInterval"/>
+           <widget class="QSpinBox" name="spinBox_NormalInterval">
+            <property name="maximum">
+             <number>600000</number>
+            </property>
+           </widget>
           </item>
           <item row="4" column="1">
-           <widget class="QSpinBox" name="spinBox_BigInterval"/>
+           <widget class="QSpinBox" name="spinBox_BigInterval">
+            <property name="maximum">
+             <number>600000</number>
+            </property>
+           </widget>
           </item>
           <item row="5" column="1">
-           <widget class="QSpinBox" name="spinBox_VeryBigInterval"/>
+           <widget class="QSpinBox" name="spinBox_VeryBigInterval">
+            <property name="maximum">
+             <number>600000</number>
+            </property>
+           </widget>
           </item>
           <item row="6" column="1">
-           <widget class="QSpinBox" name="spinBox_VeryVeryBigInterval"/>
+           <widget class="QSpinBox" name="spinBox_VeryVeryBigInterval">
+            <property name="maximum">
+             <number>600000</number>
+            </property>
+           </widget>
           </item>
          </layout>
         </widget>

@@ -7,6 +7,8 @@ namespace Ui {
     class Settings;
 }
 
+class QDomDocument;
+
 class Settings : public QDialog
 {
     Q_OBJECT
@@ -19,6 +21,16 @@ private slots:
 
     void on_checkBox_DisableIntervals_stateChanged(int arg1);
 
+private:
+    void Initialize();
+    int InitializeAssParsing( const QDomDocument & domDoc);
+    int InitializeSrtParsing(const QDomDocument & domDoc);
+    int InitializeTimingParsing(const QDomDocument & domDoc);
+    int InitializeStyleParsing(const QDomDocument & domDoc);
+    int InitializeStyle1Parsing(const QDomDocument & domDoc);
+    int InitializeStyle2Parsing(const QDomDocument & domDoc);
+    int InitializeStyle3Parsing(const QDomDocument & domDoc);
+    int InitializeAdditionalParsing( const QDomDocument & domDoc);
 private:
     Ui::Settings* ui;
 };
