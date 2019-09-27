@@ -85,7 +85,7 @@ void Settings::Initialize()
 {
     QDomDocument domDoc;
     QFile file(SETTINGS_DIR);
-    // TODO: бросить исключение, если файл не найден
+    // TODO: бросить исключение, если файл не найден (не забыть перед этим сделать запрос на повторное создание файла)
     if (file.open(QIODevice::ReadOnly))
     {
         QString errorStr;
@@ -110,7 +110,7 @@ void Settings::Initialize()
 
 
 template <typename T>
-QList<QDomNode> elementsByTagPath(const T& doc, QStringList& names)
+static QList<QDomNode> elementsByTagPath(const T& doc, QStringList& names)
 {
     QList<QDomNode> Returned;
     if (!names.empty())
@@ -138,440 +138,234 @@ QList<QDomNode> elementsByTagPath(const T& doc, QStringList& names)
 }
 
 template <typename T>
-QList<QDomNode> elementsByTagPath(const T& doc, const QString& Path)
+static QList<QDomNode> elementsByTagPath(const T& doc, const QString& Path)
 {
     QStringList names = Path.split(".");
     return elementsByTagPath(doc, names);
 }
 
-int Settings::InitializeAssParsing(const QDomDocument &domDoc)
+struct ParsingStats
 {
-    // TODO: запретить запятые
-    // TODO: предусмотреть случай, если nodes оказался пустой
-    int count = 0;
-    {
+    QStringList Unrecognized;
+    int Count = 0;
+};
 
-        QString text;
-        QList<QDomNode> nodes = elementsByTagPath(domDoc, "Root.AssParsing.NeededColumns.TimeStartColumn");
-        if (!nodes.empty())
-        {
-            for (const QDomNode& node : nodes)
-            {
-                const QString& nodeText = node.toElement().text();
-                if (text.size()!=0&&nodeText.size()!=0)
-                    text += ", ";
-                text += nodeText;
-            }
-            if (text.size()!=0)
-            {
-                ui->lineEdit_ColumnStart->setText(text);
-                count++;
-            }
-        }
-    }
+static void AssParsingInitializeNeededColumns(ParsingStats* stats,const QDomDocument &domDoc, QLineEdit* lineEdit, const QString& Path)
+{
+    QString text;
+    QList<QDomNode> nodes = elementsByTagPath(domDoc, Path);
+    Q_ASSERT(stats);
+    Q_ASSERT(lineEdit);
+    if (!nodes.empty())
     {
-        QString text;
-        QList<QDomNode> nodes = elementsByTagPath(domDoc, "Root.AssParsing.NeededColumns.TimeEndColumn");
-        if (!nodes.empty())
+        for (const QDomNode& node : nodes)
         {
-            for (const QDomNode& node : nodes)
-            {
-                const QString& nodeText = node.toElement().text();
-                if (text.size()!=0&&nodeText.size()!=0)
-                    text += ", ";
-                text += nodeText;
-            }
-            if (text.size()!=0)
-            {
-                ui->lineEdit_ColumnEnd->setText(text);
-                count++;
-            }
-            else {
-                // TODO: handle
-            }
+            const QString& nodeText = node.toElement().text();
+            if (text.size()!=0&&nodeText.size()!=0)
+                text += ", ";
+            text += nodeText;
+        }
+        if (text.size()!=0)
+        {
+            lineEdit->setText(text);
+            stats->Count++;
         }
         else {
-            // TODO: handle
+            stats->Unrecognized.push_back(Path);
         }
     }
-    {
-        QString text;
-        QList<QDomNode> nodes = elementsByTagPath(domDoc, "Root.AssParsing.NeededColumns.NameColumn");
-        if (!nodes.empty())
-        {
-            for (const QDomNode& node : nodes)
-            {
-                const QString& nodeText = node.toElement().text();
-                if (text.size()!=0&&nodeText.size()!=0)
-                    text += ", ";
-                text += nodeText;
-            }
-            if (text.size()!=0)
-            {
-                ui->lineEdit_ColumnName->setText(text);
-                count++;
-            }
-            else {
-                // TODO: handle
-            }
-        }
-        else {
-            // TODO: handle
-        }
+    else {
+        stats->Unrecognized.push_back(Path);
     }
-    {
-        QString text;
-        QList<QDomNode> nodes = elementsByTagPath(domDoc, "Root.AssParsing.NeededColumns.TextColumn");
-        if (!nodes.empty())
-        {
-            for (const QDomNode& node : nodes)
-            {
-                const QString& nodeText = node.toElement().text();
-                if (text.size()!=0&&nodeText.size()!=0)
-                    text += ", ";
-                text += nodeText;
-            }
-            if (text.size()!=0)
-            {
-                ui->lineEdit_ColumnText->setText(text);
-                count++;
-            }
-            else {
-                // TODO: handle
-            }
-        }
-        else {
-            // TODO: handle
-        }
-    }
-    return count;
 }
 
-int Settings::InitializeSrtParsing(const QDomDocument & domDoc)
+static void SrtParsingInitializeTimeDistributing(ParsingStats* stats,const QDomDocument &domDoc, QComboBox* comboBox, const QString& Path)
 {
-    int count = 0;
-    QList<QDomNode> nodes = elementsByTagPath(domDoc, "Root.SrtParsing.ComplexPhrases.TimeDistributing.Strategy");
+    QList<QDomNode> nodes = elementsByTagPath(domDoc, Path);
     if (nodes.size()==1)
     {
         const QString& nodeText = nodes[0].toElement().text();
         if (nodeText == "Uniform")
         {
-            ui->comboBox_Distribution->setCurrentIndex(0);
-            count++;
+            comboBox->setCurrentIndex(0);
+            stats->Count++;
         }
         else if (nodeText == "Fair")
         {
-            ui->comboBox_Distribution->setCurrentIndex(1);
-            count++;
+            comboBox->setCurrentIndex(1);
+            stats->Count++;
         }
         else {
-            // TODO: handle
+            stats->Unrecognized.push_back(Path);
         }
     }
     else {
-        // TODO: handle
+        stats->Unrecognized.push_back(Path);
     }
-    return count;
+}
+
+static void InitializeSpinBox(ParsingStats* stats,const QDomDocument &domDoc, QSpinBox* spinBox, const QString& Path)
+{
+    QList<QDomNode> nodes = elementsByTagPath(domDoc, Path);
+    if (nodes.size() == 1)
+    {
+        const QString& nodeText = nodes[0].toElement().text();
+        int iValue = 0;
+        bool castStatus = false;
+        iValue = nodeText.toInt(&castStatus);
+        if (castStatus)
+        {
+            spinBox->setValue(iValue);
+            stats->Count++;
+        }
+        else {
+            stats->Unrecognized.push_back(Path);
+        }
+    }
+    else {
+        stats->Unrecognized.push_back(Path);
+    }
+}
+
+static void InitializeDoubleSpinBox(ParsingStats* stats,const QDomDocument &domDoc, QDoubleSpinBox* spinBox, const QString& Path)
+{
+    QList<QDomNode> nodes = elementsByTagPath(domDoc, Path);
+    if (nodes.size() == 1)
+    {
+        const QString& nodeText = nodes[0].toElement().text();
+        double dValue = 0;
+        bool castStatus = false;
+        dValue = nodeText.toDouble(&castStatus);
+        if (castStatus)
+        {
+            spinBox->setValue(dValue);
+            stats->Count++;
+        }
+        else {
+            stats->Unrecognized.push_back(Path);
+        }
+    }
+    else {
+        stats->Unrecognized.push_back(Path);
+    }
+}
+
+static void InitializeCheckBox(ParsingStats* stats,const QDomDocument &domDoc, QCheckBox* checkBox, const QString& Path)
+{
+    QList<QDomNode> nodes = elementsByTagPath(domDoc, Path);
+    if (nodes.size() == 1)
+    {
+        const QString& nodeText = nodes[0].toElement().text();
+        if (nodeText=="true")
+        {
+            checkBox->setCheckState(Qt::CheckState::Checked);
+            stats->Count++;
+        }
+        else if (nodeText=="false")
+        {
+            checkBox->setCheckState(Qt::CheckState::Unchecked);
+            stats->Count++;
+        }
+        else {
+            stats->Unrecognized.push_back(Path);
+        }
+    }
+    else {
+        stats->Unrecognized.push_back(Path);
+    }
+}
+
+static void InitializeLineEdit(ParsingStats* stats,const QDomDocument &domDoc, QLineEdit* lineEdit, const QString& Path)
+{
+    QList<QDomNode> nodes = elementsByTagPath(domDoc, Path);
+    if (nodes.size()==1)
+    {
+        const QString& nodeText = nodes[0].toElement().text();
+        if (nodeText.size()!=0)
+        {
+            lineEdit->setText(nodeText);
+            stats->Count++;
+        }
+        else {
+            stats->Unrecognized.push_back(Path);
+        }
+    }
+    else {
+        stats->Unrecognized.push_back(Path);
+    }
+}
+
+
+int Settings::InitializeAssParsing(const QDomDocument &domDoc)
+{
+    // TODO: запретить запятые
+    ParsingStats stats;
+    AssParsingInitializeNeededColumns(&stats, domDoc, ui->lineEdit_ColumnStart, "Root.AssParsing.NeededColumns.TimeStartColumn");
+    AssParsingInitializeNeededColumns(&stats, domDoc, ui->lineEdit_ColumnEnd, "Root.AssParsing.NeededColumns.TimeEndColumn");
+    AssParsingInitializeNeededColumns(&stats, domDoc, ui->lineEdit_ColumnName, "Root.AssParsing.NeededColumns.NameColumn");
+    AssParsingInitializeNeededColumns(&stats, domDoc, ui->lineEdit_ColumnText, "Root.AssParsing.NeededColumns.TextColumn");
+    return stats.Count;
+}
+
+int Settings::InitializeSrtParsing(const QDomDocument & domDoc)
+{
+    ParsingStats stats;
+    SrtParsingInitializeTimeDistributing(&stats, domDoc, ui->comboBox_Distribution, "Root.SrtParsing.ComplexPhrases.TimeDistributing.Strategy");
+    return stats.Count;
 }
 
 int Settings::InitializeTimingParsing(const QDomDocument &domDoc)
 {
-    int count = 0;
-    {
-        QList<QDomNode> nodes = elementsByTagPath(domDoc, "Root.Timing.MilisecondRoundValue");
-        if (nodes.size() == 1)
-        {
-            const QString& nodeText = nodes[0].toElement().text();
-            // TODO: handle invalid int conversing
-            ui->spinBox_RoundValue->setValue(nodeText.toInt());
-            count++;
-        }
-        else {
-            // TODO: handle
-        }
-    }
-    {
-        QList<QDomNode> nodes = elementsByTagPath(domDoc, "Root.Timing.DisableIntervals");
-        if (nodes.size() == 1)
-        {
-            const QString& nodeText = nodes[0].toElement().text();
-            if (nodeText=="true")
-            {
-                ui->checkBox_DisableIntervals->setCheckState(Qt::CheckState::Checked);
-                count++;
-            }
-            else if (nodeText=="false")
-            {
-                ui->checkBox_DisableIntervals->setCheckState(Qt::CheckState::Unchecked);
-                count++;
-            }
-            else {
-                // TODO: handle
-            }
-        }
-        else {
-            // TODO: handle
-        }
-    }
-    {
-        QList<QDomNode> nodes = elementsByTagPath(domDoc, "Root.Timing.IntervalsDistributing.VerySmall");
-        if (nodes.size() == 1)
-        {
-            const QString& nodeText = nodes[0].toElement().text();
-            // TODO: handle invalid int conversing
-            ui->spinBox_SmallInterval->setValue(nodeText.toInt());
-            count++;
-        }
-        else {
-            // TODO: handle
-        }
-    }
-    {
-        QList<QDomNode> nodes = elementsByTagPath(domDoc, "Root.Timing.IntervalsDistributing.Normal");
-        if (nodes.size() == 1)
-        {
-            const QString& nodeText = nodes[0].toElement().text();
-            // TODO: handle invalid int conversing
-            ui->spinBox_NormalInterval->setValue(nodeText.toInt());
-            count++;
-        }
-        else {
-            // TODO: handle
-        }
-    }
-    {
-        QList<QDomNode> nodes = elementsByTagPath(domDoc, "Root.Timing.IntervalsDistributing.Big");
-        if (nodes.size() == 1)
-        {
-            const QString& nodeText = nodes[0].toElement().text();
-            // TODO: handle invalid int conversing
-            ui->spinBox_BigInterval->setValue(nodeText.toInt());
-            count++;
-        }
-        else {
-            // TODO: handle
-        }
-    }
-    {
-        QList<QDomNode> nodes = elementsByTagPath(domDoc, "Root.Timing.IntervalsDistributing.VeryBig");
-        if (nodes.size() == 1)
-        {
-            const QString& nodeText = nodes[0].toElement().text();
-            // TODO: handle invalid int conversing
-            ui->spinBox_VeryBigInterval->setValue(nodeText.toInt());
-            count++;
-        }
-        else {
-            // TODO: handle
-        }
-    }
-    {
-        QList<QDomNode> nodes = elementsByTagPath(domDoc, "Root.Timing.IntervalsDistributing.VeryVeryBig");
-        if (nodes.size() == 1)
-        {
-            const QString& nodeText = nodes[0].toElement().text();
-            // TODO: handle invalid int conversing
-            ui->spinBox_VeryVeryBigInterval->setValue(nodeText.toInt());
-            count++;
-        }
-        else {
-            // TODO: handle
-        }
-    }
-    return count;
+    ParsingStats stats;
+    InitializeSpinBox(&stats, domDoc, ui->spinBox_RoundValue, "Root.Timing.MilisecondRoundValue");
+    InitializeCheckBox(&stats, domDoc, ui->checkBox_DisableIntervals, "Root.Timing.DisableIntervals");
+    InitializeSpinBox(&stats, domDoc, ui->spinBox_SmallInterval, "Root.Timing.IntervalsDistributing.VerySmall");
+    InitializeSpinBox(&stats, domDoc, ui->spinBox_NormalInterval, "Root.Timing.IntervalsDistributing.Normal");
+    InitializeSpinBox(&stats, domDoc, ui->spinBox_BigInterval, "Root.Timing.IntervalsDistributing.Big");
+    InitializeSpinBox(&stats, domDoc, ui->spinBox_VeryBigInterval, "Root.Timing.IntervalsDistributing.VeryBig");
+    InitializeSpinBox(&stats, domDoc, ui->spinBox_VeryVeryBigInterval, "Root.Timing.IntervalsDistributing.VeryVeryBig");
+    return stats.Count;
 }
 
 int Settings::InitializeStyleParsing(const QDomDocument & domDoc)
 {
-    int count = 0;
-    {
-        QList<QDomNode> nodes = elementsByTagPath(domDoc, "Root.DocumentStyle.DisableTags");
-        if (nodes.size() == 1)
-        {
-            const QString& nodeText = nodes[0].toElement().text();
-            if (nodeText=="true")
-            {
-                ui->checkBox_DisableTags->setCheckState(Qt::CheckState::Checked);
-                count++;
-            }
-            else if (nodeText=="false")
-            {
-                ui->checkBox_DisableTags->setCheckState(Qt::CheckState::Unchecked);
-                count++;
-            }
-            else {
-                // TODO: handle
-            }
-        }
-        else {
-            // TODO: handle
-        }
-    }
-    {
-        QList<QDomNode> nodes = elementsByTagPath(domDoc, "Root.DocumentStyle.DisableLinesCounter");
-        if (nodes.size() == 1)
-        {
-            const QString& nodeText = nodes[0].toElement().text();
-            if (nodeText=="true")
-            {
-                ui->checkBox_DisableCounter->setCheckState(Qt::CheckState::Checked);
-                count++;
-            }
-            else if (nodeText=="false")
-            {
-                ui->checkBox_DisableCounter->setCheckState(Qt::CheckState::Unchecked);
-                count++;
-            }
-            else {
-                // TODO: handle
-            }
-        }
-        else {
-            // TODO: handle
-        }
-    }
-    count += InitializeStyle1Parsing(domDoc);
-    count += InitializeStyle2Parsing(domDoc);
-    count += InitializeStyle3Parsing(domDoc);
-    return count;
+    ParsingStats stats;
+    InitializeCheckBox(&stats, domDoc, ui->checkBox_DisableTags, "Root.DocumentStyle.DisableTags");
+    InitializeCheckBox(&stats, domDoc, ui->checkBox_DisableCounter, "Root.DocumentStyle.DisableLinesCounter");
+
+    stats.Count += InitializeStyle1Parsing(domDoc);
+    stats.Count += InitializeStyle2Parsing(domDoc);
+    stats.Count += InitializeStyle3Parsing(domDoc);
+    return stats.Count;
 }
 
 int Settings::InitializeStyle1Parsing(const QDomDocument &domDoc)
 {
-    int count = 0;
-    {
-        QList<QDomNode> nodes = elementsByTagPath(domDoc, "Root.DocumentStyle.MainFont.Name");
-        if (nodes.size()==1)
-        {
-            const QString& nodeText = nodes[0].toElement().text();
-            if (nodeText.size()!=0)
-            {
-                ui->lineEdit_Font->setText(nodeText);
-                count++;
-            }
-            else {
-                // TODO: handle
-            }
-        }
-        else {
-            // TODO: handle
-        }
-    }
-    {
-        QList<QDomNode> nodes = elementsByTagPath(domDoc, "Root.DocumentStyle.MainFont.Size");
-        if (nodes.size()==1)
-        {
-            const QString& nodeText = nodes[0].toElement().text();
-            // TODO: handle invalid double conversion
-            ui->doubleSpinBox_Size->setValue(nodeText.toDouble());
-            count++;
-        }
-        else {
-            // TODO: handle
-        }
-    }
-    return count;
+    ParsingStats stats;
+    InitializeLineEdit(&stats, domDoc, ui->lineEdit_Font, "Root.DocumentStyle.MainFont.Name");
+    InitializeDoubleSpinBox(&stats, domDoc, ui->doubleSpinBox_Size, "Root.DocumentStyle.MainFont.Size");
+    return stats.Count;
 }
 
 int Settings::InitializeStyle2Parsing(const QDomDocument &domDoc)
 {
-    int count = 0;
-    {
-        QList<QDomNode> nodes = elementsByTagPath(domDoc, "Root.DocumentStyle.PageNumberFont.Name");
-        if (nodes.size()==1)
-        {
-            const QString& nodeText = nodes[0].toElement().text();
-            if (nodeText.size()!=0)
-            {
-                ui->lineEdit_Font_2->setText(nodeText);
-                count++;
-            }
-            else {
-                // TODO: handle
-            }
-        }
-        else {
-            // TODO: handle
-        }
-    }
-    {
-        QList<QDomNode> nodes = elementsByTagPath(domDoc, "Root.DocumentStyle.PageNumberFont.Size");
-        if (nodes.size()==1)
-        {
-            const QString& nodeText = nodes[0].toElement().text();
-            // TODO: handle invalid double conversion
-            ui->doubleSpinBox_Size_2->setValue(nodeText.toDouble());
-            count++;
-        }
-        else {
-            // TODO: handle
-        }
-    }
-    return count;
+    ParsingStats stats;
+    InitializeLineEdit(&stats, domDoc, ui->lineEdit_Font_2, "Root.DocumentStyle.PageNumberFont.Name");
+    InitializeDoubleSpinBox(&stats, domDoc, ui->doubleSpinBox_Size_2, "Root.DocumentStyle.PageNumberFont.Size");
+    return stats.Count;
 }
 
 int Settings::InitializeStyle3Parsing(const QDomDocument &domDoc)
 {
-    int count = 0;
-    {
-        QList<QDomNode> nodes = elementsByTagPath(domDoc, "Root.DocumentStyle.IndividualSelectedFont.Name");
-        if (nodes.size()==1)
-        {
-            const QString& nodeText = nodes[0].toElement().text();
-            if (nodeText.size()!=0)
-            {
-                ui->lineEdit_Font_3->setText(nodeText);
-                count++;
-            }
-            else {
-                // TODO: handle
-            }
-        }
-        else {
-            // TODO: handle
-        }
-    }
-    {
-        QList<QDomNode> nodes = elementsByTagPath(domDoc, "Root.DocumentStyle.IndividualSelectedFont.Size");
-        if (nodes.size()==1)
-        {
-            const QString& nodeText = nodes[0].toElement().text();
-            // TODO: handle invalid double conversion
-            ui->doubleSpinBox_Size_3->setValue(nodeText.toDouble());
-            count++;
-        }
-        else {
-            // TODO: handle
-        }
-    }
-    return count;
+    ParsingStats stats;
+    InitializeLineEdit(&stats, domDoc, ui->lineEdit_Font_3, "Root.DocumentStyle.IndividualSelectedFont.Name");
+    InitializeDoubleSpinBox(&stats, domDoc, ui->doubleSpinBox_Size_3, "Root.DocumentStyle.IndividualSelectedFont.Size");
+    return stats.Count;
 }
 
 int Settings::InitializeAdditionalParsing(const QDomDocument &domDoc)
 {
-    int count = 0;
-    {
-        QList<QDomNode> nodes = elementsByTagPath(domDoc, "Root.Additional.EnableSoundTheme");
-        if (nodes.size()==1)
-        {
-            const QString& nodeText = nodes[0].toElement().text();
-            if (nodeText=="true")
-            {
-                ui->checkBox_ExtSound->setCheckState(Qt::CheckState::Checked);
-                count++;
-            }
-            else if (nodeText=="false")
-            {
-                ui->checkBox_ExtSound->setCheckState(Qt::CheckState::Unchecked);
-                count++;
-            }
-            else {
-                // TODO: handle
-            }
-        }
-        else {
-            // TODO: handle
-        }
-    }
-    return count;
+    ParsingStats stats;
+    InitializeCheckBox(&stats, domDoc, ui->checkBox_ExtSound, "Root.Additional.EnableSoundTheme");
+    return stats.Count;
 }
