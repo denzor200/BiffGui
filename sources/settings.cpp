@@ -2,9 +2,72 @@
 #include "ui_settings.h"
 #include <QtXml>
 #include <QDebug>
+#include <QMessageBox>
+#include <sstream>
 
 // TODO: make normal path
 #define SETTINGS_DIR "D:/repos/subtitles/Debug/settings.xml"
+
+static QString PrintConfigPath(const QString& Path)
+{
+    // AssParsing
+    if (Path == "Root.AssParsing.NeededColumns.TimeStartColumn")
+        return "ASS:Колонка Start";
+    else if (Path == "Root.AssParsing.NeededColumns.TimeEndColumn")
+        return "ASS:Колонка End";
+    else if (Path == "Root.AssParsing.NeededColumns.NameColumn")
+        return "ASS:Колонка Name";
+    else if (Path == "Root.AssParsing.NeededColumns.TextColumn")
+        return "ASS:Колонка Text";
+
+
+    // SrtParsing
+    else if (Path == "Root.SrtParsing.ComplexPhrases.TimeDistributing.Strategy")
+        return "SRT:Метод распределения времени в комплексных фразах";
+
+
+    // Timing
+    else if (Path == "Root.Timing.MilisecondRoundValue")
+        return "Тайминг:Верхний порог округления";
+    else if (Path == "Root.Timing.DisableIntervals")
+        return "Тайминг:Отключить интервалы";
+    else if (Path == "Root.Timing.IntervalsDistributing.VerySmall")
+        return "Тайминг:Маленький интервал";
+    else if (Path == "Root.Timing.IntervalsDistributing.Normal")
+        return "Тайминг:Обычный интервал";
+    else if (Path == "Root.Timing.IntervalsDistributing.Big")
+        return "Тайминг:Большой интервал";
+    else if (Path == "Root.Timing.IntervalsDistributing.VeryBig")
+        return "Тайминг:Очень большой интервал";
+    else if (Path == "Root.Timing.IntervalsDistributing.VeryVeryBig")
+        return "Тайминг:Слишком большой интервал";
+
+
+    // DocumentStyle
+    else if (Path == "Root.DocumentStyle.DisableTags")
+        return "Стиль документа:Отключить тэги";
+    else if (Path == "Root.DocumentStyle.DisableLinesCounter")
+        return "Стиль документа:Отключить подсчет строк";
+    else if (Path == "Root.DocumentStyle.MainFont.Name")
+        return "Стиль документа:Главное:Шрифт";
+    else if (Path == "Root.DocumentStyle.MainFont.Size")
+        return "Стиль документа:Главное:Размер";
+    else if (Path == "Root.DocumentStyle.PageNumberFont.Name")
+        return "Стиль документа:Нумерация:Шрифт";
+    else if (Path == "Root.DocumentStyle.PageNumberFont.Size")
+        return "Стиль документа:Нумерация:Размер";
+    else if (Path == "Root.DocumentStyle.IndividualSelectedFont.Name")
+        return "Стиль документа:Выделенные:Шрифт";
+    else if (Path =="Root.DocumentStyle.IndividualSelectedFont.Size")
+        return "Стиль документа:Выделенные:Размер";
+
+    // Additional
+    else if (Path == "Root.Additional.EnableSoundTheme")
+        return "Дополнительно:Включить расширенную звуковую тему";
+
+
+    return Path;
+}
 
 Settings::Settings(QWidget *parent) :
     QDialog(parent),
@@ -81,6 +144,12 @@ void Settings::on_checkBox_DisableIntervals_stateChanged(int arg1)
     }
 }
 
+struct ParsingStats
+{
+    QStringList Unrecognized;
+    unsigned Count = 0;
+};
+
 void Settings::Initialize()
 {
     QDomDocument domDoc;
@@ -94,17 +163,39 @@ void Settings::Initialize()
         if (domDoc.setContent(&file, true, &errorStr, &errorLine,
                               &errorColumn))
         {
-            int count = 0;
-            count += InitializeAssParsing(domDoc);
-            count += InitializeSrtParsing(domDoc);
-            count += InitializeTimingParsing(domDoc);
-            count += InitializeStyleParsing(domDoc);
-            count += InitializeAdditionalParsing(domDoc);
+            ParsingStats stats;
+            InitializeAssParsing(&stats,domDoc);
+            InitializeSrtParsing(&stats,domDoc);
+            InitializeTimingParsing(&stats,domDoc);
+            InitializeStyleParsing(&stats,domDoc);
+            InitializeAdditionalParsing(&stats,domDoc);
+            if (stats.Count != 0)
+            {
+                if (!stats.Unrecognized.empty())
+                {
+                    std::stringstream ss;
+                    ss << "В ходе открытия файла конфига(settings.xml) произошли некоторые ошибки, возможно этот конфликт был спровоцирован ручным вмешательством в этот файл со стороны пользователя." << std::endl;
+                    ss << "Следующие значения не были распознаны и оставлены в нулевом состоянии:" << std::endl;
+                    for (const QString& Value : stats.Unrecognized)
+                    {
+                        ss << "\t\t" << PrintConfigPath(Value).toUtf8().data() << std::endl;
+                    }
+                    ss << "Вам следует самим проставить эти значения, или вернуть опции к состоянию по умолчанию" << std::endl;
+                    QMessageBox::warning(QApplication::activeWindow(), "Обратите внимание..", ss.str().c_str());
+                }
+            }
+            else {
+                // TODO: handle
+            }
         }
         else {
             qWarning("Line %d, column %d: %s", errorLine, errorColumn,
                          errorStr.toUtf8().data());
+            // TODO: handle
         }
+    }
+    else {
+        // TODO: handle
     }
 }
 
@@ -143,12 +234,6 @@ static QList<QDomNode> elementsByTagPath(const T& doc, const QString& Path)
     QStringList names = Path.split(".");
     return elementsByTagPath(doc, names);
 }
-
-struct ParsingStats
-{
-    QStringList Unrecognized;
-    int Count = 0;
-};
 
 static void AssParsingInitializeNeededColumns(ParsingStats* stats,const QDomDocument &domDoc, QLineEdit* lineEdit, const QString& Path)
 {
@@ -296,76 +381,75 @@ static void InitializeLineEdit(ParsingStats* stats,const QDomDocument &domDoc, Q
 }
 
 
-int Settings::InitializeAssParsing(const QDomDocument &domDoc)
+void Settings::InitializeAssParsing(void* rawStats, const QDomDocument &domDoc)
 {
-    // TODO: запретить запятые
-    ParsingStats stats;
-    AssParsingInitializeNeededColumns(&stats, domDoc, ui->lineEdit_ColumnStart, "Root.AssParsing.NeededColumns.TimeStartColumn");
-    AssParsingInitializeNeededColumns(&stats, domDoc, ui->lineEdit_ColumnEnd, "Root.AssParsing.NeededColumns.TimeEndColumn");
-    AssParsingInitializeNeededColumns(&stats, domDoc, ui->lineEdit_ColumnName, "Root.AssParsing.NeededColumns.NameColumn");
-    AssParsingInitializeNeededColumns(&stats, domDoc, ui->lineEdit_ColumnText, "Root.AssParsing.NeededColumns.TextColumn");
-    return stats.Count;
+    auto stats = reinterpret_cast<ParsingStats*>(rawStats);
+    Q_ASSERT(stats);
+    AssParsingInitializeNeededColumns(stats, domDoc, ui->lineEdit_ColumnStart, "Root.AssParsing.NeededColumns.TimeStartColumn");
+    AssParsingInitializeNeededColumns(stats, domDoc, ui->lineEdit_ColumnEnd, "Root.AssParsing.NeededColumns.TimeEndColumn");
+    AssParsingInitializeNeededColumns(stats, domDoc, ui->lineEdit_ColumnName, "Root.AssParsing.NeededColumns.NameColumn");
+    AssParsingInitializeNeededColumns(stats, domDoc, ui->lineEdit_ColumnText, "Root.AssParsing.NeededColumns.TextColumn");
 }
 
-int Settings::InitializeSrtParsing(const QDomDocument & domDoc)
+void Settings::InitializeSrtParsing(void* rawStats, const QDomDocument & domDoc)
 {
-    ParsingStats stats;
-    SrtParsingInitializeTimeDistributing(&stats, domDoc, ui->comboBox_Distribution, "Root.SrtParsing.ComplexPhrases.TimeDistributing.Strategy");
-    return stats.Count;
+    auto stats = reinterpret_cast<ParsingStats*>(rawStats);
+    Q_ASSERT(stats);
+    SrtParsingInitializeTimeDistributing(stats, domDoc, ui->comboBox_Distribution, "Root.SrtParsing.ComplexPhrases.TimeDistributing.Strategy");
 }
 
-int Settings::InitializeTimingParsing(const QDomDocument &domDoc)
+void Settings::InitializeTimingParsing(void* rawStats, const QDomDocument &domDoc)
 {
-    ParsingStats stats;
-    InitializeSpinBox(&stats, domDoc, ui->spinBox_RoundValue, "Root.Timing.MilisecondRoundValue");
-    InitializeCheckBox(&stats, domDoc, ui->checkBox_DisableIntervals, "Root.Timing.DisableIntervals");
-    InitializeSpinBox(&stats, domDoc, ui->spinBox_SmallInterval, "Root.Timing.IntervalsDistributing.VerySmall");
-    InitializeSpinBox(&stats, domDoc, ui->spinBox_NormalInterval, "Root.Timing.IntervalsDistributing.Normal");
-    InitializeSpinBox(&stats, domDoc, ui->spinBox_BigInterval, "Root.Timing.IntervalsDistributing.Big");
-    InitializeSpinBox(&stats, domDoc, ui->spinBox_VeryBigInterval, "Root.Timing.IntervalsDistributing.VeryBig");
-    InitializeSpinBox(&stats, domDoc, ui->spinBox_VeryVeryBigInterval, "Root.Timing.IntervalsDistributing.VeryVeryBig");
-    return stats.Count;
+    auto stats = reinterpret_cast<ParsingStats*>(rawStats);
+    Q_ASSERT(stats);
+    InitializeSpinBox(stats, domDoc, ui->spinBox_RoundValue, "Root.Timing.MilisecondRoundValue");
+    InitializeCheckBox(stats, domDoc, ui->checkBox_DisableIntervals, "Root.Timing.DisableIntervals");
+    InitializeSpinBox(stats, domDoc, ui->spinBox_SmallInterval, "Root.Timing.IntervalsDistributing.VerySmall");
+    InitializeSpinBox(stats, domDoc, ui->spinBox_NormalInterval, "Root.Timing.IntervalsDistributing.Normal");
+    InitializeSpinBox(stats, domDoc, ui->spinBox_BigInterval, "Root.Timing.IntervalsDistributing.Big");
+    InitializeSpinBox(stats, domDoc, ui->spinBox_VeryBigInterval, "Root.Timing.IntervalsDistributing.VeryBig");
+    InitializeSpinBox(stats, domDoc, ui->spinBox_VeryVeryBigInterval, "Root.Timing.IntervalsDistributing.VeryVeryBig");
 }
 
-int Settings::InitializeStyleParsing(const QDomDocument & domDoc)
+void Settings::InitializeStyleParsing(void* rawStats, const QDomDocument & domDoc)
 {
-    ParsingStats stats;
-    InitializeCheckBox(&stats, domDoc, ui->checkBox_DisableTags, "Root.DocumentStyle.DisableTags");
-    InitializeCheckBox(&stats, domDoc, ui->checkBox_DisableCounter, "Root.DocumentStyle.DisableLinesCounter");
+    auto stats = reinterpret_cast<ParsingStats*>(rawStats);
+    Q_ASSERT(stats);
+    InitializeCheckBox(stats, domDoc, ui->checkBox_DisableTags, "Root.DocumentStyle.DisableTags");
+    InitializeCheckBox(stats, domDoc, ui->checkBox_DisableCounter, "Root.DocumentStyle.DisableLinesCounter");
 
-    stats.Count += InitializeStyle1Parsing(domDoc);
-    stats.Count += InitializeStyle2Parsing(domDoc);
-    stats.Count += InitializeStyle3Parsing(domDoc);
-    return stats.Count;
+     InitializeStyle1Parsing(stats, domDoc);
+     InitializeStyle2Parsing(stats, domDoc);
+     InitializeStyle3Parsing(stats, domDoc);
 }
 
-int Settings::InitializeStyle1Parsing(const QDomDocument &domDoc)
+void Settings::InitializeStyle1Parsing(void* rawStats, const QDomDocument &domDoc)
 {
-    ParsingStats stats;
-    InitializeLineEdit(&stats, domDoc, ui->lineEdit_Font, "Root.DocumentStyle.MainFont.Name");
-    InitializeDoubleSpinBox(&stats, domDoc, ui->doubleSpinBox_Size, "Root.DocumentStyle.MainFont.Size");
-    return stats.Count;
+    auto stats = reinterpret_cast<ParsingStats*>(rawStats);
+    Q_ASSERT(stats);
+    InitializeLineEdit(stats, domDoc, ui->lineEdit_Font, "Root.DocumentStyle.MainFont.Name");
+    InitializeDoubleSpinBox(stats, domDoc, ui->doubleSpinBox_Size, "Root.DocumentStyle.MainFont.Size");
 }
 
-int Settings::InitializeStyle2Parsing(const QDomDocument &domDoc)
+void Settings::InitializeStyle2Parsing(void* rawStats, const QDomDocument &domDoc)
 {
-    ParsingStats stats;
-    InitializeLineEdit(&stats, domDoc, ui->lineEdit_Font_2, "Root.DocumentStyle.PageNumberFont.Name");
-    InitializeDoubleSpinBox(&stats, domDoc, ui->doubleSpinBox_Size_2, "Root.DocumentStyle.PageNumberFont.Size");
-    return stats.Count;
+    auto stats = reinterpret_cast<ParsingStats*>(rawStats);
+    Q_ASSERT(stats);
+    InitializeLineEdit(stats, domDoc, ui->lineEdit_Font_2, "Root.DocumentStyle.PageNumberFont.Name");
+    InitializeDoubleSpinBox(stats, domDoc, ui->doubleSpinBox_Size_2, "Root.DocumentStyle.PageNumberFont.Size");
 }
 
-int Settings::InitializeStyle3Parsing(const QDomDocument &domDoc)
+void Settings::InitializeStyle3Parsing(void* rawStats, const QDomDocument &domDoc)
 {
-    ParsingStats stats;
-    InitializeLineEdit(&stats, domDoc, ui->lineEdit_Font_3, "Root.DocumentStyle.IndividualSelectedFont.Name");
-    InitializeDoubleSpinBox(&stats, domDoc, ui->doubleSpinBox_Size_3, "Root.DocumentStyle.IndividualSelectedFont.Size");
-    return stats.Count;
+    auto stats = reinterpret_cast<ParsingStats*>(rawStats);
+    Q_ASSERT(stats);
+    InitializeLineEdit(stats, domDoc, ui->lineEdit_Font_3, "Root.DocumentStyle.IndividualSelectedFont.Name");
+    InitializeDoubleSpinBox(stats, domDoc, ui->doubleSpinBox_Size_3, "Root.DocumentStyle.IndividualSelectedFont.Size");
 }
 
-int Settings::InitializeAdditionalParsing(const QDomDocument &domDoc)
+void Settings::InitializeAdditionalParsing(void* rawStats, const QDomDocument &domDoc)
 {
-    ParsingStats stats;
-    InitializeCheckBox(&stats, domDoc, ui->checkBox_ExtSound, "Root.Additional.EnableSoundTheme");
-    return stats.Count;
+    auto stats = reinterpret_cast<ParsingStats*>(rawStats);
+    Q_ASSERT(stats);
+    InitializeCheckBox(stats, domDoc, ui->checkBox_ExtSound, "Root.Additional.EnableSoundTheme");
 }

@@ -23,14 +23,14 @@ private slots:
 
 private:
     void Initialize();
-    int InitializeAssParsing( const QDomDocument & domDoc);
-    int InitializeSrtParsing(const QDomDocument & domDoc);
-    int InitializeTimingParsing(const QDomDocument & domDoc);
-    int InitializeStyleParsing(const QDomDocument & domDoc);
-    int InitializeStyle1Parsing(const QDomDocument & domDoc);
-    int InitializeStyle2Parsing(const QDomDocument & domDoc);
-    int InitializeStyle3Parsing(const QDomDocument & domDoc);
-    int InitializeAdditionalParsing( const QDomDocument & domDoc);
+    void InitializeAssParsing(void* stats, const QDomDocument & domDoc);
+    void InitializeSrtParsing(void* stats,const QDomDocument & domDoc);
+    void InitializeTimingParsing(void* stats,const QDomDocument & domDoc);
+    void InitializeStyleParsing(void* stats,const QDomDocument & domDoc);
+    void InitializeStyle1Parsing(void* stats,const QDomDocument & domDoc);
+    void InitializeStyle2Parsing(void* stats,const QDomDocument & domDoc);
+    void InitializeStyle3Parsing(void* stats,const QDomDocument & domDoc);
+    void InitializeAdditionalParsing( void* stats,const QDomDocument & domDoc);
 private:
     Ui::Settings* ui;
 };
