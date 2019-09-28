@@ -14,7 +14,7 @@ class ConverterWaiting : public QDialog
     Q_OBJECT
 
 public:
-    explicit ConverterWaiting(QWidget *parent = nullptr);
+    explicit ConverterWaiting(bool DisableCancel,QWidget *parent = nullptr);
     ~ConverterWaiting();
 
     bool IsCanceledByUser() const {return m_CanceledByUser;}

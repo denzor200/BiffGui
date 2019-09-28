@@ -63,9 +63,14 @@ MainWindow::~MainWindow()
 
 void MainWindow::makeDoc()
 {
-    const int actorsCount = m_ModelsMgr->constRegistryAPI()->getActorsCount();
-    const int personsCount = m_ModelsMgr->constRegistryAPI()->getPersonsCount();
+    const int actorsCount = m_ModelsMgr->constRegistryAPI()->getRealActorsCount();
+    const int personsCount = m_ModelsMgr->constRegistryAPI()->getRealPersonsCount();
 
+    if (!m_OpenedSubbtitle)
+    {
+        QMessageBox::critical(this, "Ошибка", "Не открыт файл с субтитрами");
+        return;
+    }
     if (actorsCount <= 0 && personsCount <= 0)
     {
         QMessageBox::critical(this, "Ошибка", "Таблица пуста");
@@ -84,8 +89,7 @@ void MainWindow::makeDoc()
 
     QString InFile, OutDir;
 
-    // TODO: Сделать нормальную выборку InFile
-    InFile = "D:\\repos\\subtitles\\Debug\\Subtitry4.ass";
+    InFile = m_OpenedSubbtitle->FileName;
     QSettings Settings;
     OutDir = QFileDialog::getExistingDirectory(this, "Создать монтажные листы", Settings.value(DirectoriesRegistry::DOC_OUTDIR).toString());
 
@@ -231,8 +235,8 @@ void MainWindow::on_action_close_triggered()
     bool doIt = false;
     if (
             m_OpenedSubbtitle != nullptr ||
-            m_ModelsMgr->constRegistryAPI()->getActorsCount() > 0 ||
-            m_ModelsMgr->constRegistryAPI()->getPersonsCount() > 0)
+            m_ModelsMgr->constRegistryAPI()->getRealActorsCount() > 0 ||
+            m_ModelsMgr->constRegistryAPI()->getRealPersonsCount() > 0)
     {
         auto reply = QMessageBox::question(this, "Подтверждение действия", "Вы действительно хотите закрыть текущую сессию? Все несохраненные данные будут утеряны.",
                                         QMessageBox::Yes|QMessageBox::No);
@@ -261,12 +265,13 @@ void MainWindow::on_action_exit_triggered()
 void MainWindow::on_action_settings_triggered()
 {
     Settings w(this);
-    w.exec();
+    if (w.Initialize())
+        w.exec();
 }
 
 void MainWindow::on_action_save_persons_triggered()
 {
-    const int personsCount = m_ModelsMgr->constRegistryAPI()->getPersonsCount();
+    const int personsCount = m_ModelsMgr->constRegistryAPI()->getRealPersonsCount();
     if (personsCount > 0)
     {
         QSettings Settings;
@@ -317,8 +322,8 @@ void MainWindow::on_action_open_table_triggered()
 void MainWindow::on_action_save_table_triggered()
 {
     // Игнорируем, если сохранять нечего
-    const int actorsCount = m_ModelsMgr->constRegistryAPI()->getActorsCount();
-    const int personsCount = m_ModelsMgr->constRegistryAPI()->getPersonsCount();
+    const int actorsCount = m_ModelsMgr->constRegistryAPI()->getRealActorsCount();
+    const int personsCount = m_ModelsMgr->constRegistryAPI()->getRealPersonsCount();
     if (actorsCount > 0 || personsCount > 0)
     {
         if (actorsCount > 0)

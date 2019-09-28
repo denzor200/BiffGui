@@ -393,8 +393,6 @@ Status MainTableModelRegistry::Actor_ChangeRelation(const ActorName &actor, cons
 #define GETTER_DEBUG QT_NO_QDEBUG_MACRO
 #endif // DISABLE_DEBUG_GETTERS
 
-// TODO: геттеры слишком жирные
-// нужна общая функция, которая выполняла бы сама все нужные проверки
 QString MainTableModelRegistry::PersonGetName(int ID) const
 {
     GETTER_DEBUG() << "[MainTableModelRegistry::PersonGetName]: " << ID;

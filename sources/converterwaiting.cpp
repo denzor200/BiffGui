@@ -12,7 +12,7 @@
 #include <QDebug>
 #include <QFileInfo>
 
-ConverterWaiting::ConverterWaiting(QWidget *parent) :
+ConverterWaiting::ConverterWaiting(bool DisableCancel,QWidget *parent) :
     QDialog(parent),
     ui(new Ui::ConverterWaiting)
 {
@@ -25,17 +25,25 @@ ConverterWaiting::ConverterWaiting(QWidget *parent) :
     movie->start();
     lbl->show();
 
-    QPushButton *b = new QPushButton(this);
-    b->setText("Отмена");
-    b->setGeometry(0, lbl->height(), b->width(),b->height());
-    this->setFixedSize(lbl->width(), lbl->height()+b->height());
+    QPushButton* b = NULL;
+    if (!DisableCancel)
+    {
+        b = new QPushButton(this);
+        b->setText("Отмена");
+        b->setGeometry(0, lbl->height(), b->width(),b->height());
+        this->setFixedSize(lbl->width(), lbl->height()+b->height());
+    }
+    else {
+        this->setFixedSize(lbl->width(), lbl->height());
+    }
     /*this->move(
         (QApplication::activeWindow()->width() - width()) / 2 + QApplication::activeWindow()->x(),
         (QApplication::activeWindow()->height() - height()) / 2 + QApplication::activeWindow()->y());*/
     this->setWindowTitle(" ");
     setWindowFlags(Qt::Dialog | Qt::Desktop );
 
-    connect(b, SIGNAL(clicked(bool)), SLOT(ButtonClicked(bool)) );
+    if (!DisableCancel)
+        connect(b, SIGNAL(clicked(bool)), SLOT(ButtonClicked(bool)) );
 
     m_Process = new QProcess(this);
 
@@ -62,7 +70,7 @@ void ConverterWaiting::slotFinished(int, QProcess::ExitStatus)
 }
 
 ConverterWaiting_ShowPersonList::ConverterWaiting_ShowPersonList(QStringList& Persons,QWidget *parent) :
-    ConverterWaiting(parent),
+    ConverterWaiting(false,parent),
     m_Persons(Persons)
 {
     connect(getProcess(),
@@ -104,7 +112,7 @@ void ConverterWaiting_ShowPersonList::slotFinished(int Status, QProcess::ExitSta
 
 
 ConverterWaiting_SaveSubbtitle::ConverterWaiting_SaveSubbtitle(QWidget *parent) :
-    ConverterWaiting(parent)
+    ConverterWaiting(false,parent)
 {
     connect(getProcess(),
                     SIGNAL(finished(int, QProcess::ExitStatus)),
@@ -146,7 +154,7 @@ void ConverterWaiting_SaveSubbtitle::slotFinished(int Status, QProcess::ExitStat
 
 
 ConverterWaiting_SaveMySubbtitle::ConverterWaiting_SaveMySubbtitle(QWidget *parent) :
-    ConverterWaiting(parent)
+    ConverterWaiting(false,parent)
 {
     connect(getProcess(),
                     SIGNAL(finished(int, QProcess::ExitStatus)),
@@ -196,7 +204,7 @@ void ConverterWaiting_SaveMySubbtitle::slotFinished(int Status, QProcess::ExitSt
 
 
 ConverterWaiting_ResetSetting::ConverterWaiting_ResetSetting(QWidget *parent):
-    ConverterWaiting(parent)
+    ConverterWaiting(true,parent)
 {
     connect(getProcess(),
                     SIGNAL(finished(int, QProcess::ExitStatus)),

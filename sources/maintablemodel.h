@@ -53,6 +53,9 @@ public:
 
     virtual int getPersonsCount() const = 0;
     virtual int getActorsCount() const = 0;
+
+    virtual int getRealPersonsCount() const = 0;
+    virtual int getRealActorsCount() const = 0;
 };
 
 class MainTableModelRegistry : public IMainTableModelRegistryConst
@@ -132,6 +135,10 @@ public:
 
     int getPersonsCount() const noexcept override { return static_cast<int>(m_Persons_ByID.size()); }
     int getActorsCount() const noexcept override { return static_cast<int>(m_Actors_ByID.size()); }
+
+    // TODO: под gcc и clang list<>::size() может работать за O(n), надо проверить
+    int getRealPersonsCount() const noexcept override { return static_cast<int>(m_Persons.size()); }
+    int getRealActorsCount() const noexcept override { return static_cast<int>(m_Actors.size()); }
 
     struct ReadingStats
     {

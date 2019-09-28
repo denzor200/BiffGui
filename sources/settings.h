@@ -16,7 +16,8 @@ public:
     explicit Settings(QWidget *parent = nullptr);
     ~Settings();
 
-    void Reset();
+    bool Initialize();
+    bool Reset();
 
 private slots:
     void on_toolButton_stackedWidgetPrev_clicked();
@@ -29,7 +30,7 @@ private slots:
     void on_pushButton_SetDefault_clicked();
 
 private:
-    void Initialize(bool FirstAttempt);
+    bool _Initialize(bool FirstAttempt);
     void InitializeAssParsing(void* stats, const QDomDocument & domDoc);
     void InitializeSrtParsing(void* stats,const QDomDocument & domDoc);
     void InitializeTimingParsing(void* stats,const QDomDocument & domDoc);

@@ -75,7 +75,6 @@ Settings::Settings(QWidget *parent) :
     ui(new Ui::Settings)
 {
     ui->setupUi(this);
-    Initialize(true);
 }
 
 Settings::~Settings()
@@ -83,9 +82,13 @@ Settings::~Settings()
     delete ui;
 }
 
-void Settings::Reset()
+bool Settings::Initialize()
 {
-    // TODO: отмена пользователем должна быть запрещена
+    return _Initialize(true);
+}
+
+bool Settings::Reset()
+{
     ConverterWaiting_ResetSetting waiting;
     waiting.StartProcess();
     int execStatus = waiting.exec();
@@ -99,7 +102,7 @@ void Settings::Reset()
     else {
         QMessageBox::critical(this, "Что-то пошло не так..", "Не удалось сбросить настройки по умолчанию");
     }
-    Initialize(false);
+    return _Initialize(false);
 }
 
 
@@ -170,21 +173,21 @@ struct ParsingStats
     unsigned Count = 0;
 };
 
-void Settings::Initialize(bool FirstAttempt)
+bool Settings::_Initialize(bool FirstAttempt)
 {
     QDomDocument domDoc;
     QFile file(SETTINGS_DIR);
 
-    auto HandleError = [&]()
+    auto HandleError = [&]() -> bool
     {
         if (FirstAttempt)
-            Reset();
+            return Reset();
         else {
-            // TODO: handle
+            QMessageBox::critical(this, "Что-то пошло не так..", "Не удалось открыть файл конфига");
+            return false;
         }
     };
 
-    // TODO: бросить исключение, если файл не найден (не забыть перед этим сделать запрос на повторное создание файла)
     if (file.open(QIODevice::ReadOnly))
     {
         QString errorStr;
@@ -213,20 +216,15 @@ void Settings::Initialize(bool FirstAttempt)
                     ss << "Вам следует самим проставить эти значения, или вернуть опции к состоянию по умолчанию" << std::endl;
                     QMessageBox::warning(QApplication::activeWindow(), "Обратите внимание..", ss.str().c_str());
                 }
-            }
-            else {
-                HandleError();
+                return true;
             }
         }
         else {
             qWarning("Line %d, column %d: %s", errorLine, errorColumn,
                          errorStr.toUtf8().data());
-            HandleError();
         }
     }
-    else {
-        HandleError();
-    }
+    return HandleError();
 }
 
 
