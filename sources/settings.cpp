@@ -84,7 +84,10 @@ Settings::~Settings()
 
 bool Settings::Initialize()
 {
-    return _Initialize(true);
+    bool Status = _Initialize(true);
+    ui->pushButton_OK->setEnabled(false);
+    ui->pushButton_Apply->setEnabled(false);
+    return Status;
 }
 
 bool Settings::Reset()
@@ -103,6 +106,118 @@ bool Settings::Reset()
         QMessageBox::critical(this, "Что-то пошло не так..", "Не удалось сбросить настройки по умолчанию");
     }
     return _Initialize(false);
+}
+
+void Settings::beginChanges()
+{
+    ui->pushButton_OK->setEnabled(true);
+    ui->pushButton_Apply->setEnabled(true);
+}
+
+static QString CheckBoxGetText(QCheckBox* checkBox)
+{
+    switch (checkBox->checkState())
+    {
+    case Qt::CheckState::Checked:
+        return "true";
+    case Qt::CheckState::Unchecked:
+        return "false";
+    default:
+        Q_ASSERT_X(0, "CheckBoxGetText",  "Invalid 'Qt::CheckState'");
+        break;
+    }
+    return "";
+}
+
+static void WriteAssColumnAttribute(QXmlStreamWriter& xmlWriter, const QString& attributeName, QLineEdit* lineEdit)
+{
+    const QString& text = lineEdit->text();
+    QStringList sections = text.split(",", QString::SkipEmptyParts);
+    for (const QString& section : sections)
+    {
+        xmlWriter.writeTextElement(attributeName,section.trimmed());
+    }
+}
+
+void Settings::commitChanges()
+{
+    QFile file(SETTINGS_DIR);
+    file.open(QIODevice::WriteOnly);
+
+    QXmlStreamWriter xmlWriter(&file);
+    xmlWriter.setAutoFormatting(true);
+    xmlWriter.writeStartDocument();
+
+    xmlWriter.writeStartElement("Root");
+    {
+        xmlWriter.writeStartElement("AssParsing");
+        {
+            xmlWriter.writeStartElement("NeededColumns");
+            {
+                WriteAssColumnAttribute(xmlWriter,"NameColumn",ui->lineEdit_ColumnName);
+                WriteAssColumnAttribute(xmlWriter,"TextColumn",ui->lineEdit_ColumnText);
+                WriteAssColumnAttribute(xmlWriter,"TimeStartColumn",ui->lineEdit_ColumnStart);
+                WriteAssColumnAttribute(xmlWriter,"TimeEndColumn",ui->lineEdit_ColumnEnd);
+            } xmlWriter.writeEndElement();
+        } xmlWriter.writeEndElement();
+
+        xmlWriter.writeStartElement("Timing");
+        {
+            xmlWriter.writeTextElement("MilisecondRoundValue",ui->spinBox_RoundValue->text());
+            xmlWriter.writeTextElement("DisableIntervals",CheckBoxGetText(ui->checkBox_DisableIntervals));
+            xmlWriter.writeStartElement("IntervalsDistributing");
+            {
+                xmlWriter.writeTextElement("VerySmall",ui->spinBox_SmallInterval->text());
+                xmlWriter.writeTextElement("Normal",ui->spinBox_NormalInterval->text());
+                xmlWriter.writeTextElement("Big",ui->spinBox_BigInterval->text());
+                xmlWriter.writeTextElement("VeryBig",ui->spinBox_VeryBigInterval->text());
+                xmlWriter.writeTextElement("VeryVeryBig",ui->spinBox_VeryVeryBigInterval->text());
+            } xmlWriter.writeEndElement();
+        } xmlWriter.writeEndElement();
+
+        xmlWriter.writeStartElement("DocumentStyle");
+        {
+            xmlWriter.writeTextElement("DisableTags",CheckBoxGetText(ui->checkBox_DisableTags));
+            xmlWriter.writeTextElement("DisableLinesCounter",CheckBoxGetText(ui->checkBox_DisableCounter));
+            xmlWriter.writeStartElement("MainFont");
+            {
+                xmlWriter.writeTextElement("Name",ui->lineEdit_Font->text());
+                xmlWriter.writeTextElement("Size",QString::number(ui->doubleSpinBox_Size->value()));
+            } xmlWriter.writeEndElement();
+            xmlWriter.writeStartElement("PageNumberFont");
+            {
+                xmlWriter.writeTextElement("Name",ui->lineEdit_Font_2->text());
+                xmlWriter.writeTextElement("Size",QString::number(ui->doubleSpinBox_Size_2->value()));
+            } xmlWriter.writeEndElement();
+            xmlWriter.writeStartElement("IndividualSelectedFont");
+            {
+                xmlWriter.writeTextElement("Name",ui->lineEdit_Font_3->text());
+                xmlWriter.writeTextElement("Size",QString::number(ui->doubleSpinBox_Size_3->value()));
+            } xmlWriter.writeEndElement();
+        } xmlWriter.writeEndElement();
+
+        xmlWriter.writeStartElement("SrtParsing");
+        {
+            xmlWriter.writeStartElement("ComplexPhrases");
+            {
+                xmlWriter.writeStartElement("TimeDistributing");
+                {
+                    xmlWriter.writeTextElement("Strategy",ui->comboBox_Distribution->currentText());
+                } xmlWriter.writeEndElement();
+            } xmlWriter.writeEndElement();
+        } xmlWriter.writeEndElement();
+
+        xmlWriter.writeStartElement("Additional");
+        {
+            xmlWriter.writeTextElement("EnableSoundTheme",CheckBoxGetText(ui->checkBox_ExtSound));
+        } xmlWriter.writeEndElement();
+
+    } xmlWriter.writeEndElement();
+
+    xmlWriter.writeEndDocument();
+    file.close();
+
+    this->on_CommitedChanges();
 }
 
 
@@ -165,6 +280,8 @@ void Settings::on_checkBox_DisableIntervals_stateChanged(int arg1)
         Q_ASSERT_X(0, "checkBoxStateChanged",  "Invalid 'Qt::CheckState'");
         break;
     }
+
+    beginChanges();
 }
 
 struct ParsingStats
@@ -482,6 +599,12 @@ void Settings::InitializeAdditionalParsing(void* rawStats, const QDomDocument &d
     InitializeCheckBox(stats, domDoc, ui->checkBox_ExtSound, "Root.Additional.EnableSoundTheme");
 }
 
+void Settings::on_CommitedChanges()
+{
+    ui->pushButton_OK->setEnabled(false);
+    ui->pushButton_Apply->setEnabled(false);
+}
+
 void Settings::on_pushButton_Cancel_clicked()
 {
     close();
@@ -490,4 +613,116 @@ void Settings::on_pushButton_Cancel_clicked()
 void Settings::on_pushButton_SetDefault_clicked()
 {
     Reset();
+    this->on_CommitedChanges();
+}
+
+void Settings::on_pushButton_OK_clicked()
+{
+    commitChanges();
+    close();
+}
+
+void Settings::on_pushButton_Apply_clicked()
+{
+    commitChanges();
+}
+
+void Settings::on_spinBox_RoundValue_valueChanged(int )
+{
+    beginChanges();
+}
+
+void Settings::on_spinBox_SmallInterval_valueChanged(int )
+{
+    beginChanges();
+}
+
+void Settings::on_spinBox_NormalInterval_valueChanged(int )
+{
+    beginChanges();
+}
+
+void Settings::on_spinBox_BigInterval_valueChanged(int )
+{
+    beginChanges();
+}
+
+void Settings::on_spinBox_VeryBigInterval_valueChanged(int )
+{
+    beginChanges();
+}
+
+void Settings::on_spinBox_VeryVeryBigInterval_valueChanged(int )
+{
+    beginChanges();
+}
+
+void Settings::on_lineEdit_Font_textChanged(const QString &)
+{
+    beginChanges();
+}
+
+void Settings::on_doubleSpinBox_Size_valueChanged(double )
+{
+    beginChanges();
+}
+
+void Settings::on_lineEdit_Font_2_textChanged(const QString &)
+{
+    beginChanges();
+}
+
+void Settings::on_doubleSpinBox_Size_2_valueChanged(double )
+{
+    beginChanges();
+}
+
+void Settings::on_lineEdit_Font_3_textChanged(const QString &)
+{
+    beginChanges();
+}
+
+void Settings::on_doubleSpinBox_Size_3_valueChanged(double )
+{
+    beginChanges();
+}
+
+void Settings::on_checkBox_DisableTags_stateChanged(int )
+{
+    beginChanges();
+}
+
+void Settings::on_checkBox_DisableCounter_stateChanged(int )
+{
+    beginChanges();
+}
+
+void Settings::on_checkBox_ExtSound_stateChanged(int )
+{
+    beginChanges();
+}
+
+void Settings::on_comboBox_Distribution_currentIndexChanged(int )
+{
+    beginChanges();
+}
+
+void Settings::on_lineEdit_ColumnText_textChanged(const QString &)
+{
+    beginChanges();
+}
+
+void Settings::on_lineEdit_ColumnStart_textChanged(const QString &)
+{
+    beginChanges();
+}
+
+void Settings::on_lineEdit_ColumnEnd_textChanged(const QString &)
+{
+    beginChanges();
+}
+
+void Settings::on_lineEdit_ColumnName_textChanged(const QString &)
+{
+    beginChanges();
 }
