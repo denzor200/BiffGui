@@ -7,7 +7,7 @@
 #include "ConverterWaiting.h"
 
 // TODO: make normal path
-#define SETTINGS_DIR "D:/repos/subtitles/Debug/settings.xml"
+#define SETTINGS_DIR "settings.xml"
 
 static QString PrintConfigPath(const QString& Path)
 {
@@ -204,7 +204,7 @@ void Settings::Initialize(bool FirstAttempt)
                 if (!stats.Unrecognized.empty())
                 {
                     std::stringstream ss;
-                    ss << "В ходе открытия файла конфига(settings.xml) произошли некоторые ошибки, возможно этот конфликт был спровоцирован ручным вмешательством в этот файл со стороны пользователя." << std::endl;
+                    ss << "В ходе открытия файла конфига(" SETTINGS_DIR ") произошли некоторые ошибки, возможно этот конфликт был спровоцирован ручным вмешательством в этот файл со стороны пользователя." << std::endl;
                     ss << "Следующие значения не были распознаны и оставлены в нулевом состоянии:" << std::endl;
                     for (const QString& Value : stats.Unrecognized)
                     {

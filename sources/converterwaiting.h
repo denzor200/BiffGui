@@ -72,7 +72,7 @@ class ConverterWaiting_SaveMySubbtitle : public ConverterWaiting
 public:
     explicit ConverterWaiting_SaveMySubbtitle(QWidget *parent = nullptr);
 
-    void StartProcess(const QString& InFile, const QString& SettingsFile, const QString& OutFile);
+    void StartProcess(const QString& InFile, const QString& PersonsFile, const QString& OutFile);
     int GetProcessStatus() const {return m_ProcessStatus;}
 
 private slots:

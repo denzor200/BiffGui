@@ -156,19 +156,19 @@ ConverterWaiting_SaveMySubbtitle::ConverterWaiting_SaveMySubbtitle(QWidget *pare
 
 void ConverterWaiting_SaveMySubbtitle::StartProcess(
         const QString &InFile,
-        const QString& SettingsFile,
+        const QString& PersonsFile,
         const QString &OutFile)
 {
     QStringList Arguments;
     QString Suffix = QFileInfo(OutFile).suffix();
 
-    // TODO: Мы должны передавать параметром имитовставку от SettingsFile, поскольку это временный не залоченный файл
+    // TODO: Мы должны передавать параметром имитовставку от PersonsFile, поскольку это временный не залоченный файл
     if (Suffix == "ass")
     {
         Arguments.reserve(4);
         Arguments.push_back("-make_my_ass");
         Arguments.push_back(InFile);
-        Arguments.push_back(SettingsFile);
+        Arguments.push_back(PersonsFile);
         Arguments.push_back(OutFile);
         // TODO: make normal path
         getProcess()->start("D:\\repos\\subtitles\\Debug\\converter", Arguments);
@@ -177,7 +177,7 @@ void ConverterWaiting_SaveMySubbtitle::StartProcess(
         Arguments.reserve(4);
         Arguments.push_back("-make_my_srt");
         Arguments.push_back(InFile);
-        Arguments.push_back(SettingsFile);
+        Arguments.push_back(PersonsFile);
         Arguments.push_back(OutFile);
         // TODO: make normal path
         getProcess()->start("D:\\repos\\subtitles\\Debug\\converter", Arguments);
