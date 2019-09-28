@@ -82,6 +82,22 @@ private:
     int m_ProcessStatus = -1;
 };
 
+class ConverterWaiting_ResetSetting : public ConverterWaiting
+{
+    Q_OBJECT
+public:
+    explicit ConverterWaiting_ResetSetting(QWidget *parent = nullptr);
+
+    void StartProcess();
+    int GetProcessStatus() const {return m_ProcessStatus;}
+
+private slots:
+    void slotFinished(int, QProcess::ExitStatus);
+
+private:
+    int m_ProcessStatus = -1;
+};
+
 
 
 #endif // CONVERTERWAITING_H

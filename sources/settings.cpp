@@ -4,6 +4,7 @@
 #include <QDebug>
 #include <QMessageBox>
 #include <sstream>
+#include "ConverterWaiting.h"
 
 // TODO: make normal path
 #define SETTINGS_DIR "D:/repos/subtitles/Debug/settings.xml"
@@ -74,12 +75,31 @@ Settings::Settings(QWidget *parent) :
     ui(new Ui::Settings)
 {
     ui->setupUi(this);
-    Initialize();
+    Initialize(true);
 }
 
 Settings::~Settings()
 {
     delete ui;
+}
+
+void Settings::Reset()
+{
+    // TODO: отмена пользователем должна быть запрещена
+    ConverterWaiting_ResetSetting waiting;
+    waiting.StartProcess();
+    int execStatus = waiting.exec();
+    bool isCanceled = waiting.IsCanceledByUser();
+    int procStatus = waiting.GetProcessStatus();
+    Q_ASSERT(!isCanceled);
+
+    if (0 == execStatus && 0 == procStatus)
+    {
+    }
+    else {
+        QMessageBox::critical(this, "Что-то пошло не так..", "Не удалось сбросить настройки по умолчанию");
+    }
+    Initialize(false);
 }
 
 
@@ -150,10 +170,20 @@ struct ParsingStats
     unsigned Count = 0;
 };
 
-void Settings::Initialize()
+void Settings::Initialize(bool FirstAttempt)
 {
     QDomDocument domDoc;
     QFile file(SETTINGS_DIR);
+
+    auto HandleError = [&]()
+    {
+        if (FirstAttempt)
+            Reset();
+        else {
+            // TODO: handle
+        }
+    };
+
     // TODO: бросить исключение, если файл не найден (не забыть перед этим сделать запрос на повторное создание файла)
     if (file.open(QIODevice::ReadOnly))
     {
@@ -185,17 +215,17 @@ void Settings::Initialize()
                 }
             }
             else {
-                // TODO: handle
+                HandleError();
             }
         }
         else {
             qWarning("Line %d, column %d: %s", errorLine, errorColumn,
                          errorStr.toUtf8().data());
-            // TODO: handle
+            HandleError();
         }
     }
     else {
-        // TODO: handle
+        HandleError();
     }
 }
 
@@ -452,4 +482,14 @@ void Settings::InitializeAdditionalParsing(void* rawStats, const QDomDocument &d
     auto stats = reinterpret_cast<ParsingStats*>(rawStats);
     Q_ASSERT(stats);
     InitializeCheckBox(stats, domDoc, ui->checkBox_ExtSound, "Root.Additional.EnableSoundTheme");
+}
+
+void Settings::on_pushButton_Cancel_clicked()
+{
+    close();
+}
+
+void Settings::on_pushButton_SetDefault_clicked()
+{
+    Reset();
 }

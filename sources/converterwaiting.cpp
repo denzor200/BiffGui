@@ -194,3 +194,26 @@ void ConverterWaiting_SaveMySubbtitle::slotFinished(int Status, QProcess::ExitSt
 
 
 
+
+ConverterWaiting_ResetSetting::ConverterWaiting_ResetSetting(QWidget *parent):
+    ConverterWaiting(parent)
+{
+    connect(getProcess(),
+                    SIGNAL(finished(int, QProcess::ExitStatus)),
+                    SLOT(slotFinished(int, QProcess::ExitStatus))
+                   );
+}
+
+void ConverterWaiting_ResetSetting::StartProcess()
+{
+    QStringList Arguments;
+    Arguments.reserve(1);
+    Arguments.push_back("-reset_settings");
+    // TODO: make normal path
+    getProcess()->start("D:\\repos\\subtitles\\Debug\\converter", Arguments);
+}
+
+void ConverterWaiting_ResetSetting::slotFinished(int Status, QProcess::ExitStatus)
+{
+    m_ProcessStatus = Status;
+}

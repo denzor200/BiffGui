@@ -15,14 +15,21 @@ class Settings : public QDialog
 public:
     explicit Settings(QWidget *parent = nullptr);
     ~Settings();
+
+    void Reset();
+
 private slots:
     void on_toolButton_stackedWidgetPrev_clicked();
     void on_toolButton_stackedWidgetNext_clicked();
 
     void on_checkBox_DisableIntervals_stateChanged(int arg1);
 
+    void on_pushButton_Cancel_clicked();
+
+    void on_pushButton_SetDefault_clicked();
+
 private:
-    void Initialize();
+    void Initialize(bool FirstAttempt);
     void InitializeAssParsing(void* stats, const QDomDocument & domDoc);
     void InitializeSrtParsing(void* stats,const QDomDocument & domDoc);
     void InitializeTimingParsing(void* stats,const QDomDocument & domDoc);
