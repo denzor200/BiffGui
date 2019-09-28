@@ -958,7 +958,8 @@ Qt::ItemFlags MainTableModel_Reversed::flags(const QModelIndex &index) const
 {
     Qt::ItemFlags flags = QAbstractTableModel::flags( index );
     if( index.isValid() ) {
-        flags |= Qt::ItemIsEditable;
+        if (index.column()!=0)
+            flags |= Qt::ItemIsEditable;
     }
     return flags;
 }
@@ -976,24 +977,8 @@ bool MainTableModel_Reversed::setData(const QModelIndex &index, const QVariant &
 
     // Setting Actor Name..
     case 0:
-        if (value.canConvert<QString>())
-        {
-            if (m_Other)
-                m_Other->beginResetModel();
-            try {
-                // Возвращаемое значение от SetPerson можно и проигнорировать
-                MainTableModelUtils::SetPerson(*m_Mngr->GetRegistry(), index.row(), ActorName(value.toString()));
-                Changed = true;
-            }
-            catch (const ActorNameStringEmpty&) {
-            }
-            catch (const MainTableModelRegistry_InvalidPersonID&) {
-            }
-			catch (const ActorNameForbiddenSymbols&)
-			{
-				ActorName::ShowForbidenSymbolsError("");
-			}
-        }
+        // Имя персонажа запрещено редактировать
+        // Редактируем только имя актера
         break;
 
     // Setting Persons list..

@@ -125,11 +125,15 @@ void MainWindow::ReverseTable()
     {
         ui->tableView->show();
         ui->tableView_Reversed->hide();
+        ui->toolButton_Insert->setEnabled(true);
+        ui->toolButton_Delete->setEnabled(true);
         m_IsReversed = false;
     }
     else {
         ui->tableView->hide();
         ui->tableView_Reversed->show();
+        ui->toolButton_Insert->setEnabled(false);
+        ui->toolButton_Delete->setEnabled(false);
         m_IsReversed = true;
     }
 }
