@@ -87,6 +87,7 @@ bool Settings::Initialize()
     bool Status = _Initialize(true);
     ui->pushButton_OK->setEnabled(false);
     ui->pushButton_Apply->setEnabled(false);
+    ui->pushButton_Cancel->setFocus();
     return Status;
 }
 
@@ -112,6 +113,7 @@ void Settings::beginChanges()
 {
     ui->pushButton_OK->setEnabled(true);
     ui->pushButton_Apply->setEnabled(true);
+    ui->pushButton_Apply->setFocus();
 }
 
 static QString CheckBoxGetText(QCheckBox* checkBox)
@@ -603,6 +605,7 @@ void Settings::on_CommitedChanges()
 {
     ui->pushButton_OK->setEnabled(false);
     ui->pushButton_Apply->setEnabled(false);
+    ui->pushButton_Cancel->setFocus();
 }
 
 void Settings::on_pushButton_Cancel_clicked()
