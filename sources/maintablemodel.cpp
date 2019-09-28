@@ -9,6 +9,8 @@
 
 using Status = MainTableModelRegistry::Status;
 
+#define VERIFY_MODEL_CONSISTENCY VerifyModelConsistency
+
 #define CHECK_COND(c) \
     if (!(c)) \
         return false;
@@ -24,6 +26,7 @@ bool MainTableModelRegistry::ReserveNewPersonIndex()
     qDebug() << "[MainTableModelRegistry::ReserveNewPersonIndex]";
     CHECK_COND(m_Persons_ByID.size() < TO_SZ(std::numeric_limits<int>::max()));
     m_Persons_ByID.push_back(NULL_PERSON);
+    VERIFY_MODEL_CONSISTENCY();
     return true;
 }
 
@@ -32,6 +35,7 @@ bool MainTableModelRegistry::ReserveNewActorIndex()
     qDebug() << "[MainTableModelRegistry::ReserveNewActorIndex]";
     CHECK_COND(m_Actors_ByID.size() < TO_SZ(std::numeric_limits<int>::max()));
     m_Actors_ByID.push_back(NULL_ACTOR);
+    VERIFY_MODEL_CONSISTENCY();
     return true;
 }
 
@@ -93,6 +97,7 @@ bool MainTableModelRegistry::AddPerson(const ActorName& person, int ID)
             }
 
         } // ID < 0
+        VERIFY_MODEL_CONSISTENCY();
         return true;
     }
     return false;
@@ -135,6 +140,7 @@ bool MainTableModelRegistry::AddActor(const ActorName& actor, int ID)
             }
 
         } // ID < 0
+        VERIFY_MODEL_CONSISTENCY();
         return true;
     }
     return false;
@@ -144,7 +150,7 @@ bool MainTableModelRegistry::AddActor(const ActorName& actor, int ID)
 bool MainTableModelRegistry::RenamePerson(int ID, const ActorName& newName)
 {
     qDebug() << "[MainTableModelRegistry::RenamePerson]: " << ID << ", " << newName;
-    return PersonsBaseSetter(ID, [&](PersonsList::iterator Value)
+    bool Status = PersonsBaseSetter(ID, [&](PersonsList::iterator Value)
     {
         ActorName OldName = Value->name;
         auto inserted = m_Persons_ByName.insert({newName, Value});
@@ -161,12 +167,14 @@ bool MainTableModelRegistry::RenamePerson(int ID, const ActorName& newName)
         }
         return false;
     });
+    VERIFY_MODEL_CONSISTENCY();
+    return Status;
 }
 
 bool MainTableModelRegistry::RenameActor(int ID, const ActorName& newName)
 {
     qDebug() << "[MainTableModelRegistry::RenameActor]: " << ID << ", " << newName;
-    return ActorsBaseSetter(ID, [&](ActorsList::iterator Value)
+    bool Status = ActorsBaseSetter(ID, [&](ActorsList::iterator Value)
     {
         ActorName OldName = Value->name;
         auto inserted = m_Actors_ByName.insert({newName, Value});
@@ -183,48 +191,58 @@ bool MainTableModelRegistry::RenameActor(int ID, const ActorName& newName)
         }
         return false;
     });
+    VERIFY_MODEL_CONSISTENCY();
+    return Status;
 }
 
 bool MainTableModelRegistry::ChangeDenyPerson(int ID, bool State)
 {
     qDebug() << "[MainTableModelRegistry::ChangeDenyPerson]: " << ID << ", " << State;
-    return PersonsBaseSetter(ID, [&](PersonsList::iterator Value)
+    bool Status = PersonsBaseSetter(ID, [&](PersonsList::iterator Value)
     {
         Value->deny = State;
         return true;
     });
+    VERIFY_MODEL_CONSISTENCY();
+    return Status;
 }
 
 bool MainTableModelRegistry::ChangeDenyActor(int ID, bool State)
 {
     qDebug() << "[MainTableModelRegistry::ChangeDenyActor]: " << ID << ", " << State;
-    return ActorsBaseSetter(ID, [&](ActorsList::iterator Value)
+    bool Status = ActorsBaseSetter(ID, [&](ActorsList::iterator Value)
     {
         Value->deny = State;
         return true;
     });
+    VERIFY_MODEL_CONSISTENCY();
+    return Status;
 }
 
 bool MainTableModelRegistry::PersonClearAllRelations(int ID)
 {
     qDebug() << "[MainTableModelRegistry::PersonClearAllRelations]: " << ID;
-    return PersonsBaseSetter(ID, [&](PersonsList::iterator Value)
+    bool Status =  PersonsBaseSetter(ID, [&](PersonsList::iterator Value)
     {
         RemoveAllLinksToPerson(Value);
         Value->actors.clear();
         return true;
     });
+    VERIFY_MODEL_CONSISTENCY();
+    return Status;
 }
 
 bool MainTableModelRegistry::ActorClearAllRelations(int ID)
 {
     qDebug() << "[MainTableModelRegistry::ActorClearAllRelations]: " << ID;
-    return ActorsBaseSetter(ID, [&](ActorsList::iterator Value)
+    bool Status = ActorsBaseSetter(ID, [&](ActorsList::iterator Value)
     {
         RemoveAllLinksToActor(Value);
         Value->persons.clear();
         return true;
     });
+    VERIFY_MODEL_CONSISTENCY();
+    return Status;
 }
 
 
@@ -330,7 +348,7 @@ bool MainTableModelRegistry::ActorHasOtherLink(ActorsList::iterator actorIt, Per
 bool MainTableModelRegistry::Person_ChangeRelation(int personID, const ActorName& actor, bool State)
 {
     qDebug() << "[MainTableModelRegistry::Person_ChangeRelation]: " << personID << ", " << actor << ", " << State;
-    return PersonsBaseSetter(personID, [&](PersonsList::iterator Value)
+    bool Status = PersonsBaseSetter(personID, [&](PersonsList::iterator Value)
     {
         auto actorIt = m_Actors_ByName.find(actor);
         if (actorIt != m_Actors_ByName.end())
@@ -340,11 +358,13 @@ bool MainTableModelRegistry::Person_ChangeRelation(int personID, const ActorName
         }
         return false;
     });
+    VERIFY_MODEL_CONSISTENCY();
+    return Status;
 }
 bool MainTableModelRegistry::Actor_ChangeRelation(int actorID, const ActorName& person, bool State)
 {
     qDebug() << "[MainTableModelRegistry::Actor_ChangeRelation]: " << actorID << ", " << person << ", " << State;
-    return ActorsBaseSetter(actorID, [&](ActorsList::iterator Value)
+    bool Status = ActorsBaseSetter(actorID, [&](ActorsList::iterator Value)
     {
         auto personIt = m_Persons_ByName.find(person);
         if (personIt != m_Persons_ByName.end())
@@ -354,6 +374,8 @@ bool MainTableModelRegistry::Actor_ChangeRelation(int actorID, const ActorName& 
         }
         return false;
     });
+    VERIFY_MODEL_CONSISTENCY();
+    return Status;
 }
 
 Status MainTableModelRegistry::Person_ChangeRelation(const ActorName &person, const ActorName &actor, bool State)
@@ -368,6 +390,7 @@ Status MainTableModelRegistry::Person_ChangeRelation(const ActorName &person, co
         return Status::ACTOR_NOT_FOUND;
 
     Person_ChangeRelationMaster(personIt->second, actorIt->second, State);
+    VERIFY_MODEL_CONSISTENCY();
     return Status::SUCCESS;
 }
 
@@ -383,6 +406,7 @@ Status MainTableModelRegistry::Actor_ChangeRelation(const ActorName &actor, cons
         return Status::ACTOR_NOT_FOUND;
 
     Actor_ChangeRelationMaster(actorIt->second, personIt->second, State);
+    VERIFY_MODEL_CONSISTENCY();
     return Status::SUCCESS;
 }
 
@@ -507,7 +531,7 @@ bool MainTableModelRegistry::ActorIsDenied(int ID) const
 bool MainTableModelRegistry::RemovePerson(int ID) noexcept
 {
     qDebug() << "[MainTableModelRegistry::RemovePerson]: " << ID;
-    return PersonsBaseSetter(ID, [&](PersonsList::iterator Value)
+    bool Status = PersonsBaseSetter(ID, [&](PersonsList::iterator Value)
     {
         // Сначала снимаем все ссылки на конкретный элемент
         // Затем удаляем элемент непосредственно из хранилищ
@@ -520,12 +544,14 @@ bool MainTableModelRegistry::RemovePerson(int ID) noexcept
         m_Persons_ByID.erase(m_Persons_ByID.begin() + ID);
         return true;
     }, static_cast<uint32_t>(SETTER_FLAGS::ALLOW_NULL));
+    VERIFY_MODEL_CONSISTENCY();
+    return Status;
 }
 
 bool MainTableModelRegistry::RemoveActor(int ID) noexcept
 {
     qDebug() << "[MainTableModelRegistry::RemoveActor]: " << ID;
-    return ActorsBaseSetter(ID, [&](ActorsList::iterator Value)
+    bool Status = ActorsBaseSetter(ID, [&](ActorsList::iterator Value)
     {
         // Сначала снимаем все ссылки на конкретный элемент
         // Затем удаляем элемент непосредственно из хранилищ
@@ -538,6 +564,8 @@ bool MainTableModelRegistry::RemoveActor(int ID) noexcept
         m_Actors_ByID.erase(m_Actors_ByID.begin() + ID);
         return true;
     }, static_cast<uint32_t>(SETTER_FLAGS::ALLOW_NULL));
+    VERIFY_MODEL_CONSISTENCY();
+    return Status;
 }
 
 void MainTableModelRegistry::ClearAllPersons() noexcept
@@ -552,6 +580,7 @@ void MainTableModelRegistry::ClearAllPersons() noexcept
     m_Persons_ByID.clear();
     m_Persons_ByName.clear();
     m_Persons.clear();
+    VERIFY_MODEL_CONSISTENCY();
 }
 
 void MainTableModelRegistry::ClearAllActors() noexcept
@@ -566,8 +595,10 @@ void MainTableModelRegistry::ClearAllActors() noexcept
     m_Actors_ByID.clear();
     m_Actors_ByName.clear();
     m_Actors.clear();
+    VERIFY_MODEL_CONSISTENCY();
 }
 
+// TODO: ридер и врайтер следует выкинуть наружу из и без того загруженного АПИ
 MainTableModelRegistry::ReadingStats MainTableModelRegistry::ReadInStream(QTextStream &in)
 {
     qDebug() << "[MainTableModelRegistry::ReadInStream]";
@@ -626,6 +657,7 @@ MainTableModelRegistry::ReadingStats MainTableModelRegistry::ReadInStream(QTextS
             Stats.UnrecognisedActors += pair[0];
         }
     }
+    VERIFY_MODEL_CONSISTENCY();
     return Stats;
 }
 

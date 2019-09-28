@@ -36,6 +36,7 @@ SOURCES += \
         main.cpp \
         maintabledelegates.cpp \
         maintablemodel.cpp \
+        maintablemodel_verifier.cpp \
         mainwindow.cpp \
         settings.cpp \
         utils.cpp

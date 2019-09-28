@@ -140,6 +140,9 @@ public:
     int getRealPersonsCount() const noexcept override { return static_cast<int>(m_Persons.size()); }
     int getRealActorsCount() const noexcept override { return static_cast<int>(m_Actors.size()); }
 
+    // Не для продакшена..
+    void VerifyModelConsistency() const;
+
     struct ReadingStats
     {
         QStringList UnrecognisedLines;
