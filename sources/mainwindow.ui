@@ -236,12 +236,12 @@
   </action>
   <action name="action_open_table">
    <property name="text">
-    <string>Открыть таблицу</string>
+    <string>Импортировать таблицу</string>
    </property>
   </action>
   <action name="action_save_table">
    <property name="text">
-    <string>Сохранить таблицу</string>
+    <string>Экспортировать таблицу</string>
    </property>
   </action>
   <action name="action_generate_doc">

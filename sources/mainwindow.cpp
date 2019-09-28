@@ -134,6 +134,39 @@ void MainWindow::ReverseTable()
     }
 }
 
+// В возвращаемом значении флаг - давал ли пользователь согласие на выволнение операции
+bool MainWindow::tryCloseFile()
+{
+    bool doIt = false;
+    if (m_OpenedSubbtitle != nullptr)
+    {
+        // Запрашиваем у пользователя подтверждения только если есть реальные не сохраненные данные..
+        if (m_ModelsMgr->constRegistryAPI()->getRealActorsCount() > 0 ||
+                m_ModelsMgr->constRegistryAPI()->getRealPersonsCount() > 0)
+        {
+            auto reply = QMessageBox::question(this, "Подтверждение действия", "Вы действительно хотите закрыть текущую сессию? Все несохраненные данные будут утеряны.",
+                                        QMessageBox::Yes|QMessageBox::No);
+            if (reply==QMessageBox::Yes)
+                doIt = true;
+            else {
+                return false;
+            }
+        }
+        else {
+            // .. в противном случае нет никакого смысла его беспокоить
+            doIt = true;
+        }
+    }
+    if (doIt)
+    {
+        delete m_OpenedSubbtitle;
+        m_OpenedSubbtitle = nullptr;
+        m_ModelsMgr->ClearAll();
+        setWindowTitle(QApplication::applicationName());
+    }
+    return true;
+}
+
 void MainWindow::showFileOpenRError(const QString &fileName) const
 {
     std::stringstream ss;
@@ -155,6 +188,9 @@ void MainWindow::showMainTableWError() const
 
 void MainWindow::on_action_open_triggered()
 {
+    if (!tryCloseFile())
+        return;
+
     QSettings Settings;
     QString subbtitleFilename = QFileDialog::getOpenFileName(this,
         tr("Открыть субтитры"),
@@ -181,6 +217,7 @@ void MainWindow::on_action_open_triggered()
                 SubbtitleContext* ctx = new SubbtitleContext();
                 ctx->FileName = subbtitleFilename;
                 m_OpenedSubbtitle = ctx;
+                setWindowTitle(subbtitleFilename + " - " + QApplication::applicationName());
             }
             else {
                 QMessageBox::critical(this, "Что-то пошло не так..", "Не удалось сгенерировать список персонажей");
@@ -227,28 +264,7 @@ void MainWindow::on_action_save_triggered()
 
 void MainWindow::on_action_close_triggered()
 {
-    // TODO: выведи в заголовок название открытого файла
-    // И не забудь здесь его очистить
-
-    // Выполняет операцию только если есть что закрывать..
-    // И только если пользователь дал согласие
-    bool doIt = false;
-    if (
-            m_OpenedSubbtitle != nullptr ||
-            m_ModelsMgr->constRegistryAPI()->getRealActorsCount() > 0 ||
-            m_ModelsMgr->constRegistryAPI()->getRealPersonsCount() > 0)
-    {
-        auto reply = QMessageBox::question(this, "Подтверждение действия", "Вы действительно хотите закрыть текущую сессию? Все несохраненные данные будут утеряны.",
-                                        QMessageBox::Yes|QMessageBox::No);
-        if (reply==QMessageBox::Yes)
-            doIt = true;
-    }
-    if (doIt)
-    {
-        delete m_OpenedSubbtitle;
-        m_OpenedSubbtitle = nullptr;
-        m_ModelsMgr->ClearAll();
-    }
+    tryCloseFile();
 }
 
 

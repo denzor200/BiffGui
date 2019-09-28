@@ -20,6 +20,9 @@ public:
     void makeDoc();
     void ReverseTable();
 
+    // В возвращаемом значении флаг - давал ли пользователь согласие на выволнение операции
+    bool tryCloseFile();
+
     void showFileOpenRError(const QString& fileName) const;
     void showFileOpenWError(const QString& fileName) const;
     void showMainTableWError() const;
