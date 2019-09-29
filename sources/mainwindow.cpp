@@ -113,6 +113,10 @@ void MainWindow::makeDoc()
             else {
                 showFileOpenWError(tempFilename);
             }
+
+            // темповый файл нам больше не нужен..
+            // TODO: потестировать при отсутствии файла, или отсутствии прав
+            QFile::remove(tempFilename);
         }
         else {
             showMainTableWError();
