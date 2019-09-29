@@ -5,6 +5,7 @@
 #include <ctime>
 #include "CommandLineParser.h"
 #include <QDebug>
+#include <QMessageBox>
 
 #define MAX_PATH 260
 
@@ -34,17 +35,18 @@ Generating::~Generating()
     delete ui;
 }
 
-void Generating::StartProcess(const QString &InFile, const QString& ConfigFile, const QString &OutDir)
+void Generating::StartProcess(const QString &InFile, const QString& TableFile, const QString &OutDir, const QString& CRC32_TableFile)
 {
     // TODO: make normal command line
     // TODO: потестить на путях с пробелами и кириллицей
     // TODO: темповому файлу ConfigFile нужна имитозащита
     QStringList Arguments;
-    Arguments.reserve(4);
+    Arguments.reserve(5);
     Arguments.push_back("-make_docx");
     Arguments.push_back(InFile);
-    Arguments.push_back(ConfigFile);
+    Arguments.push_back(TableFile);
     Arguments.push_back(OutDir);
+    Arguments.push_back(CRC32_TableFile);
     m_Process->start("D:\\repos\\subtitles\\Debug\\converter", Arguments);
 }
 

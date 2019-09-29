@@ -365,7 +365,7 @@ public:
     void LoadPersons(const QStringList& Persons);
 
     bool OpenTable(const QString& Path);
-    bool SaveTable(const QString& Path, bool DisableDenied = false) const;
+    bool SaveTable(const QString& Path, bool DisableDenied = false, uint32_t* CRC32 = NULL) const;
 
     void ClearAll();
 

@@ -100,13 +100,14 @@ void MainWindow::makeDoc()
             CurrentDir.absoluteFilePath(OutDir));
 
         const QString& tempFilename = Utils::GetNewTempFilename();
+        uint32_t CRC32 = 0;
         if (tempFilename != "") {
             // Saving to temp file..
-            if (m_ModelsMgr->SaveTable(tempFilename, true))
+            if (m_ModelsMgr->SaveTable(tempFilename, true, &CRC32))
             {
                 // Using temp file in another child process..
                 Generating w(this);
-                w.StartProcess(InFile, tempFilename, OutDir);
+                w.StartProcess(InFile, tempFilename, OutDir, Utils::hexStr(reinterpret_cast<uint8_t*>(&CRC32), sizeof(CRC32)).c_str());
                 w.exec();
             }
             else {
