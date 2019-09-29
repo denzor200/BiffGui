@@ -1222,37 +1222,26 @@ extern "C" uint_least32_t Crc32(const unsigned char * buf, size_t len);
 
 bool MainTableModelsManager::SaveTable(const QString &Path, bool DisableDenied, uint32_t* CRC32) const
 {
+    QByteArray memoryFileOut;
     QFile fileOut(Path);
-    QFile fileIn(Path);
-    if (
-            fileOut.open(QIODevice::WriteOnly) &&
-            fileOut.setPermissions(fileOut.permissions() & ~(QFile::WriteOther | QFile::WriteGroup | QFile::WriteUser | QFile::WriteOwner)) &&
-            fileIn.open(QIODevice::ReadOnly))
+    if (fileOut.open(QIODevice::WriteOnly))
     {
         {
-            QTextStream streamFileOut(&fileOut);
+            QTextStream streamFileOut(&memoryFileOut);
             streamFileOut.setCodec("UTF-8");
             streamFileOut.setGenerateByteOrderMark(true);
             m_Registry.WriteToStream(streamFileOut, DisableDenied);
             streamFileOut.flush();
         }
+        fileOut.write(memoryFileOut);
 
         // crc32
-        // TODO: оптимизировать по памяти. Совсем не обязательно считывать файл целиком
+        // TODO: оптимизировать по памяти.
         if (CRC32)
         {
-            fileOut.flush();
-            if (fileIn.seek(0))
-            {
-                const QByteArray& buffer = fileIn.readAll();
-                *CRC32 = Crc32(
-                   reinterpret_cast<uint8_t*>(const_cast<char*>(buffer.data())),
-                   static_cast<size_t>(buffer.size()));
-            }
-            else {
-                fileOut.close();
-                return false;
-            }
+            *CRC32 = Crc32(
+               reinterpret_cast<uint8_t*>(const_cast<char*>(memoryFileOut.data())),
+               static_cast<size_t>(memoryFileOut.size()));
         }
 
         fileOut.close();
