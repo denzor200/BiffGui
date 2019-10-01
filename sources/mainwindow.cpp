@@ -41,15 +41,21 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->tableView->setItemDelegateForColumn(0,new CEnterNameDelegate(this) );
     ui->tableView->setItemDelegateForColumn(1,new CChoiceLinksDelegate(this) );
     ui->tableView->setItemDelegateForColumn(2,new CChoiceDenyStatusDelegate(this) );
+    ui->tableView->setSortingEnabled(true);
 
     ui->tableView_Reversed->verticalHeader()->setSectionResizeMode (QHeaderView::Fixed);
     ui->tableView_Reversed->horizontalHeader()->setSectionResizeMode (QHeaderView::Stretch);
     ui->tableView_Reversed->setItemDelegateForColumn(0,new CEnterNameDelegate(this) );
     ui->tableView_Reversed->setItemDelegateForColumn(1,new CChoiceLinksDelegate(this) );
     ui->tableView_Reversed->setItemDelegateForColumn(2,new CChoiceDenyStatusDelegate(this) );
+    ui->tableView_Reversed->setSortingEnabled(true);
 
-    ui->tableView->setModel(m_ModelsMgr->GetModel());
-    ui->tableView_Reversed->setModel(m_ModelsMgr->GetModelReversed());
+    m_ProxyModel.setSourceModel( m_ModelsMgr->GetModel() );
+    ui->tableView->setModel( &m_ProxyModel );
+
+    m_ProxyModelReversed.setSourceModel( m_ModelsMgr->GetModelReversed() );
+    ui->tableView_Reversed->setModel( &m_ProxyModelReversed );
+
 
     // под конец решили, что перевернутая таблица по умолчанию все же лучше..
     ReverseTable();
@@ -457,16 +463,19 @@ void MainWindow::on_toolButton_Insert_clicked()
 
 void MainWindow::on_toolButton_Delete_clicked()
 {
-    IMainTableModel* activeModel = nullptr;
-    QTableView* activeView = nullptr;
+    IMainTableModel*        activeModel = nullptr;
+    QTableView*             activeView = nullptr;
+    QSortFilterProxyModel*  activeProxy = nullptr;
     if (m_IsReversed)
     {
         activeView = ui->tableView_Reversed;
         activeModel = m_ModelsMgr->GetModelReversed();
+        activeProxy = &m_ProxyModelReversed;
     }
     else {
         activeView = ui->tableView;
         activeModel = m_ModelsMgr->GetModel();
+        activeProxy = &m_ProxyModel;
     }
 
     // preparing..
@@ -475,7 +484,8 @@ void MainWindow::on_toolButton_Delete_clicked()
     QList<int> rows;
     QSet<int> rows_set; // rows_set only for checking
     foreach( const QModelIndex & value, selection.indexes() ) {
-        int id = value.row();
+        const QModelIndex & translatedValue = activeProxy->mapToSource(value);
+        int id = translatedValue.row();
         if (rows_set.find(id)==rows_set.end())
         {
             rows.append( id );

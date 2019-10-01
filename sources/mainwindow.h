@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QEvent>
+#include <QSortFilterProxyModel>
 
 #include "MainTableModel.h"
 
@@ -61,6 +62,8 @@ private slots:
 private:
     Ui::MainWindow* ui;
     MainTableModelsManager*     m_ModelsMgr;
+    QSortFilterProxyModel       m_ProxyModel;
+    QSortFilterProxyModel       m_ProxyModelReversed;
     bool                        m_IsReversed = false;
 
     struct SubbtitleContext
