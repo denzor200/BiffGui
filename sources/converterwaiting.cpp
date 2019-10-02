@@ -87,7 +87,7 @@ void ConverterWaiting_ShowPersonList::StartProcess(const QString &SubbtitlePath)
 {
     QStringList Arguments;
     Arguments.reserve(2);
-    Arguments.push_back("-show_person_list");
+    Arguments.push_back("show_person_list");
     Arguments.push_back(SubbtitlePath);
     // TODO: make normal path
     getProcess()->start("D:\\repos\\subtitles\\Debug\\converter", Arguments);
@@ -120,82 +120,23 @@ ConverterWaiting_SaveSubbtitle::ConverterWaiting_SaveSubbtitle(QWidget *parent) 
                    );
 }
 
-void ConverterWaiting_SaveSubbtitle::StartProcess(const QString &InFile, const QString &OutFile)
+void ConverterWaiting_SaveSubbtitle::StartProcess(const QString &InFile, const QString &OutFile, const QVector<QPair<QString,QString>>& params)
 {
     QStringList Arguments;
-    QString Suffix = QFileInfo(OutFile).suffix();
-
-    if (Suffix == "ass")
+    Arguments.reserve(3 + params.size()*2);
+    Arguments.push_back("make_subbtitle");
+    Arguments.push_back(InFile);
+    Arguments.push_back(OutFile);
+    for (const auto& pair : params)
     {
-        Arguments.reserve(3);
-        Arguments.push_back("-make_ass");
-        Arguments.push_back(InFile);
-        Arguments.push_back(OutFile);
-        // TODO: make normal path
-        getProcess()->start("D:\\repos\\subtitles\\Debug\\converter", Arguments);
+        Arguments.push_back(pair.first);
+        Arguments.push_back(pair.second);
     }
-    else if (Suffix == "srt") {
-        Arguments.reserve(3);
-        Arguments.push_back("-make_srt");
-        Arguments.push_back(InFile);
-        Arguments.push_back(OutFile);
-        // TODO: make normal path
-        getProcess()->start("D:\\repos\\subtitles\\Debug\\converter", Arguments);
-    }
-    else {
-        QMessageBox::critical(this, "Ошибка", "Расширение выходного файла не опознано");
-    }
+    // TODO: make normal path
+    getProcess()->start("D:\\repos\\subtitles\\Debug\\converter", Arguments);
 }
 
 void ConverterWaiting_SaveSubbtitle::slotFinished(int Status, QProcess::ExitStatus)
-{
-    m_ProcessStatus = Status;
-}
-
-
-ConverterWaiting_SaveMySubbtitle::ConverterWaiting_SaveMySubbtitle(QWidget *parent) :
-    ConverterWaiting(false,parent)
-{
-    connect(getProcess(),
-                    SIGNAL(finished(int, QProcess::ExitStatus)),
-                    SLOT(slotFinished(int, QProcess::ExitStatus))
-                   );
-}
-
-void ConverterWaiting_SaveMySubbtitle::StartProcess(
-        const QString &InFile,
-        const QString& PersonsFile,
-        const QString &OutFile)
-{
-    QStringList Arguments;
-    QString Suffix = QFileInfo(OutFile).suffix();
-
-    // TODO: Мы должны передавать параметром имитовставку от PersonsFile, поскольку это временный не залоченный файл
-    if (Suffix == "ass")
-    {
-        Arguments.reserve(4);
-        Arguments.push_back("-make_my_ass");
-        Arguments.push_back(InFile);
-        Arguments.push_back(PersonsFile);
-        Arguments.push_back(OutFile);
-        // TODO: make normal path
-        getProcess()->start("D:\\repos\\subtitles\\Debug\\converter", Arguments);
-    }
-    else if (Suffix == "srt") {
-        Arguments.reserve(4);
-        Arguments.push_back("-make_my_srt");
-        Arguments.push_back(InFile);
-        Arguments.push_back(PersonsFile);
-        Arguments.push_back(OutFile);
-        // TODO: make normal path
-        getProcess()->start("D:\\repos\\subtitles\\Debug\\converter", Arguments);
-    }
-    else {
-        QMessageBox::critical(this, "Ошибка", "Расширение выходного файла не опознано");
-    }
-}
-
-void ConverterWaiting_SaveMySubbtitle::slotFinished(int Status, QProcess::ExitStatus)
 {
     m_ProcessStatus = Status;
 }

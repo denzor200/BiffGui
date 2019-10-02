@@ -15,7 +15,7 @@ public:
     explicit Generating(QWidget *parent = nullptr);
     ~Generating();
 
-    void StartProcess(const QString& InFile, const QString& TableFile, const QString& OutDir, const QString& CRC32_TableFile);
+    void StartProcess(const QString& InFile, const QString& TableFile, const QString& OutDir, const QVector<QPair<QString,QString>>& params);
 
 private:
     void StdoutReadLines();

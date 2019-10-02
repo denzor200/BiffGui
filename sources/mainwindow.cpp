@@ -113,7 +113,9 @@ void MainWindow::makeDoc()
             {
                 // Using temp file in another child process..
                 Generating w(this);
-                w.StartProcess(InFile, tempFilename, OutDir, Utils::hexStr(reinterpret_cast<uint8_t*>(&CRC32), sizeof(CRC32)).c_str());
+                // Utils::hexStr(reinterpret_cast<uint8_t*>(&CRC32), sizeof(CRC32)).c_str()
+                QVector<QPair<QString,QString>> Params;
+                w.StartProcess(InFile, tempFilename, OutDir, Params);
                 w.exec();
             }
             else {
@@ -259,7 +261,8 @@ void MainWindow::on_action_save_triggered()
                         CurrentDir.absoluteFilePath(outFileName));
 
             ConverterWaiting_SaveSubbtitle waiting;
-            waiting.StartProcess( m_OpenedSubbtitle->FileName, outFileName);
+            QVector<QPair<QString,QString>> Params;
+            waiting.StartProcess( m_OpenedSubbtitle->FileName, outFileName, Params);
             int execStatus = waiting.exec();
             bool isCanceled = waiting.IsCanceledByUser();
             int procStatus = waiting.GetProcessStatus();
@@ -404,8 +407,11 @@ void MainWindow::on_action_save_individual_triggered()
                 if (m_ModelsMgr->SavePersons(tempFilename, true))
                 {
                     // Using temp file in another child process..
-                    ConverterWaiting_SaveMySubbtitle waiting;
-                    waiting.StartProcess( m_OpenedSubbtitle->FileName,tempFilename, outFileName);
+                    ConverterWaiting_SaveSubbtitle waiting;
+                    QVector<QPair<QString,QString>> Params;
+                    Params.reserve(1);
+                    Params.push_back({"-p", tempFilename});
+                    waiting.StartProcess( m_OpenedSubbtitle->FileName, outFileName, Params);
                     int execStatus = waiting.exec();
                     bool isCanceled = waiting.IsCanceledByUser();
                     int procStatus = waiting.GetProcessStatus();

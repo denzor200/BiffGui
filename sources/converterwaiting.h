@@ -56,23 +56,7 @@ class ConverterWaiting_SaveSubbtitle : public ConverterWaiting
 public:
     explicit ConverterWaiting_SaveSubbtitle(QWidget *parent = nullptr);
 
-    void StartProcess(const QString& InFile, const QString& OutFile);
-    int GetProcessStatus() const {return m_ProcessStatus;}
-
-private slots:
-    void slotFinished(int, QProcess::ExitStatus);
-
-private:
-    int m_ProcessStatus = -1;
-};
-
-class ConverterWaiting_SaveMySubbtitle : public ConverterWaiting
-{
-    Q_OBJECT
-public:
-    explicit ConverterWaiting_SaveMySubbtitle(QWidget *parent = nullptr);
-
-    void StartProcess(const QString& InFile, const QString& PersonsFile, const QString& OutFile);
+    void StartProcess(const QString& InFile, const QString& OutFile, const QVector<QPair<QString,QString>>& params);
     int GetProcessStatus() const {return m_ProcessStatus;}
 
 private slots:
