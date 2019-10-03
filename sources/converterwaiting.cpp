@@ -157,7 +157,7 @@ void ConverterWaiting_ResetSetting::StartProcess()
 {
     QStringList Arguments;
     Arguments.reserve(1);
-    Arguments.push_back("-reset_settings");
+    Arguments.push_back("reset_settings");
     // TODO: make normal path
     getProcess()->start("D:\\repos\\subtitles\\Debug\\converter", Arguments);
 }
