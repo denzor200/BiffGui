@@ -349,6 +349,8 @@ namespace MainTableModelUtils
 class MainTableModel;
 class MainTableModel_Reversed;
 
+class ControlInfo;
+
 class MainTableModelsManager : public QObject
 {
     Q_OBJECT
@@ -365,7 +367,7 @@ public:
     void LoadPersons(const QStringList& Persons);
 
     bool OpenTable(const QString& Path);
-    bool SaveTable(const QString& Path, bool DisableDenied = false, uint32_t* CRC32 = NULL) const;
+    bool SaveTable(const QString& Path, bool DisableDenied = false, ControlInfo* ctrl = NULL) const;
 
     void ClearAll();
 

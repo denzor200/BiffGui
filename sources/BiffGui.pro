@@ -44,6 +44,7 @@ SOURCES += \
 HEADERS += \
         ActorName.h \
         commandlineparser.h \
+        controlinfo.h \
         convertersyncapi.h \
         converterwaiting.h \
         directoriesregistry.h \

@@ -24,6 +24,7 @@
 #include "utils.h"
 #include "convertersyncapi.h"
 #include "converterwaiting.h"
+#include "controlinfo.h"
 
 static const char* SUBBTITLES_EXTENSIONS = "Все поддерживаемые форматы(*.ass *.srt);;"
                                            "Advanced SubStation Alpha (*.ass);;"
@@ -106,15 +107,17 @@ void MainWindow::makeDoc()
             CurrentDir.absoluteFilePath(OutDir));
 
         const QString& tempFilename = Utils::GetNewTempFilename();
-        uint32_t CRC32 = 0;
+        ControlInfo ctrl;
         if (tempFilename != "") {
             // Saving to temp file..
-            if (m_ModelsMgr->SaveTable(tempFilename, true, &CRC32))
+            if (m_ModelsMgr->SaveTable(tempFilename, true, &ctrl))
             {
                 // Using temp file in another child process..
                 Generating w(this);
-                // Utils::hexStr(reinterpret_cast<uint8_t*>(&CRC32), sizeof(CRC32)).c_str()
                 QVector<QPair<QString,QString>> Params;
+                Params.reserve(1);
+                // TODO: завести список "коротких" параметров где нибудь в h-нике
+                Params.push_back({"-z", PrintControlInfo(ctrl)});
                 w.StartProcess(InFile, tempFilename, OutDir, Params);
                 w.exec();
             }

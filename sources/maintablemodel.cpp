@@ -1,3 +1,4 @@
+#include "controlinfo.h"
 #include "maintablemodel.h"
 #include <algorithm>
 #include <limits>
@@ -1220,7 +1221,7 @@ bool MainTableModelsManager::OpenTable(const QString &Path)
 
 extern "C" uint_least32_t Crc32(const unsigned char * buf, size_t len);
 
-bool MainTableModelsManager::SaveTable(const QString &Path, bool DisableDenied, uint32_t* CRC32) const
+bool MainTableModelsManager::SaveTable(const QString &Path, bool DisableDenied, ControlInfo* ctrl) const
 {
     QByteArray memoryFileOut;
     QFile fileOut(Path);
@@ -1237,11 +1238,12 @@ bool MainTableModelsManager::SaveTable(const QString &Path, bool DisableDenied, 
 
         // crc32
         // TODO: оптимизировать по памяти.
-        if (CRC32)
+        if (ctrl)
         {
-            *CRC32 = Crc32(
+            ctrl->CRC = Crc32(
                reinterpret_cast<uint8_t*>(const_cast<char*>(memoryFileOut.data())),
                static_cast<size_t>(memoryFileOut.size()));
+            ctrl->Size = static_cast<uint32_t>(memoryFileOut.size());
         }
 
         fileOut.close();
