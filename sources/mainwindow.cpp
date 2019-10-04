@@ -106,33 +106,28 @@ void MainWindow::makeDoc()
         Settings.setValue(DirectoriesRegistry::DOC_OUTDIR,
             CurrentDir.absoluteFilePath(OutDir));
 
-        const QString& tempFilename = Utils::GetNewTempFilename();
-        ControlInfo ctrl;
-        if (tempFilename != "") {
+        Utils::TempFilenameGuard tempTableFilename;
+        Utils::TempFilenameGuard tempDecisionsFilename;
+        ControlInfo ctrlTable;
+        ControlInfo ctrlDecisions;
+        if (static_cast<QString>(tempTableFilename) != "" && static_cast<QString>(tempDecisionsFilename) != "") {
             // Saving to temp file..
-            if (m_ModelsMgr->SaveTable(tempFilename, true, &ctrl))
+            if (m_ModelsMgr->SaveTable(tempTableFilename, true, &ctrlTable) && SaveDecisions(tempDecisionsFilename, &ctrlDecisions))
             {
-                // Using temp file in another child process..
+                // Using temp files in another child process..
                 Generating w(this);
                 QVector<QPair<QString,QString>> Params;
                 Params.reserve(2);
                 // TODO: завести список "коротких" параметров где нибудь в h-нике
-                Params.push_back({"-z", PrintControlInfo(ctrl)});
+                Params.push_back({"-z", PrintControlInfo(ctrlTable)});
                 Params.push_back({"-c", m_OpenedSubbtitle->CtrlData});
-                w.StartProcess(InFile, tempFilename, OutDir, Params);
+                w.StartProcess(InFile, tempTableFilename, OutDir, Params);
                 w.exec();
-            }
-            else {
-                showFileOpenWError(tempFilename);
-            }
 
-            // темповый файл нам больше не нужен..
-            // TODO: потестировать при отсутствии файла, или отсутствии прав
-            QFile::remove(tempFilename);
+                return; // all right
+            }
         }
-        else {
-            showMainTableWError();
-        }
+        showTempFileOpenWError();
     }
 }
 
@@ -202,9 +197,46 @@ void MainWindow::showFileOpenWError(const QString &fileName) const
     QMessageBox::critical(QApplication::activeWindow(), "Что-то пошло не так..", ss.str().c_str());
 }
 
-void MainWindow::showMainTableWError() const
+void MainWindow::showTempFileOpenWError() const
 {
-    QMessageBox::critical(QApplication::activeWindow(), "Что-то пошло не так..", "Не удалось открыть временный файл для записи главной таблицы");
+    QMessageBox::critical(QApplication::activeWindow(), "Что-то пошло не так..", "Не удалось открыть временный файл на запись");
+}
+
+extern "C" uint_least32_t Crc32(const unsigned char * buf, size_t len);
+
+bool MainWindow::SaveDecisions(const QString &path, ControlInfo *ctrl) const
+{
+    if (!m_OpenedSubbtitle)
+        return false;
+
+    QByteArray memoryFileOut;
+    QFile fileOut(path);
+    if (fileOut.open(QIODevice::WriteOnly))
+    {
+        {
+            QTextStream streamFileOut(&memoryFileOut);
+            streamFileOut.setCodec("UTF-8");
+            streamFileOut.setGenerateByteOrderMark(true);
+            for (const QString& line : m_OpenedSubbtitle->UsersDecisions)
+                streamFileOut << line << endl;
+            streamFileOut.flush();
+        }
+        fileOut.write(memoryFileOut);
+
+        // crc32
+        // TODO: оптимизировать по памяти.
+        if (ctrl)
+        {
+            ctrl->CRC = Crc32(
+               reinterpret_cast<uint8_t*>(const_cast<char*>(memoryFileOut.data())),
+               static_cast<size_t>(memoryFileOut.size()));
+            ctrl->Size = static_cast<uint32_t>(memoryFileOut.size());
+        }
+
+        fileOut.close();
+        return true;
+    }
+    return false;
 }
 
 void MainWindow::on_action_open_triggered()
@@ -242,6 +274,7 @@ void MainWindow::on_action_open_triggered()
                     SubbtitleContext* ctx = new SubbtitleContext();
                     ctx->FileName = subbtitleFilename;
                     ctx->CtrlData = CRC;
+                    ctx->UsersDecisions = waiting.GetUsersDecisions();
                     m_OpenedSubbtitle = ctx;
                     setWindowTitle(subbtitleFilename + " - " + QApplication::applicationName());
                 }
@@ -452,7 +485,7 @@ void MainWindow::on_action_save_individual_triggered()
                 QFile::remove(tempFilename);
             }
             else {
-                showMainTableWError();
+                showTempFileOpenWError();
             }
         }
     }

@@ -43,6 +43,7 @@ public:
     int GetProcessStatus() const {return m_ProcessStatus;}
 
     bool GetCRC(QString& out) const;
+    const QStringList& GetUsersDecisions() const { return m_UsersDecisions; }
 
 private slots:
     void slotDataOnStdout();
@@ -53,6 +54,7 @@ private:
     bool HandleCommandFromConverter(int argc, char **argv);
 
 private:
+    QStringList m_UsersDecisions; // специально для субтитров .srt
     QString m_CRC;
     bool m_CRC_Initialized = false;
     QStringList& m_Persons;

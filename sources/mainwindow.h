@@ -26,7 +26,9 @@ public:
 
     void showFileOpenRError(const QString& fileName) const;
     void showFileOpenWError(const QString& fileName) const;
-    void showMainTableWError() const;
+    void showTempFileOpenWError() const;
+
+    bool SaveDecisions(const QString& path, ControlInfo* ctrl) const;
 
 private slots:
     void on_action_open_triggered();
@@ -70,6 +72,7 @@ private:
     {
         QString FileName;
         QString CtrlData;
+        QStringList UsersDecisions; // специально для субтитров .srt
     };
     SubbtitleContext*           m_OpenedSubbtitle = nullptr;
 };

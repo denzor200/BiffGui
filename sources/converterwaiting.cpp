@@ -137,18 +137,18 @@ bool ConverterWaiting_ShowPersonList::StdoutReadLines()
 
 bool ConverterWaiting_ShowPersonList::HandleCommandFromConverter(int argc, char **argv)
 {
-    if (argc > 0)
+    if (argc >= 1)
     {
         if (strcmp(argv[0], "person")==0)
         {
-            if (argc > 1)
+            if (argc >= 2)
             {
                 m_Persons << argv[1];
             }
         }
         else if (strcmp(argv[0], "input_file_crc")==0)
         {
-            if (argc > 1)
+            if (argc >= 2)
             {
                 if (m_CRC_Initialized)
                 {
@@ -161,6 +161,23 @@ bool ConverterWaiting_ShowPersonList::HandleCommandFromConverter(int argc, char 
                 }
                 m_CRC = argv[1];
                 m_CRC_Initialized = true;
+            }
+        }
+        else if (strcmp(argv[0], "users_decision")==0)
+        {
+            if (argc >= 5)
+            {
+                const char* phrase = argv[1];
+                const char* line = argv[2];
+                const char* status = argv[3];
+                const char* always = argv[4];
+                m_UsersDecisions.push_back(
+                            QString()
+                            + "\"users_decision\" "
+                            + "\"" + phrase+ "\" "
+                            + "\"" + line+ "\" "
+                            + "\"" + status+ "\" "
+                            + "\"" + always+ "\"");
             }
         }
     }
