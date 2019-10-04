@@ -275,6 +275,8 @@ void MainWindow::on_action_save_triggered()
 
             ConverterWaiting_SaveSubbtitle waiting;
             QVector<QPair<QString,QString>> Params;
+            Params.reserve(1);
+            Params.push_back({"-c", m_OpenedSubbtitle->CtrlData});
             waiting.StartProcess( m_OpenedSubbtitle->FileName, outFileName, Params);
             int execStatus = waiting.exec();
             bool isCanceled = waiting.IsCanceledByUser();
