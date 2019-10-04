@@ -1,3 +1,4 @@
+#include "commandlineparser.h"
 #include "converterwaiting.h"
 #include "ui_converterwaiting.h"
 
@@ -25,7 +26,7 @@ ConverterWaiting::ConverterWaiting(bool DisableCancel,QWidget *parent) :
     movie->start();
     lbl->show();
 
-    QPushButton* b = NULL;
+    QPushButton* b = nullptr;
     if (!DisableCancel)
     {
         b = new QPushButton(this);
@@ -95,19 +96,40 @@ void ConverterWaiting_ShowPersonList::StartProcess(const QString &SubbtitlePath)
 
 void ConverterWaiting_ShowPersonList::slotDataOnStdout()
 {
-    while (getProcess()->canReadLine())
-    {
-        m_Persons << QString::fromUtf8(getProcess()->readLine());
-    }
+    StdoutReadLines();
 }
 
 void ConverterWaiting_ShowPersonList::slotFinished(int Status, QProcess::ExitStatus)
 {
+    StdoutReadLines();
+    m_ProcessStatus = Status;
+}
+
+void ConverterWaiting_ShowPersonList::StdoutReadLines()
+{
     while (getProcess()->canReadLine())
     {
-        m_Persons << QString::fromUtf8(getProcess()->readLine());
+        QString Value = QString::fromUtf8(getProcess()->readLine());
+        Value.remove("\r\n");
+        Value.remove('\r');
+        Value.remove('\n');
+        CommandLineParser P(Value);
+        HandleCommandFromConverter(P.argc(), P.argv());
     }
-    m_ProcessStatus = Status;
+}
+
+void ConverterWaiting_ShowPersonList::HandleCommandFromConverter(int argc, char **argv)
+{
+    if (argc > 0)
+    {
+        if (strcmp(argv[0], "person")==0)
+        {
+            if (argc > 1)
+            {
+                m_Persons << argv[1];
+            }
+        }
+    }
 }
 
 

@@ -46,6 +46,10 @@ private slots:
     void slotFinished(int, QProcess::ExitStatus);
 
 private:
+    void StdoutReadLines();
+    void HandleCommandFromConverter(int argc, char **argv);
+
+private:
     QStringList& m_Persons;
     int m_ProcessStatus = -1;
 };
