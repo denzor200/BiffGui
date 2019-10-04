@@ -120,8 +120,9 @@ void MainWindow::makeDoc()
                 Params.reserve(2);
                 // TODO: завести список "коротких" параметров где нибудь в h-нике
                 Params.push_back({"-z", PrintControlInfo(ctrlTable)});
+                Params.push_back({"-d", PrintControlInfo(ctrlDecisions)});
                 Params.push_back({"-c", m_OpenedSubbtitle->CtrlData});
-                w.StartProcess(InFile, tempTableFilename, OutDir, Params);
+                w.StartProcess(InFile, tempTableFilename, OutDir, tempDecisionsFilename, Params);
                 w.exec();
 
                 return; // all right

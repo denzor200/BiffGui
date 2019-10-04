@@ -35,17 +35,18 @@ Generating::~Generating()
     delete ui;
 }
 
-void Generating::StartProcess(const QString &InFile, const QString& TableFile, const QString &OutDir, const QVector<QPair<QString,QString>>& params)
+void Generating::StartProcess(const QString &InFile, const QString& TableFile, const QString &OutDir, const QString& Decisions, const QVector<QPair<QString,QString>>& params)
 {
     // TODO: make normal command line
     // TODO: потестить на путях с пробелами и кириллицей
     // TODO: темповому файлу ConfigFile нужна имитозащита
     QStringList Arguments;
-    Arguments.reserve(4+params.size()*2);
+    Arguments.reserve(5+params.size()*2);
     Arguments.push_back("make_docx");
     Arguments.push_back(InFile);
     Arguments.push_back(TableFile);
     Arguments.push_back(OutDir);
+    Arguments.push_back(Decisions);
     for (const auto& pair : params)
     {
         Arguments.push_back(pair.first);
