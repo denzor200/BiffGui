@@ -115,9 +115,10 @@ void MainWindow::makeDoc()
                 // Using temp file in another child process..
                 Generating w(this);
                 QVector<QPair<QString,QString>> Params;
-                Params.reserve(1);
+                Params.reserve(2);
                 // TODO: завести список "коротких" параметров где нибудь в h-нике
                 Params.push_back({"-z", PrintControlInfo(ctrl)});
+                Params.push_back({"-c", m_OpenedSubbtitle->CtrlData});
                 w.StartProcess(InFile, tempFilename, OutDir, Params);
                 w.exec();
             }
@@ -224,23 +225,32 @@ void MainWindow::on_action_open_triggered()
                     CurrentDir.absoluteFilePath(subbtitleFilename));
 
         QStringList personsList;
+        QString CRC;
         ConverterWaiting_ShowPersonList waiting(personsList);
         waiting.StartProcess( subbtitleFilename);
         int execStatus = waiting.exec();
         bool isCanceled = waiting.IsCanceledByUser();
         int procStatus = waiting.GetProcessStatus();
+        bool isCRC_Inited = waiting.GetCRC(CRC);
         if (!isCanceled)
         {
-            if (0 == execStatus && 0 == procStatus)
+            if (isCRC_Inited)
             {
-                m_ModelsMgr->LoadPersons(personsList);
-                SubbtitleContext* ctx = new SubbtitleContext();
-                ctx->FileName = subbtitleFilename;
-                m_OpenedSubbtitle = ctx;
-                setWindowTitle(subbtitleFilename + " - " + QApplication::applicationName());
+                if (0 == execStatus && 0 == procStatus)
+                {
+                    m_ModelsMgr->LoadPersons(personsList);
+                    SubbtitleContext* ctx = new SubbtitleContext();
+                    ctx->FileName = subbtitleFilename;
+                    ctx->CtrlData = CRC;
+                    m_OpenedSubbtitle = ctx;
+                    setWindowTitle(subbtitleFilename + " - " + QApplication::applicationName());
+                }
+                else {
+                    QMessageBox::critical(this, "Что-то пошло не так..", "Не удалось сгенерировать список персонажей");
+                }
             }
             else {
-                QMessageBox::critical(this, "Что-то пошло не так..", "Не удалось сгенерировать список персонажей");
+                QMessageBox::critical(this, "Что-то пошло не так..", "Дочерний процесс не послал контрольную сумму входного файла");
             }
         }
     }

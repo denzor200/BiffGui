@@ -69,6 +69,7 @@ private:
     struct SubbtitleContext
     {
         QString FileName;
+        QString CtrlData;
     };
     SubbtitleContext*           m_OpenedSubbtitle = nullptr;
 };

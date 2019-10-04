@@ -61,13 +61,18 @@ ConverterWaiting::~ConverterWaiting()
 
 void ConverterWaiting::ButtonClicked(bool)
 {
-    close();
-    m_CanceledByUser = true;
+    cancel();
 }
 
 void ConverterWaiting::slotFinished(int, QProcess::ExitStatus)
 {
     close();
+}
+
+void ConverterWaiting::cancel()
+{
+    close();
+    m_CanceledByUser = true;
 }
 
 ConverterWaiting_ShowPersonList::ConverterWaiting_ShowPersonList(QStringList& Persons,QWidget *parent) :
@@ -94,18 +99,28 @@ void ConverterWaiting_ShowPersonList::StartProcess(const QString &SubbtitlePath)
     getProcess()->start("D:\\repos\\subtitles\\Debug\\converter", Arguments);
 }
 
+bool ConverterWaiting_ShowPersonList::GetCRC(QString &out) const
+{
+    if (!m_CRC_Initialized)
+        return false;
+    out = m_CRC;
+    return true;
+}
+
 void ConverterWaiting_ShowPersonList::slotDataOnStdout()
 {
-    StdoutReadLines();
+    if (!StdoutReadLines())
+        cancel();
 }
 
 void ConverterWaiting_ShowPersonList::slotFinished(int Status, QProcess::ExitStatus)
 {
-    StdoutReadLines();
+    if (!StdoutReadLines())
+        cancel();
     m_ProcessStatus = Status;
 }
 
-void ConverterWaiting_ShowPersonList::StdoutReadLines()
+bool ConverterWaiting_ShowPersonList::StdoutReadLines()
 {
     while (getProcess()->canReadLine())
     {
@@ -114,11 +129,13 @@ void ConverterWaiting_ShowPersonList::StdoutReadLines()
         Value.remove('\r');
         Value.remove('\n');
         CommandLineParser P(Value);
-        HandleCommandFromConverter(P.argc(), P.argv());
+        if (!HandleCommandFromConverter(P.argc(), P.argv()))
+            return false;
     }
+    return true;
 }
 
-void ConverterWaiting_ShowPersonList::HandleCommandFromConverter(int argc, char **argv)
+bool ConverterWaiting_ShowPersonList::HandleCommandFromConverter(int argc, char **argv)
 {
     if (argc > 0)
     {
@@ -129,7 +146,25 @@ void ConverterWaiting_ShowPersonList::HandleCommandFromConverter(int argc, char 
                 m_Persons << argv[1];
             }
         }
+        else if (strcmp(argv[0], "input_file_crc")==0)
+        {
+            if (argc > 1)
+            {
+                if (m_CRC_Initialized)
+                {
+                    QMessageBox::critical(
+                                QApplication::activeWindow(),
+                                "Что-то пошло не так..",
+                                "От дочернего процесса пришла более чем одна контрольная сумма.\n"
+                                "Ожидалась только одна контрольная сумма от входного файла.");
+                    return false;
+                }
+                m_CRC = argv[1];
+                m_CRC_Initialized = true;
+            }
+        }
     }
+    return true;
 }
 
 

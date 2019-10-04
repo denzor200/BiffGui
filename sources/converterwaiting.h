@@ -25,6 +25,7 @@ private slots:
 
 protected:
     QProcess* getProcess() {return m_Process;}
+    void cancel();
 
 private:
     Ui::ConverterWaiting *ui;
@@ -41,15 +42,19 @@ public:
     void StartProcess( const QString &SubbtitlePath);
     int GetProcessStatus() const {return m_ProcessStatus;}
 
+    bool GetCRC(QString& out) const;
+
 private slots:
     void slotDataOnStdout();
     void slotFinished(int, QProcess::ExitStatus);
 
 private:
-    void StdoutReadLines();
-    void HandleCommandFromConverter(int argc, char **argv);
+    bool StdoutReadLines();
+    bool HandleCommandFromConverter(int argc, char **argv);
 
 private:
+    QString m_CRC;
+    bool m_CRC_Initialized = false;
     QStringList& m_Persons;
     int m_ProcessStatus = -1;
 };
