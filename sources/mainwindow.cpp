@@ -111,10 +111,10 @@ void MainWindow::makeDoc()
         ControlInfo ctrlTable;
         ControlInfo ctrlDecisions;
         if (static_cast<QString>(tempTableFilename) != "" && static_cast<QString>(tempDecisionsFilename) != "") {
-            // Saving to temp file..
+            // Saving to temp files..
             if (
                     tempTableFilename.Write([&](auto W){m_ModelsMgr->SaveTable(W, true);}, &ctrlTable) &&
-                    SaveDecisions(tempDecisionsFilename, &ctrlDecisions))
+                    tempDecisionsFilename.Write([&](auto W){SaveDecisions(W);}, &ctrlDecisions))
             {
                 // Using temp files in another child process..
                 Generating w(this);
@@ -204,43 +204,17 @@ void MainWindow::showTempFileOpenWError() const
     QMessageBox::critical(QApplication::activeWindow(), "Что-то пошло не так..", "Не удалось открыть временный файл на запись");
 }
 
-extern "C" uint_least32_t Crc32(const unsigned char * buf, size_t len);
-
-bool MainWindow::SaveDecisions(const QString &path, ControlInfo *ctrl) const
+void MainWindow::SaveDecisions(QByteArray *StreamOut) const
 {
-    if (!m_OpenedSubbtitle)
-        return false;
+    Q_ASSERT(m_OpenedSubbtitle);
 
-    // TODO: refactor it
-    QByteArray memoryFileOut;
-    QFile fileOut(path);
-    if (fileOut.open(QIODevice::WriteOnly))
-    {
-        {
-            QTextStream streamFileOut(&memoryFileOut);
-            streamFileOut.setCodec("UTF-8");
-            streamFileOut.setGenerateByteOrderMark(true);
-            for (const QString& line : m_OpenedSubbtitle->UsersDecisions)
-                streamFileOut << line << endl;
-            streamFileOut << endl;
-            streamFileOut.flush();
-        }
-        fileOut.write(memoryFileOut);
-
-        // crc32
-        // TODO: оптимизировать по памяти.
-        if (ctrl)
-        {
-            ctrl->CRC = Crc32(
-               reinterpret_cast<uint8_t*>(const_cast<char*>(memoryFileOut.data())),
-               static_cast<size_t>(memoryFileOut.size()));
-            ctrl->Size = static_cast<uint32_t>(memoryFileOut.size());
-        }
-
-        fileOut.close();
-        return true;
-    }
-    return false;
+    QTextStream streamFileOut(StreamOut);
+    streamFileOut.setCodec("UTF-8");
+    streamFileOut.setGenerateByteOrderMark(true);
+    for (const QString& line : m_OpenedSubbtitle->UsersDecisions)
+        streamFileOut << line << endl;
+    streamFileOut << endl;
+    streamFileOut.flush();
 }
 
 void MainWindow::SaveSubbtitle(const QString &outFileName, bool isIndividual)
@@ -254,7 +228,7 @@ void MainWindow::SaveSubbtitle(const QString &outFileName, bool isIndividual)
     if (static_cast<QString>(tempDecisionsFilename) != "" && (isFull || static_cast<QString>(tempPersonsFilename) != ""))
     {
         if (
-                SaveDecisions(tempDecisionsFilename, &ctrlDecisions) &&
+                tempDecisionsFilename.Write([&](auto W){SaveDecisions(W);}, &ctrlDecisions) &&
                 (isFull || tempPersonsFilename.Write([&](auto W){m_ModelsMgr->SavePersons(W, true);}, &ctrlPersons)))
         {
             ConverterWaiting_SaveSubbtitle waiting;

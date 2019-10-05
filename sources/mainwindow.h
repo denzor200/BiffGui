@@ -28,7 +28,7 @@ public:
     void showFileOpenWError(const QString& fileName) const;
     void showTempFileOpenWError() const;
 
-    bool SaveDecisions(const QString& path, ControlInfo* ctrl) const;
+    void SaveDecisions(QByteArray* StreamOut) const;
 
     void SaveSubbtitle(const QString& outFileName, bool isIndividual);
 
