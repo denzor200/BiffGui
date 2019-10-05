@@ -26,6 +26,10 @@
 #include "converterwaiting.h"
 #include "controlinfo.h"
 
+#ifdef _DEBUG
+#include <QAbstractItemModelTester>
+#endif // _DEBUG
+
 static const char* SUBBTITLES_EXTENSIONS = "Все поддерживаемые форматы(*.ass *.srt);;"
                                            "Advanced SubStation Alpha (*.ass);;"
                                            "SubRip (*.srt)";
@@ -57,9 +61,13 @@ MainWindow::MainWindow(QWidget *parent) :
     m_ProxyModelReversed.setSourceModel( m_ModelsMgr->GetModelReversed() );
     ui->tableView_Reversed->setModel( &m_ProxyModelReversed );
 
-
     // под конец решили, что перевернутая таблица по умолчанию все же лучше..
     ReverseTable();
+
+#ifdef _DEBUG
+    new QAbstractItemModelTester(m_ModelsMgr->GetModel(), QAbstractItemModelTester::FailureReportingMode::Fatal, this);
+    new QAbstractItemModelTester(m_ModelsMgr->GetModelReversed(), QAbstractItemModelTester::FailureReportingMode::Fatal, this);
+#endif // _DEBUG
 }
 
 MainWindow::~MainWindow()
