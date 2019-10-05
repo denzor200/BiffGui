@@ -62,6 +62,6 @@ void ActorName::ShowForbidenSymbolsError(const QString& header)
     ss << "\t\t- , \"";
     if (header.size() !=0 )
         ss << std::endl << header.toUtf8().data();
-    QMessageBox::critical(QApplication::activeWindow(), "Ошибка", ss.str().c_str());
+    QMessageBox::warning(QApplication::activeWindow(), "Предупреждение", ss.str().c_str());
 }
 
