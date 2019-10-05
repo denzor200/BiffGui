@@ -231,6 +231,22 @@ void MainWindow::RemoveAllSelectedRows()
     }
 }
 
+void MainWindow::SetDenyValueToAll(bool value)
+{
+    QAbstractTableModel* model = nullptr;
+    if (m_IsReversed)
+        model = m_ModelsMgr->GetModelReversed();
+    else {
+        model = m_ModelsMgr->GetModel();
+    }
+    int count = model->rowCount();
+    for (int i=0;i<count;++i)
+    {
+        QModelIndex index = model->index(i, 2, QModelIndex());
+        model->setData(index, value, Qt::EditRole);
+    }
+}
+
 // В возвращаемом значении флаг - давал ли пользователь согласие на выволнение операции
 bool MainWindow::tryCloseFile()
 {
@@ -597,17 +613,29 @@ void MainWindow::on_action_about_this_triggered()
 
 void MainWindow::on_action_deny_all_triggered()
 {
-
+    SetDenyValueToAll(true);
 }
 
 void MainWindow::on_action_deny_disable_all_triggered()
 {
-
+    SetDenyValueToAll(false);
 }
 
 void MainWindow::on_action_remove_all_links_triggered()
 {
-
+    QAbstractTableModel* model = nullptr;
+    if (m_IsReversed)
+        model = m_ModelsMgr->GetModelReversed();
+    else {
+        model = m_ModelsMgr->GetModel();
+    }
+    int count = model->rowCount();
+    for (int i=0;i<count;++i)
+    {
+        QModelIndex index = model->index(i, 1, QModelIndex());
+        QStringList empty;
+        model->setData(index, empty, Qt::EditRole);
+    }
 }
 
 void MainWindow::on_action_register_software_triggered()

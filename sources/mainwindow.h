@@ -24,6 +24,8 @@ public:
     void InsertRow();
     void RemoveAllSelectedRows();
 
+    void SetDenyValueToAll(bool value);
+
     // В возвращаемом значении флаг - давал ли пользователь согласие на выволнение операции
     bool tryCloseFile();
 
