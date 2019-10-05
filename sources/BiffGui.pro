@@ -43,6 +43,7 @@ SOURCES += \
 
 HEADERS += \
         ActorName.h \
+        build_defs.h \
         commandlineparser.h \
         controlinfo.h \
         convertersyncapi.h \

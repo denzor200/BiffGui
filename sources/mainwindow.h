@@ -21,6 +21,9 @@ public:
     void makeDoc();
     void ReverseTable();
 
+    void InsertRow();
+    void RemoveAllSelectedRows();
+
     // В возвращаемом значении флаг - давал ли пользователь согласие на выволнение операции
     bool tryCloseFile();
 
@@ -52,16 +55,22 @@ private slots:
     void on_action_save_individual_triggered();
 
     void on_action_make_shared_flag_triggered();
-
     void on_action_make_individual_flag_triggered();
 
     void on_toolButton_Insert_clicked();
-
     void on_toolButton_Delete_clicked();
-
     void on_toolButton_Reverse_clicked();
 
     void on_commandLinkButton_makeDoc_clicked();
+
+    void on_action_select_all_triggered();
+    void on_action_about_this_triggered();
+    void on_action_deny_all_triggered();
+    void on_action_deny_disable_all_triggered();
+    void on_action_remove_all_links_triggered();
+    void on_action_register_software_triggered();
+    void on_action_add_triggered();
+    void on_action_remove_triggered();
 
 private:
     Ui::MainWindow* ui;

@@ -9,6 +9,10 @@ struct ControlInfo;
 
 namespace Utils
 {
+
+    const char* compileDatetime();
+    std::string compilerString();
+
     // Возвращает или путь, или пустую строку
     // Ответственность за удаление временного файла переносится на пользователя
     QString GetNewTempFilename();

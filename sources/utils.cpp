@@ -3,6 +3,60 @@
 #include <sstream>
 #include <iomanip>
 #include "controlinfo.h"
+#include "build_defs.h"
+
+static const char completeVersion[] =
+{
+#if defined(VERSION_MAJOR_INIT) && defined(VERSION_MINOR_INIT)
+    VERSION_MAJOR_INIT,
+    '.',
+    VERSION_MINOR_INIT,
+    '-', 'V', '-',
+#endif
+    BUILD_YEAR_CH0, BUILD_YEAR_CH1, BUILD_YEAR_CH2, BUILD_YEAR_CH3,
+    '-',
+    BUILD_MONTH_CH0, BUILD_MONTH_CH1,
+    '-',
+    BUILD_DAY_CH0, BUILD_DAY_CH1,
+    ' ',
+    BUILD_HOUR_CH0, BUILD_HOUR_CH1,
+    ':',
+    BUILD_MIN_CH0, BUILD_MIN_CH1,
+    ':',
+    BUILD_SEC_CH0, BUILD_SEC_CH1,
+    '\0'
+};
+
+const char* Utils::compileDatetime()
+{
+    return completeVersion;
+}
+
+std::string Utils::compilerString()
+{
+#if defined(__clang__) // must be before GNU, because clang claims to be GNU too
+    std::string isAppleString;
+#if defined(__apple_build_version__) // Apple clang has other version numbers
+    isAppleString = (" (Apple)");
+#endif
+    return std::string("Clang ") + std::to_string(__clang_major__) + ('.')
+        + std::to_string(__clang_minor__) + isAppleString;
+#elif defined(__GNUC__) || defined(__MINGW32__)
+    return std::string("GCC ") + (__VERSION__);
+#elif defined(_MSC_VER)
+    if (_MSC_VER > 1999)
+        return std::string("MSVC <unknown>");
+    if (_MSC_VER >= 1910)
+        return std::string("MSVC 2017");
+    if (_MSC_VER >= 1900)
+        return std::string("MSVC 2015");
+    if (_MSC_VER >= 1800) // 1800: MSVC 2013 (yearly release cycle)
+        return std::string("MSVC ") + std::to_string(2008 + ((_MSC_VER / 100) - 13));
+    if (_MSC_VER >= 1500) // 1500: MSVC 2008, 1600: MSVC 2010, ... (2-year release cycle)
+        return std::string("MSVC ") + std::to_string(2008 + 2 * ((_MSC_VER / 100) - 15));
+#endif
+    return std::string("<unknown compiler>");
+}
 
 QString Utils::GetNewTempFilename()
 {

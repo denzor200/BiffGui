@@ -172,7 +172,10 @@
     <property name="title">
      <string>Справка</string>
     </property>
+    <addaction name="action_register_software"/>
+    <addaction name="separator"/>
     <addaction name="actionAbout_Qt"/>
+    <addaction name="action_about_this"/>
    </widget>
    <widget class="QMenu" name="menu">
     <property name="title">
@@ -188,7 +191,21 @@
     <addaction name="action_settings"/>
     <addaction name="menu_2"/>
    </widget>
+   <widget class="QMenu" name="menu_3">
+    <property name="title">
+     <string>Правка</string>
+    </property>
+    <addaction name="action_add"/>
+    <addaction name="action_remove"/>
+    <addaction name="separator"/>
+    <addaction name="action_select_all"/>
+    <addaction name="separator"/>
+    <addaction name="action_deny_all"/>
+    <addaction name="action_deny_disable_all"/>
+    <addaction name="action_remove_all_links"/>
+   </widget>
    <addaction name="menu_file"/>
+   <addaction name="menu_3"/>
    <addaction name="menu"/>
    <addaction name="menu_help"/>
   </widget>
@@ -213,6 +230,9 @@
    <property name="text">
     <string>Открыть субтитры</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+O</string>
+   </property>
   </action>
   <action name="action_settings">
    <property name="text">
@@ -223,6 +243,9 @@
    <property name="text">
     <string>Сохранить субтитры</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+Alt+S</string>
+   </property>
   </action>
   <action name="action_save_persons">
    <property name="text">
@@ -232,6 +255,9 @@
   <action name="action_close">
    <property name="text">
     <string>Закрыть субтитру</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+W</string>
    </property>
   </action>
   <action name="action_open_table">
@@ -274,6 +300,58 @@
    </property>
    <property name="text">
     <string>Создавать индивидуальные</string>
+   </property>
+  </action>
+  <action name="action_select_all">
+   <property name="text">
+    <string>Выделить все</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+A</string>
+   </property>
+  </action>
+  <action name="action_about_this">
+   <property name="text">
+    <string>О программе</string>
+   </property>
+   <property name="shortcut">
+    <string>F1</string>
+   </property>
+  </action>
+  <action name="action_deny_all">
+   <property name="text">
+    <string>Исключить все</string>
+   </property>
+  </action>
+  <action name="action_deny_disable_all">
+   <property name="text">
+    <string>Снять все исключения</string>
+   </property>
+  </action>
+  <action name="action_remove_all_links">
+   <property name="text">
+    <string>Снять все связи</string>
+   </property>
+  </action>
+  <action name="action_register_software">
+   <property name="text">
+    <string>Активировать полную версию</string>
+   </property>
+  </action>
+  <action name="action_add">
+   <property name="text">
+    <string>Добавить </string>
+   </property>
+   <property name="shortcut">
+    <string>Ins</string>
+   </property>
+  </action>
+  <action name="action_remove">
+   <property name="text">
+    <string>Удалить</string>
+   </property>
+   <property name="shortcut">
+    <string>Del</string>
    </property>
   </action>
  </widget>

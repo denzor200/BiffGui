@@ -160,6 +160,77 @@ void MainWindow::ReverseTable()
     }
 }
 
+void MainWindow::InsertRow()
+{
+    if (m_IsReversed)
+        m_ModelsMgr->GetModelReversed()->InsertRow();
+    else {
+        m_ModelsMgr->GetModel()->InsertRow();
+    }
+}
+
+void MainWindow::RemoveAllSelectedRows()
+{
+    IMainTableModel*        activeModel = nullptr;
+    QTableView*             activeView = nullptr;
+    QSortFilterProxyModel*  activeProxy = nullptr;
+    if (m_IsReversed)
+    {
+        activeView = ui->tableView_Reversed;
+        activeModel = m_ModelsMgr->GetModelReversed();
+        activeProxy = &m_ProxyModelReversed;
+    }
+    else {
+        activeView = ui->tableView;
+        activeModel = m_ModelsMgr->GetModel();
+        activeProxy = &m_ProxyModel;
+    }
+
+    // preparing..
+    QItemSelection selection( activeView->selectionModel()->selection() );
+
+    QList<int> rows;
+    QSet<int> rows_set; // rows_set only for checking
+    foreach( const QModelIndex & value, selection.indexes() ) {
+        const QModelIndex & translatedValue = activeProxy->mapToSource(value);
+        int id = translatedValue.row();
+        if (rows_set.find(id)==rows_set.end())
+        {
+            rows.append( id );
+            rows_set.insert(id);
+        }
+    }
+
+    std::sort( rows.begin(), rows.end() );
+
+    // checking for zero size
+    if (rows.size()==0)
+    {
+        return ;
+    }
+
+    // confirmation from user..
+    std::stringstream ss;
+    ss << "Вы действительно хотите удалить выделенные строки в таблице? (" << rows.size() << " шт.)";
+    auto reply = QMessageBox::question(this, "Подтверждение действия", ss.str().c_str(),
+                                    QMessageBox::Yes|QMessageBox::No);
+    if (reply!=QMessageBox::Yes)
+    {
+        return ;
+    }
+
+    // just doing..
+    // strictly in reverse order!!
+    int prev = -1;
+    for( int i = rows.count() - 1; i >= 0; i -= 1 ) {
+        int current = rows[i];
+        if( current != prev ) {
+            activeModel->RemoveRow(current);
+            prev = current;
+        }
+    }
+}
+
 // В возвращаемом значении флаг - давал ли пользователь согласие на выволнение операции
 bool MainWindow::tryCloseFile()
 {
@@ -485,73 +556,12 @@ void MainWindow::on_action_make_individual_flag_triggered()
 
 void MainWindow::on_toolButton_Insert_clicked()
 {
-    if (m_IsReversed)
-        m_ModelsMgr->GetModelReversed()->InsertRow();
-    else {
-        m_ModelsMgr->GetModel()->InsertRow();
-    }
+    InsertRow();
 }
 
 void MainWindow::on_toolButton_Delete_clicked()
 {
-    IMainTableModel*        activeModel = nullptr;
-    QTableView*             activeView = nullptr;
-    QSortFilterProxyModel*  activeProxy = nullptr;
-    if (m_IsReversed)
-    {
-        activeView = ui->tableView_Reversed;
-        activeModel = m_ModelsMgr->GetModelReversed();
-        activeProxy = &m_ProxyModelReversed;
-    }
-    else {
-        activeView = ui->tableView;
-        activeModel = m_ModelsMgr->GetModel();
-        activeProxy = &m_ProxyModel;
-    }
-
-    // preparing..
-    QItemSelection selection( activeView->selectionModel()->selection() );
-
-    QList<int> rows;
-    QSet<int> rows_set; // rows_set only for checking
-    foreach( const QModelIndex & value, selection.indexes() ) {
-        const QModelIndex & translatedValue = activeProxy->mapToSource(value);
-        int id = translatedValue.row();
-        if (rows_set.find(id)==rows_set.end())
-        {
-            rows.append( id );
-            rows_set.insert(id);
-        }
-    }
-
-    std::sort( rows.begin(), rows.end() );
-
-    // checking for zero size
-    if (rows.size()==0)
-    {
-        return ;
-    }
-
-    // confirmation from user..
-    std::stringstream ss;
-    ss << "Вы действительно хотите удалить выделенные строки в таблице? (" << rows.size() << " шт.)";
-    auto reply = QMessageBox::question(this, "Подтверждение действия", ss.str().c_str(),
-                                    QMessageBox::Yes|QMessageBox::No);
-    if (reply!=QMessageBox::Yes)
-    {
-        return ;
-    }
-
-    // just doing..
-    // strictly in reverse order!!
-    int prev = -1;
-    for( int i = rows.count() - 1; i >= 0; i -= 1 ) {
-        int current = rows[i];
-        if( current != prev ) {
-            activeModel->RemoveRow(current);
-            prev = current;
-        }
-    }
+    RemoveAllSelectedRows();
 }
 
 void MainWindow::on_toolButton_Reverse_clicked()
@@ -562,4 +572,55 @@ void MainWindow::on_toolButton_Reverse_clicked()
 void MainWindow::on_commandLinkButton_makeDoc_clicked()
 {
     this->makeDoc();
+}
+
+void MainWindow::on_action_select_all_triggered()
+{
+    if (m_IsReversed)
+        ui->tableView_Reversed->selectAll();
+    else {
+        ui->tableView->selectAll();
+    }
+}
+
+void MainWindow::on_action_about_this_triggered()
+{
+    const char *qt_version = qVersion();
+    QString info = "Генератор монтажных листов 'Biff Tannen'\n";
+    info += QString() + "Основан на Qt " + qt_version + " (" + Utils::compilerString().c_str() + ")\n";
+    info += QString() + "Собрано " + Utils::compileDatetime() + "\n";
+    info += "В разработке принимали участие:\n";
+    info += "\tМихайлов Денис aka denzor - Программирование, UI-дизайн\n";
+    info += "\tЧерсков Станислав aka Che - Идейный вдохновитель проекта\n";
+    QMessageBox::information(this, "О программе Biff Tannen", info);
+}
+
+void MainWindow::on_action_deny_all_triggered()
+{
+
+}
+
+void MainWindow::on_action_deny_disable_all_triggered()
+{
+
+}
+
+void MainWindow::on_action_remove_all_links_triggered()
+{
+
+}
+
+void MainWindow::on_action_register_software_triggered()
+{
+
+}
+
+void MainWindow::on_action_add_triggered()
+{
+    InsertRow();
+}
+
+void MainWindow::on_action_remove_triggered()
+{
+    RemoveAllSelectedRows();
 }
