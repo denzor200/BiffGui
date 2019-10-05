@@ -1058,6 +1058,43 @@ MainTableModelsManager::MainTableModelsManager(QObject *parent) :
     m_ModelReversed->SetOther(m_Model);
 }
 
+bool MainTableModelsManager::SavePersons(const QString &fileName, bool DisableDenied) const
+{
+    QByteArray memoryFileOut;
+    QFile fileOut(fileName);
+    if (fileOut.open(QIODevice::WriteOnly))
+    {
+        SavePersons(&memoryFileOut, DisableDenied);
+        fileOut.write(memoryFileOut);
+        fileOut.close();
+        return true;
+    }
+    return false;
+}
+
+void MainTableModelsManager::SavePersons(QByteArray *StreamOut, bool DisableDenied) const
+{
+    // Все текстовые файлы мы сохраняем только в UTF-8 with BOM
+    QTextStream streamFileOut(StreamOut);
+    streamFileOut.setCodec("UTF-8");
+    streamFileOut.setGenerateByteOrderMark(true);
+    auto data = m_Registry.ActorGetPersons(-1, DisableDenied);
+    for ( const QString& Value : data.Names)
+    {
+        if (ActorName::FindForbidenSymbols(Value))
+        {
+            std::stringstream ss;
+            // TODO: объединяй все в одно сообщение..
+            // Не надо грузить пользователя пачкой мессаг
+            ss << "Персонаж с именем '" << Value.toUtf8().data() << "' будет проигнорирован.";
+            ActorName::ShowForbidenSymbolsError(ss.str().c_str());
+            continue;
+        }
+        streamFileOut << Value << endl;
+    }
+    streamFileOut.flush();
+}
+
 void MainTableModelsManager::LoadPersons(const QStringList &Persons)
 {
     QStringList unrecognised;
@@ -1078,35 +1115,6 @@ void MainTableModelsManager::LoadPersons(const QStringList &Persons)
     m_Model->endResetModel();
     m_ModelReversed->endResetModel();
     HandleUnrecognisedPersons(unrecognised);
-}
-
-bool MainTableModelsManager::SavePersons(const QString &Path, bool DisableDenied) const
-{
-    QFile fileOut(Path);
-    if (!fileOut.open(QIODevice::WriteOnly | QIODevice::Text))
-        return false;
-
-    // Все текстовые файлы мы сохраняем только в UTF-8 with BOM
-    QTextStream streamFileOut(&fileOut);
-    streamFileOut.setCodec("UTF-8");
-    streamFileOut.setGenerateByteOrderMark(true);
-    auto data = m_Registry.ActorGetPersons(-1, DisableDenied);
-    for ( const QString& Value : data.Names)
-    {
-        if (ActorName::FindForbidenSymbols(Value))
-        {
-            std::stringstream ss;
-            // TODO: объединяй все в одно сообщение..
-            // Не надо грузить пользователя пачкой мессаг
-            ss << "Персонаж с именем '" << Value.toUtf8().data() << "' будет проигнорирован.";
-            ActorName::ShowForbidenSymbolsError(ss.str().c_str());
-            continue;
-        }
-        streamFileOut << Value << endl;
-    }
-    streamFileOut.flush();
-    fileOut.close();
-    return true;
 }
 
 void MainTableModelsManager::ClearAll()
@@ -1219,37 +1227,27 @@ bool MainTableModelsManager::OpenTable(const QString &Path)
     return true;
 }
 
-extern "C" uint_least32_t Crc32(const unsigned char * buf, size_t len);
-
-bool MainTableModelsManager::SaveTable(const QString &Path, bool DisableDenied, ControlInfo* ctrl) const
+bool MainTableModelsManager::SaveTable(const QString &fileName, bool DisableDenied) const
 {
     QByteArray memoryFileOut;
-    QFile fileOut(Path);
+    QFile fileOut(fileName);
     if (fileOut.open(QIODevice::WriteOnly))
     {
-        {
-            QTextStream streamFileOut(&memoryFileOut);
-            streamFileOut.setCodec("UTF-8");
-            streamFileOut.setGenerateByteOrderMark(true);
-            m_Registry.WriteToStream(streamFileOut, DisableDenied);
-            streamFileOut.flush();
-        }
+        SaveTable(&memoryFileOut, DisableDenied);
         fileOut.write(memoryFileOut);
-
-        // crc32
-        // TODO: оптимизировать по памяти.
-        if (ctrl)
-        {
-            ctrl->CRC = Crc32(
-               reinterpret_cast<uint8_t*>(const_cast<char*>(memoryFileOut.data())),
-               static_cast<size_t>(memoryFileOut.size()));
-            ctrl->Size = static_cast<uint32_t>(memoryFileOut.size());
-        }
-
         fileOut.close();
         return true;
     }
     return false;
+}
+
+void MainTableModelsManager::SaveTable(QByteArray *StreamOut, bool DisableDenied) const
+{
+    QTextStream streamFileOut(StreamOut);
+    streamFileOut.setCodec("UTF-8");
+    streamFileOut.setGenerateByteOrderMark(true);
+    m_Registry.WriteToStream(streamFileOut, DisableDenied);
+    streamFileOut.flush();
 }
 
 bool MainTableModelUtils::SetPerson(MainTableModelRegistry &R, int ID, const ActorName &Name)

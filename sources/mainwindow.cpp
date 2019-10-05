@@ -112,7 +112,9 @@ void MainWindow::makeDoc()
         ControlInfo ctrlDecisions;
         if (static_cast<QString>(tempTableFilename) != "" && static_cast<QString>(tempDecisionsFilename) != "") {
             // Saving to temp file..
-            if (m_ModelsMgr->SaveTable(tempTableFilename, true, &ctrlTable) && SaveDecisions(tempDecisionsFilename, &ctrlDecisions))
+            if (
+                    tempTableFilename.Write([&](auto W){m_ModelsMgr->SaveTable(W, true);}, &ctrlTable) &&
+                    SaveDecisions(tempDecisionsFilename, &ctrlDecisions))
             {
                 // Using temp files in another child process..
                 Generating w(this);
@@ -209,6 +211,7 @@ bool MainWindow::SaveDecisions(const QString &path, ControlInfo *ctrl) const
     if (!m_OpenedSubbtitle)
         return false;
 
+    // TODO: refactor it
     QByteArray memoryFileOut;
     QFile fileOut(path);
     if (fileOut.open(QIODevice::WriteOnly))
@@ -250,7 +253,9 @@ void MainWindow::SaveSubbtitle(const QString &outFileName, bool isIndividual)
     ControlInfo ctrlPersons;
     if (static_cast<QString>(tempDecisionsFilename) != "" && (isFull || static_cast<QString>(tempPersonsFilename) != ""))
     {
-        if (SaveDecisions(tempDecisionsFilename, &ctrlDecisions) && (isFull || m_ModelsMgr->SavePersons(tempPersonsFilename, true)))
+        if (
+                SaveDecisions(tempDecisionsFilename, &ctrlDecisions) &&
+                (isFull || tempPersonsFilename.Write([&](auto W){m_ModelsMgr->SavePersons(W, true);}, &ctrlPersons)))
         {
             ConverterWaiting_SaveSubbtitle waiting;
             QVector<QPair<QString,QString>> Params;

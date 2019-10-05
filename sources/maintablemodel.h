@@ -363,11 +363,13 @@ public:
     MainTableModel_Reversed*            GetModelReversed()          { return m_ModelReversed; }
     const MainTableModel_Reversed*      GetModelReversed() const    { return m_ModelReversed; }
 
-    bool SavePersons(const QString& Path, bool DisableDenied = false) const;
+    bool SavePersons(const QString& fileName, bool DisableDenied = false) const;
+    void SavePersons(QByteArray* StreamOut, bool DisableDenied = false) const;
     void LoadPersons(const QStringList& Persons);
 
     bool OpenTable(const QString& Path);
-    bool SaveTable(const QString& Path, bool DisableDenied = false, ControlInfo* ctrl = nullptr) const;
+    bool SaveTable(const QString& fileName, bool DisableDenied = false) const;
+    void SaveTable(QByteArray* StreamOut, bool DisableDenied = false) const;
 
     void ClearAll();
 

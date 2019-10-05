@@ -3,6 +3,9 @@
 
 #include <string>
 #include <QString>
+#include <functional>
+
+struct ControlInfo;
 
 namespace Utils
 {
@@ -19,10 +22,9 @@ namespace Utils
         TempFilenameGuard();
         ~TempFilenameGuard();
 
-        operator QString() const
-        {
-            return m_TempFilename;
-        }
+        bool Write(std::function<void(QByteArray*)> writer,ControlInfo* ctrl) const;
+
+        operator QString() const { return m_TempFilename; }
     };
 };
 
