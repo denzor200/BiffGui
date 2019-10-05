@@ -219,6 +219,7 @@ bool MainWindow::SaveDecisions(const QString &path, ControlInfo *ctrl) const
             streamFileOut.setGenerateByteOrderMark(true);
             for (const QString& line : m_OpenedSubbtitle->UsersDecisions)
                 streamFileOut << line << endl;
+            streamFileOut << endl;
             streamFileOut.flush();
         }
         fileOut.write(memoryFileOut);

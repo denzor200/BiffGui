@@ -50,7 +50,7 @@ bool ActorName::operator>=(const ActorName& Other) const
 
 bool ActorName::FindForbidenSymbols(const QString &Name)
 {
-    if (Name.indexOf(',') != -1 || Name.indexOf('-') != -1)
+    if (Name.indexOf(',') != -1 || Name.indexOf('-') != -1 || Name.indexOf('"') != -1)
         return true;
     return false;
 }
@@ -59,7 +59,7 @@ void ActorName::ShowForbidenSymbolsError(const QString& header)
 {
     std::stringstream ss;
     ss << "Имя не должно содержать следующих знаков:" << std::endl;
-    ss << "\t\t- ,";
+    ss << "\t\t- , \"";
     if (header.size() !=0 )
         ss << std::endl << header.toUtf8().data();
     QMessageBox::critical(QApplication::activeWindow(), "Ошибка", ss.str().c_str());
