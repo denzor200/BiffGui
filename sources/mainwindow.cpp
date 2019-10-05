@@ -117,12 +117,11 @@ void MainWindow::makeDoc()
                 // Using temp files in another child process..
                 Generating w(this);
                 QVector<QPair<QString,QString>> Params;
-                Params.reserve(2);
                 // TODO: завести список "коротких" параметров где нибудь в h-нике
                 Params.push_back({"-z", PrintControlInfo(ctrlTable)});
                 Params.push_back({"-d", PrintControlInfo(ctrlDecisions)});
                 Params.push_back({"-c", m_OpenedSubbtitle->CtrlData});
-                w.StartProcess(InFile, tempTableFilename, OutDir, tempDecisionsFilename, Params);
+                w.StartProcess(InFile, tempDecisionsFilename, tempTableFilename, OutDir, Params);
                 w.exec();
 
                 return; // all right
@@ -240,6 +239,49 @@ bool MainWindow::SaveDecisions(const QString &path, ControlInfo *ctrl) const
     return false;
 }
 
+void MainWindow::SaveSubbtitle(const QString &outFileName, bool isIndividual)
+{
+    // TODO: не забудь убедиться, что контрольная сумма у tempPersonsFilename проверяется
+    bool isFull = !isIndividual;
+    Utils::TempFilenameGuard tempDecisionsFilename;
+    Utils::TempFilenameGuard tempPersonsFilename;
+    ControlInfo ctrlDecisions;
+    ControlInfo ctrlPersons;
+    if (static_cast<QString>(tempDecisionsFilename) != "" && (isFull || static_cast<QString>(tempPersonsFilename) != ""))
+    {
+        if (SaveDecisions(tempDecisionsFilename, &ctrlDecisions) && (isFull || m_ModelsMgr->SavePersons(tempPersonsFilename, true)))
+        {
+            ConverterWaiting_SaveSubbtitle waiting;
+            QVector<QPair<QString,QString>> Params;
+            Params.push_back({"-c", m_OpenedSubbtitle->CtrlData});
+            Params.push_back({"-d", PrintControlInfo(ctrlDecisions)});
+            if (isIndividual)
+            {
+                Params.push_back({"-p", tempPersonsFilename});
+                // TODO: implement ctrlPersons
+                //Params.push_back({"-x", ctrlPersons});
+            }
+            waiting.StartProcess( m_OpenedSubbtitle->FileName, tempDecisionsFilename, outFileName, Params);
+            int execStatus = waiting.exec();
+            bool isCanceled = waiting.IsCanceledByUser();
+            int procStatus = waiting.GetProcessStatus();
+
+            if (!isCanceled)
+            {
+                if (0 == execStatus && 0 == procStatus)
+                {
+                }
+                else {
+                    QMessageBox::critical(this, "Что-то пошло не так..", "Не удалось сохранить субтитры");
+                }
+            }
+
+            return; // all right with decisions
+        }
+    }
+    showTempFileOpenWError();
+}
+
 void MainWindow::on_action_open_triggered()
 {
     if (!tryCloseFile())
@@ -307,24 +349,7 @@ void MainWindow::on_action_save_triggered()
             Settings.setValue(DirectoriesRegistry::SUBBTITLES_OUTDIR,
                         CurrentDir.absoluteFilePath(outFileName));
 
-            ConverterWaiting_SaveSubbtitle waiting;
-            QVector<QPair<QString,QString>> Params;
-            Params.reserve(1);
-            Params.push_back({"-c", m_OpenedSubbtitle->CtrlData});
-            waiting.StartProcess( m_OpenedSubbtitle->FileName, outFileName, Params);
-            int execStatus = waiting.exec();
-            bool isCanceled = waiting.IsCanceledByUser();
-            int procStatus = waiting.GetProcessStatus();
-
-            if (!isCanceled)
-            {
-                if (0 == execStatus && 0 == procStatus)
-                {
-                }
-                else {
-                    QMessageBox::critical(this, "Что-то пошло не так..", "Не удалось сохранить субтитры");
-                }
-            }
+            SaveSubbtitle(outFileName, false);
         }
     }
 }
@@ -450,44 +475,7 @@ void MainWindow::on_action_save_individual_triggered()
             Settings.setValue(DirectoriesRegistry::SUBBTITLES_OUTDIR,
                         CurrentDir.absoluteFilePath(outFileName));
 
-            const QString& tempFilename = Utils::GetNewTempFilename();
-            if (tempFilename != "") {
-                // Saving to temp file..
-                if (m_ModelsMgr->SavePersons(tempFilename, true))
-                {
-                    // Using temp file in another child process..
-                    ConverterWaiting_SaveSubbtitle waiting;
-                    QVector<QPair<QString,QString>> Params;
-                    Params.reserve(1);
-                    Params.push_back({"-p", tempFilename});
-                    waiting.StartProcess( m_OpenedSubbtitle->FileName, outFileName, Params);
-                    int execStatus = waiting.exec();
-                    bool isCanceled = waiting.IsCanceledByUser();
-                    int procStatus = waiting.GetProcessStatus();
-
-                    if (!isCanceled)
-                    {
-                        if (0 == execStatus && 0 == procStatus)
-                        {
-                        }
-                        else {
-                            QMessageBox::critical(this, "Что-то пошло не так..", "Не удалось сохранить субтитры");
-                        }
-                    }
-                }
-                else
-                {
-                    showFileOpenWError(tempFilename);
-                }
-
-
-                // темповый файл нам больше не нужен..
-                // TODO: потестировать при отсутствии файла, или отсутствии прав
-                QFile::remove(tempFilename);
-            }
-            else {
-                showTempFileOpenWError();
-            }
+            SaveSubbtitle(outFileName, true);
         }
     }
 }

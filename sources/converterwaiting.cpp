@@ -92,9 +92,10 @@ ConverterWaiting_ShowPersonList::ConverterWaiting_ShowPersonList(QStringList& Pe
 void ConverterWaiting_ShowPersonList::StartProcess(const QString &SubbtitlePath)
 {
     QStringList Arguments;
-    Arguments.reserve(2);
+    Arguments.reserve(3);
     Arguments.push_back("show_person_list");
     Arguments.push_back(SubbtitlePath);
+    Arguments.push_back("");
     // TODO: make normal path
     getProcess()->start("D:\\repos\\subtitles\\Debug\\converter", Arguments);
 }
@@ -194,12 +195,13 @@ ConverterWaiting_SaveSubbtitle::ConverterWaiting_SaveSubbtitle(QWidget *parent) 
                    );
 }
 
-void ConverterWaiting_SaveSubbtitle::StartProcess(const QString &InFile, const QString &OutFile, const QVector<QPair<QString,QString>>& params)
+void ConverterWaiting_SaveSubbtitle::StartProcess(const QString &InFile, const QString &Decisions, const QString &OutFile, const QVector<QPair<QString,QString>>& params)
 {
     QStringList Arguments;
-    Arguments.reserve(3 + params.size()*2);
+    Arguments.reserve(4 + params.size()*2);
     Arguments.push_back("make_subbtitle");
     Arguments.push_back(InFile);
+    Arguments.push_back(Decisions);
     Arguments.push_back(OutFile);
     for (const auto& pair : params)
     {

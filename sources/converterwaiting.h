@@ -17,7 +17,8 @@ public:
     explicit ConverterWaiting(bool DisableCancel,QWidget *parent = nullptr);
     ~ConverterWaiting();
 
-    bool IsCanceledByUser() const {return m_CanceledByUser;}
+    virtual int GetProcessStatus() const = 0;
+    bool IsCanceledByUser() const {return m_CanceledByUser || GetProcessStatus() == 499 ;}
 
 private slots:
     void ButtonClicked(bool);
@@ -40,7 +41,7 @@ public:
     explicit ConverterWaiting_ShowPersonList(QStringList& Persons,QWidget *parent = nullptr);
 
     void StartProcess( const QString &SubbtitlePath);
-    int GetProcessStatus() const {return m_ProcessStatus;}
+    int GetProcessStatus() const override {return m_ProcessStatus;}
 
     bool GetCRC(QString& out) const;
     const QStringList& GetUsersDecisions() const { return m_UsersDecisions; }
@@ -67,8 +68,8 @@ class ConverterWaiting_SaveSubbtitle : public ConverterWaiting
 public:
     explicit ConverterWaiting_SaveSubbtitle(QWidget *parent = nullptr);
 
-    void StartProcess(const QString& InFile, const QString& OutFile, const QVector<QPair<QString,QString>>& params);
-    int GetProcessStatus() const {return m_ProcessStatus;}
+    void StartProcess(const QString& InFile, const QString &Decisions, const QString& OutFile, const QVector<QPair<QString,QString>>& params);
+    int GetProcessStatus() const override {return m_ProcessStatus;}
 
 private slots:
     void slotFinished(int, QProcess::ExitStatus);
@@ -84,7 +85,7 @@ public:
     explicit ConverterWaiting_ResetSetting(QWidget *parent = nullptr);
 
     void StartProcess();
-    int GetProcessStatus() const {return m_ProcessStatus;}
+    int GetProcessStatus() const override {return m_ProcessStatus;}
 
 private slots:
     void slotFinished(int, QProcess::ExitStatus);

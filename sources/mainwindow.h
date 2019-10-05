@@ -30,6 +30,8 @@ public:
 
     bool SaveDecisions(const QString& path, ControlInfo* ctrl) const;
 
+    void SaveSubbtitle(const QString& outFileName, bool isIndividual);
+
 private slots:
     void on_action_open_triggered();
     void on_action_save_triggered();

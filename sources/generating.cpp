@@ -35,7 +35,7 @@ Generating::~Generating()
     delete ui;
 }
 
-void Generating::StartProcess(const QString &InFile, const QString& TableFile, const QString &OutDir, const QString& Decisions, const QVector<QPair<QString,QString>>& params)
+void Generating::StartProcess(const QString &InFile, const QString& Decisions, const QString& TableFile, const QString &OutDir, const QVector<QPair<QString,QString>>& params)
 {
     // TODO: make normal command line
     // TODO: потестить на путях с пробелами и кириллицей
@@ -44,9 +44,9 @@ void Generating::StartProcess(const QString &InFile, const QString& TableFile, c
     Arguments.reserve(5+params.size()*2);
     Arguments.push_back("make_docx");
     Arguments.push_back(InFile);
+    Arguments.push_back(Decisions);
     Arguments.push_back(TableFile);
     Arguments.push_back(OutDir);
-    Arguments.push_back(Decisions);
     for (const auto& pair : params)
     {
         Arguments.push_back(pair.first);
@@ -180,16 +180,20 @@ void Generating::slotFinished(int exitCode, QProcess::ExitStatus exitStatus)
     StdoutReadLines();
     StderrReadLines();
 
-    if (exitCode==0)
+    switch (exitCode)
     {
+    case 0:
         ui->progressBar->setValue(100);
         ui->progressBar->setEnabled(false);
         ui->pushButton_OK->setEnabled(true);
         ui->pushButton_Cancel->setEnabled(false);
         ui->listWidget_Log->addItem("Создание монтажных листов успешно завершено\n");
         ui->label_Status->setText("Успешно");
-    }
-    else {
+        break;
+    case 499:
+        close();
+        break;
+    default:
         ui->progressBar->setValue(0);
         ui->progressBar->setEnabled(false);
         ui->pushButton_OK->setEnabled(true);
@@ -198,6 +202,7 @@ void Generating::slotFinished(int exitCode, QProcess::ExitStatus exitStatus)
         ss << "Создание монтажных листов было завершено с ошибкой (код ошибки: " << exitCode << ")\n";
         ui->listWidget_Log->addItem(ss.str().c_str());
         ui->label_Status->setText("Что-то пошло не так..");
+        break;
     }
 }
 
