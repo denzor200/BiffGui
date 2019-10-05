@@ -102,9 +102,8 @@ void MainWindow::makeDoc()
         return;
     }
 
-    QString InFile, OutDir;
-
-    InFile = m_OpenedSubbtitle->FileName;
+    QString OutDir;
+	
     QSettings Settings;
     OutDir = QFileDialog::getExistingDirectory(this, "Создать монтажные листы", Settings.value(DirectoriesRegistry::DOC_OUTDIR).toString());
 
@@ -131,7 +130,7 @@ void MainWindow::makeDoc()
                 Params.push_back({"-z", PrintControlInfo(ctrlTable)});
                 Params.push_back({"-d", PrintControlInfo(ctrlDecisions)});
                 Params.push_back({"-c", m_OpenedSubbtitle->CtrlData});
-                w.StartProcess(InFile, tempDecisionsFilename, tempTableFilename, OutDir, Params);
+                w.StartProcess(m_OpenedSubbtitle->FileName, tempDecisionsFilename, tempTableFilename, OutDir, Params);
                 w.exec();
 
                 return; // all right
@@ -333,8 +332,7 @@ void MainWindow::SaveSubbtitle(const QString &outFileName, bool isIndividual)
             if (isIndividual)
             {
                 Params.push_back({"-p", tempPersonsFilename});
-                // TODO: implement ctrlPersons
-                //Params.push_back({"-x", ctrlPersons});
+                Params.push_back({"-x", PrintControlInfo(ctrlPersons)});
             }
             waiting.StartProcess( m_OpenedSubbtitle->FileName, tempDecisionsFilename, outFileName, Params);
             int execStatus = waiting.exec();
