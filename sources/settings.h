@@ -2,12 +2,47 @@
 #define SETTINGS_H
 
 #include <QDialog>
+#include <functional>
 
 namespace Ui {
     class Settings;
 }
 
 class QDomDocument;
+
+class SettingsTable
+{
+public:
+    using GetTextFuncType = std::function<QString(QWidget*)>;
+
+    struct Option
+    {
+        QString Path; // primary key
+
+        QString CategoryName;
+        QWidget* Label;
+        QWidget* Widget;
+
+        GetTextFuncType     GetTextFunc;
+
+        // TODO: reader and writer
+
+    };
+    std::map<QString, Option> m_MainTable;
+public:
+    SettingsTable() = default;
+
+    // Register with label
+    void Register(const QString& Path, const QString& Category, QWidget* Label, QWidget* Widget, GetTextFuncType GetTextFunc = nullptr);
+
+    // Register without label
+    void Register(const QString& Path, const QString& Category, QWidget* Widget, GetTextFuncType GetTextFunc);
+
+    // Только для отладки
+    void PrintFullTable() const;
+
+    QString GetFullNameByPath(const QString& Path) const;
+};
 
 class Settings : public QDialog
 {
@@ -65,9 +100,18 @@ private:
     void InitializeStyle3Parsing(void* stats,const QDomDocument & domDoc);
     void InitializeAdditionalParsing( void* stats,const QDomDocument & domDoc);
 
+    void InitializeMainTable();
+
     void on_CommitedChanges();
 
 private:
+    struct ConfigOptionData
+    {
+        QString Path;
+
+    };
+
+    SettingsTable m_Table;
     Ui::Settings* ui;
 };
 

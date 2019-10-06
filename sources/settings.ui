@@ -23,7 +23,7 @@
       <property name="geometry">
        <rect>
         <x>0</x>
-        <y>-323</y>
+        <y>-398</y>
         <width>625</width>
         <height>830</height>
        </rect>
@@ -370,7 +370,7 @@
                   <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
                  </property>
                  <item row="0" column="0">
-                  <widget class="QLabel" name="label_Font">
+                  <widget class="QLabel" name="label_StyleFont">
                    <property name="text">
                     <string>Гарнитура</string>
                    </property>
@@ -380,10 +380,10 @@
                   </widget>
                  </item>
                  <item row="0" column="1">
-                  <widget class="QLineEdit" name="lineEdit_Font"/>
+                  <widget class="QLineEdit" name="lineEdit_StyleFont"/>
                  </item>
                  <item row="1" column="0">
-                  <widget class="QLabel" name="label_Size">
+                  <widget class="QLabel" name="label_StyleSize">
                    <property name="text">
                     <string>Кегль</string>
                    </property>
@@ -393,7 +393,7 @@
                   </widget>
                  </item>
                  <item row="1" column="1">
-                  <widget class="QDoubleSpinBox" name="doubleSpinBox_Size">
+                  <widget class="QDoubleSpinBox" name="doubleSpinBox_StyleSize">
                    <property name="sizePolicy">
                     <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
                      <horstretch>0</horstretch>
@@ -403,49 +403,49 @@
                   </widget>
                  </item>
                  <item row="2" column="1">
-                  <widget class="ColoredPushButton" name="coloredPushButton_Color">
+                  <widget class="ColoredPushButton" name="coloredPushButton_StyleColor">
                    <property name="text">
                     <string/>
                    </property>
                   </widget>
                  </item>
                  <item row="3" column="0">
-                  <widget class="QLabel" name="label">
+                  <widget class="QLabel" name="label_StyleColorBack">
                    <property name="text">
                     <string>Цвет подсветки</string>
                    </property>
                   </widget>
                  </item>
                  <item row="3" column="1">
-                  <widget class="ColoredPushButton" name="coloredPushButton_ColorBack">
+                  <widget class="ColoredPushButton" name="coloredPushButton_StyleColorBack">
                    <property name="text">
                     <string/>
                    </property>
                   </widget>
                  </item>
                  <item row="4" column="1">
-                  <widget class="QCheckBox" name="checkBox_Bold">
+                  <widget class="QCheckBox" name="checkBox_StyleBold">
                    <property name="text">
                     <string>Жирный</string>
                    </property>
                   </widget>
                  </item>
                  <item row="5" column="1">
-                  <widget class="QCheckBox" name="checkBox_Italic">
+                  <widget class="QCheckBox" name="checkBox_StyleItalic">
                    <property name="text">
                     <string>Курсив</string>
                    </property>
                   </widget>
                  </item>
                  <item row="6" column="1">
-                  <widget class="QCheckBox" name="checkBox_Underline">
+                  <widget class="QCheckBox" name="checkBox_StyleUnderline">
                    <property name="text">
                     <string>Подчеркивание</string>
                    </property>
                   </widget>
                  </item>
                  <item row="2" column="0">
-                  <widget class="QLabel" name="label_2">
+                  <widget class="QLabel" name="label_StyleColor">
                    <property name="text">
                     <string>Цвет шрифта</string>
                    </property>
@@ -481,7 +481,7 @@
                   <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
                  </property>
                  <item row="0" column="0">
-                  <widget class="QLabel" name="label_Font_2">
+                  <widget class="QLabel" name="label_StyleFont_2">
                    <property name="text">
                     <string>Гарнитура</string>
                    </property>
@@ -491,10 +491,10 @@
                   </widget>
                  </item>
                  <item row="0" column="1">
-                  <widget class="QLineEdit" name="lineEdit_Font_2"/>
+                  <widget class="QLineEdit" name="lineEdit_StyleFont_2"/>
                  </item>
                  <item row="1" column="0">
-                  <widget class="QLabel" name="label_Size_2">
+                  <widget class="QLabel" name="label_StyleSize_2">
                    <property name="text">
                     <string>Кегль</string>
                    </property>
@@ -504,7 +504,7 @@
                   </widget>
                  </item>
                  <item row="1" column="1">
-                  <widget class="QDoubleSpinBox" name="doubleSpinBox_Size_2">
+                  <widget class="QDoubleSpinBox" name="doubleSpinBox_StyleSize_2">
                    <property name="sizePolicy">
                     <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
                      <horstretch>0</horstretch>
@@ -514,35 +514,35 @@
                   </widget>
                  </item>
                  <item row="2" column="0">
-                  <widget class="QLabel" name="label_4">
+                  <widget class="QLabel" name="label_StyleColor_2">
                    <property name="text">
                     <string>Цвет шрифта</string>
                    </property>
                   </widget>
                  </item>
                  <item row="2" column="1">
-                  <widget class="ColoredPushButton" name="coloredPushButton_Color_2">
+                  <widget class="ColoredPushButton" name="coloredPushButton_StyleColor_2">
                    <property name="text">
                     <string/>
                    </property>
                   </widget>
                  </item>
                  <item row="3" column="0">
-                  <widget class="QLabel" name="label_3">
+                  <widget class="QLabel" name="label_StyleColorBack_2">
                    <property name="text">
                     <string>Цвет подсветки</string>
                    </property>
                   </widget>
                  </item>
                  <item row="3" column="1">
-                  <widget class="ColoredPushButton" name="coloredPushButton_ColorBack_2">
+                  <widget class="ColoredPushButton" name="coloredPushButton_StyleColorBack_2">
                    <property name="text">
                     <string/>
                    </property>
                   </widget>
                  </item>
                  <item row="4" column="1">
-                  <widget class="QCheckBox" name="checkBox_Bold_2">
+                  <widget class="QCheckBox" name="checkBox_StyleBold_2">
                    <property name="text">
                     <string>Жирный</string>
                    </property>
@@ -562,14 +562,14 @@
                   </spacer>
                  </item>
                  <item row="5" column="1">
-                  <widget class="QCheckBox" name="checkBox_Italic_2">
+                  <widget class="QCheckBox" name="checkBox_StyleItalic_2">
                    <property name="text">
                     <string>Курсив</string>
                    </property>
                   </widget>
                  </item>
                  <item row="6" column="1">
-                  <widget class="QCheckBox" name="checkBox_Underline_2">
+                  <widget class="QCheckBox" name="checkBox_StyleUnderline_2">
                    <property name="text">
                     <string>Подчеркивание</string>
                    </property>
@@ -592,7 +592,7 @@
                   <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
                  </property>
                  <item row="0" column="0">
-                  <widget class="QLabel" name="label_Font_3">
+                  <widget class="QLabel" name="label_StyleFont_3">
                    <property name="text">
                     <string>Гарнитура</string>
                    </property>
@@ -602,10 +602,10 @@
                   </widget>
                  </item>
                  <item row="0" column="1">
-                  <widget class="QLineEdit" name="lineEdit_Font_3"/>
+                  <widget class="QLineEdit" name="lineEdit_StyleFont_3"/>
                  </item>
                  <item row="1" column="0">
-                  <widget class="QLabel" name="label_Size_3">
+                  <widget class="QLabel" name="label_StyleSize_3">
                    <property name="text">
                     <string>Кегль</string>
                    </property>
@@ -615,7 +615,7 @@
                   </widget>
                  </item>
                  <item row="1" column="1">
-                  <widget class="QDoubleSpinBox" name="doubleSpinBox_Size_3">
+                  <widget class="QDoubleSpinBox" name="doubleSpinBox_StyleSize_3">
                    <property name="sizePolicy">
                     <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
                      <horstretch>0</horstretch>
@@ -624,36 +624,29 @@
                    </property>
                   </widget>
                  </item>
-                 <item row="2" column="0">
-                  <widget class="QLabel" name="label_6">
-                   <property name="text">
-                    <string>Цвет шрифта</string>
-                   </property>
-                  </widget>
-                 </item>
                  <item row="2" column="1">
-                  <widget class="ColoredPushButton" name="coloredPushButton_Color_3">
+                  <widget class="ColoredPushButton" name="coloredPushButton_StyleColor_3">
                    <property name="text">
                     <string/>
                    </property>
                   </widget>
                  </item>
                  <item row="3" column="0">
-                  <widget class="QLabel" name="label_5">
+                  <widget class="QLabel" name="label_StyleColorBack_3">
                    <property name="text">
                     <string>Цвет подсветки</string>
                    </property>
                   </widget>
                  </item>
                  <item row="3" column="1">
-                  <widget class="ColoredPushButton" name="coloredPushButton_ColorBack_3">
+                  <widget class="ColoredPushButton" name="coloredPushButton_StyleColorBack_3">
                    <property name="text">
                     <string/>
                    </property>
                   </widget>
                  </item>
                  <item row="4" column="1">
-                  <widget class="QCheckBox" name="checkBox_Bold_3">
+                  <widget class="QCheckBox" name="checkBox_StyleBold_3">
                    <property name="text">
                     <string>Жирный</string>
                    </property>
@@ -673,16 +666,23 @@
                   </spacer>
                  </item>
                  <item row="5" column="1">
-                  <widget class="QCheckBox" name="checkBox_Italic_3">
+                  <widget class="QCheckBox" name="checkBox_StyleItalic_3">
                    <property name="text">
                     <string>Курсив</string>
                    </property>
                   </widget>
                  </item>
                  <item row="6" column="1">
-                  <widget class="QCheckBox" name="checkBox_Underline_3">
+                  <widget class="QCheckBox" name="checkBox_StyleUnderline_3">
                    <property name="text">
                     <string>Подчеркивание</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="2" column="0">
+                  <widget class="QLabel" name="label_StyleColor_3">
+                   <property name="text">
+                    <string>Цвет шрифта</string>
                    </property>
                   </widget>
                  </item>

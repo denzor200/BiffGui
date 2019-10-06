@@ -9,75 +9,12 @@
 // TODO: make normal path
 #define SETTINGS_DIR "settings.xml"
 
-static QString PrintConfigPath(const QString& Path)
-{
-    // AssParsing
-    if (Path == "Root.AssParsing.NeededColumns.TimeStartColumn")
-        return "ASS:Колонка Start";
-    else if (Path == "Root.AssParsing.NeededColumns.TimeEndColumn")
-        return "ASS:Колонка End";
-    else if (Path == "Root.AssParsing.NeededColumns.NameColumn")
-        return "ASS:Колонка Name";
-    else if (Path == "Root.AssParsing.NeededColumns.TextColumn")
-        return "ASS:Колонка Text";
-
-
-    // SrtParsing
-    else if (Path == "Root.SrtParsing.ComplexPhrases.TimeDistributing.Strategy")
-        return "SRT:Метод распределения времени в комплексных фразах";
-
-
-    // Timing
-    else if (Path == "Root.Timing.MilisecondRoundValue")
-        return "Тайминг:Верхний порог округления";
-    else if (Path == "Root.Timing.DisableIntervals")
-        return "Тайминг:Отключить интервалы";
-    else if (Path == "Root.Timing.IntervalsDistributing.VerySmall")
-        return "Тайминг:Маленький интервал";
-    else if (Path == "Root.Timing.IntervalsDistributing.Normal")
-        return "Тайминг:Обычный интервал";
-    else if (Path == "Root.Timing.IntervalsDistributing.Big")
-        return "Тайминг:Большой интервал";
-    else if (Path == "Root.Timing.IntervalsDistributing.VeryBig")
-        return "Тайминг:Очень большой интервал";
-    else if (Path == "Root.Timing.IntervalsDistributing.VeryVeryBig")
-        return "Тайминг:Слишком большой интервал";
-
-
-    // DocumentStyle
-    else if (Path == "Root.DocumentStyle.DisableTags")
-        return "Стиль документа:Отключить тэги";
-    else if (Path == "Root.DocumentStyle.DisableLinesCounter")
-        return "Стиль документа:Отключить подсчет строк";
-
-    else if (Path == "Root.DocumentStyle.MainFont.Name")
-        return "Стиль документа:Главное:Шрифт";
-    else if (Path == "Root.DocumentStyle.MainFont.Size")
-        return "Стиль документа:Главное:Размер";
-
-    else if (Path == "Root.DocumentStyle.PageNumberFont.Name")
-        return "Стиль документа:Нумерация:Шрифт";
-    else if (Path == "Root.DocumentStyle.PageNumberFont.Size")
-        return "Стиль документа:Нумерация:Размер";
-
-    else if (Path == "Root.DocumentStyle.IndividualSelectedFont.Name")
-        return "Стиль документа:Выделенные:Шрифт";
-    else if (Path =="Root.DocumentStyle.IndividualSelectedFont.Size")
-        return "Стиль документа:Выделенные:Размер";
-
-    // Additional
-    else if (Path == "Root.Additional.EnableSoundTheme")
-        return "Дополнительно:Включить расширенную звуковую тему";
-
-
-    return Path;
-}
-
 Settings::Settings(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::Settings)
 {
     ui->setupUi(this);
+    InitializeMainTable();
 }
 
 Settings::~Settings()
@@ -180,7 +117,7 @@ void Settings::commitChanges()
             } xmlWriter.writeEndElement();
         } xmlWriter.writeEndElement();
 
-        xmlWriter.writeStartElement("DocumentStyle");
+        /*xmlWriter.writeStartElement("DocumentStyle");
         {
             xmlWriter.writeTextElement("DisableTags",CheckBoxGetText(ui->checkBox_DisableTags));
             xmlWriter.writeTextElement("DisableLinesCounter",CheckBoxGetText(ui->checkBox_DisableCounter));
@@ -199,7 +136,7 @@ void Settings::commitChanges()
                 xmlWriter.writeTextElement("Name",ui->lineEdit_Font_3->text());
                 xmlWriter.writeTextElement("Size",QString::number(ui->doubleSpinBox_Size_3->value()));
             } xmlWriter.writeEndElement();
-        } xmlWriter.writeEndElement();
+        } xmlWriter.writeEndElement();*/
 
         xmlWriter.writeStartElement("SrtParsing");
         {
@@ -333,7 +270,7 @@ bool Settings::_Initialize(bool FirstAttempt)
                     ss << "Следующие значения не были распознаны и оставлены в нулевом состоянии:" << std::endl;
                     for (const QString& Value : stats.Unrecognized)
                     {
-                        ss << "\t\t" << PrintConfigPath(Value).toUtf8().data() << std::endl;
+                        ss << "\t\t" << m_Table.GetFullNameByPath(Value).toUtf8().data() << std::endl;
                     }
                     ss << "Вам следует самим проставить эти значения, или вернуть опции к состоянию по умолчанию" << std::endl;
                     QMessageBox::warning(QApplication::activeWindow(), "Обратите внимание..", ss.str().c_str());
@@ -575,26 +512,26 @@ void Settings::InitializeStyleParsing(void* rawStats, const QDomDocument & domDo
 
 void Settings::InitializeStyle1Parsing(void* rawStats, const QDomDocument &domDoc)
 {
-    auto stats = reinterpret_cast<ParsingStats*>(rawStats);
+    /*auto stats = reinterpret_cast<ParsingStats*>(rawStats);
     Q_ASSERT(stats);
     InitializeLineEdit(stats, domDoc, ui->lineEdit_Font, "Root.DocumentStyle.MainFont.Name");
-    InitializeDoubleSpinBox(stats, domDoc, ui->doubleSpinBox_Size, "Root.DocumentStyle.MainFont.Size");
+    InitializeDoubleSpinBox(stats, domDoc, ui->doubleSpinBox_Size, "Root.DocumentStyle.MainFont.Size");*/
 }
 
 void Settings::InitializeStyle2Parsing(void* rawStats, const QDomDocument &domDoc)
 {
-    auto stats = reinterpret_cast<ParsingStats*>(rawStats);
+    /*auto stats = reinterpret_cast<ParsingStats*>(rawStats);
     Q_ASSERT(stats);
     InitializeLineEdit(stats, domDoc, ui->lineEdit_Font_2, "Root.DocumentStyle.PageNumberFont.Name");
-    InitializeDoubleSpinBox(stats, domDoc, ui->doubleSpinBox_Size_2, "Root.DocumentStyle.PageNumberFont.Size");
+    InitializeDoubleSpinBox(stats, domDoc, ui->doubleSpinBox_Size_2, "Root.DocumentStyle.PageNumberFont.Size");*/
 }
 
 void Settings::InitializeStyle3Parsing(void* rawStats, const QDomDocument &domDoc)
 {
-    auto stats = reinterpret_cast<ParsingStats*>(rawStats);
+    /*auto stats = reinterpret_cast<ParsingStats*>(rawStats);
     Q_ASSERT(stats);
     InitializeLineEdit(stats, domDoc, ui->lineEdit_Font_3, "Root.DocumentStyle.IndividualSelectedFont.Name");
-    InitializeDoubleSpinBox(stats, domDoc, ui->doubleSpinBox_Size_3, "Root.DocumentStyle.IndividualSelectedFont.Size");
+    InitializeDoubleSpinBox(stats, domDoc, ui->doubleSpinBox_Size_3, "Root.DocumentStyle.IndividualSelectedFont.Size");*/
 }
 
 void Settings::InitializeAdditionalParsing(void* rawStats, const QDomDocument &domDoc)
@@ -602,6 +539,82 @@ void Settings::InitializeAdditionalParsing(void* rawStats, const QDomDocument &d
     auto stats = reinterpret_cast<ParsingStats*>(rawStats);
     Q_ASSERT(stats);
     InitializeCheckBox(stats, domDoc, ui->checkBox_ExtSound, "Root.Additional.EnableSoundTheme");
+}
+
+template <typename T>
+static
+QString TextGetter(QWidget* widget)
+{
+    T* casted = qobject_cast<T*>(widget);
+    Q_ASSERT(casted);
+    return casted->text();
+}
+
+void Settings::InitializeMainTable()
+{
+    const QString ASS_CATEGORY = "ASS";
+    const QString SRT_CATEGORY = "SRT";
+    const QString TIMING_CATEGORY = "Тайминг";
+    const QString STYLE_CATEGORY = "Стиль документа";
+    const QString STYLE_CATEGORY_MAIN = "Стиль документа:Главное";
+    const QString STYLE_CATEGORY_NUMERATION = "Стиль документа:Нумерация";
+    const QString STYLE_CATEGORY_SELECTION = "Стиль документа:Выделенные фразы в индивидуальном документе";
+    const QString STYLE_ADDITIONAL = "Дополнительно";
+
+#define REG(...) m_Table.Register(__VA_ARGS__)
+
+    // AssParsing
+    REG("Root.AssParsing.NeededColumns.TimeStartColumn",   ASS_CATEGORY, ui->label_ColumnStart,   ui->lineEdit_ColumnStart, nullptr);
+    REG("Root.AssParsing.NeededColumns.TimeEndColumn",     ASS_CATEGORY, ui->label_ColumnEnd,     ui->lineEdit_ColumnEnd, nullptr);
+    REG("Root.AssParsing.NeededColumns.NameColumn",        ASS_CATEGORY, ui->label_ColumnName,    ui->lineEdit_ColumnName, nullptr);
+    REG("Root.AssParsing.NeededColumns.TextColumn",        ASS_CATEGORY, ui->label_ColumnText,    ui->lineEdit_ColumnText, nullptr);
+
+    // SrtParsing
+    REG("Root.SrtParsing.ComplexPhrases.TimeDistributing.Strategy", SRT_CATEGORY, ui->label_Distribution, ui->comboBox_Distribution, nullptr);
+
+    // Timing
+    REG("Root.Timing.MilisecondRoundValue",                TIMING_CATEGORY, ui->label_RoundValue,             ui->spinBox_RoundValue, nullptr);
+    REG("Root.Timing.DisableIntervals",                    TIMING_CATEGORY, nullptr,                          ui->checkBox_DisableIntervals, TextGetter<QCheckBox>);
+
+    REG("Root.Timing.IntervalsDistributing.VerySmall",     TIMING_CATEGORY, ui->label_SmallInterval,          ui->spinBox_SmallInterval, nullptr);
+    REG("Root.Timing.IntervalsDistributing.Normal",        TIMING_CATEGORY, ui->label_NormalInterval,         ui->spinBox_NormalInterval, nullptr);
+    REG("Root.Timing.IntervalsDistributing.Big",           TIMING_CATEGORY, ui->label_BigInterval,            ui->spinBox_BigInterval, nullptr);
+    REG("Root.Timing.IntervalsDistributing.VeryBig",       TIMING_CATEGORY, ui->label_VeryBigInterval,        ui->spinBox_VeryBigInterval, nullptr);
+    REG("Root.Timing.IntervalsDistributing.VeryVeryBig",   TIMING_CATEGORY, ui->label_VeryVeryBigInterval,    ui->spinBox_VeryVeryBigInterval, nullptr);
+
+    // DocumentStyle
+    REG("Root.DocumentStyle.DisableTags",                  STYLE_CATEGORY, nullptr, ui->checkBox_DisableTags, TextGetter<QCheckBox>);
+    REG("Root.DocumentStyle.DisableLinesCounter",          STYLE_CATEGORY, nullptr, ui->checkBox_DisableCounter, TextGetter<QCheckBox>);
+
+    REG("Root.DocumentStyle.MainFont.Name",                STYLE_CATEGORY_MAIN, ui->label_StyleFont,      ui->lineEdit_StyleFont, nullptr);
+    REG("Root.DocumentStyle.MainFont.Size",                STYLE_CATEGORY_MAIN, ui->label_StyleSize,      ui->doubleSpinBox_StyleSize, nullptr);
+    REG("Root.DocumentStyle.MainFont.Color",               STYLE_CATEGORY_MAIN, ui->label_StyleColor,     ui->coloredPushButton_StyleColor, nullptr);
+    REG("Root.DocumentStyle.MainFont.ColorBack",           STYLE_CATEGORY_MAIN, ui->label_StyleColorBack, ui->coloredPushButton_StyleColorBack, nullptr);
+    REG("Root.DocumentStyle.MainFont.Bold",                STYLE_CATEGORY_MAIN, nullptr,                  ui->checkBox_StyleBold, TextGetter<QCheckBox>);
+    REG("Root.DocumentStyle.MainFont.Italic",              STYLE_CATEGORY_MAIN, nullptr,                  ui->checkBox_StyleItalic, TextGetter<QCheckBox>);
+    REG("Root.DocumentStyle.MainFont.Underline",           STYLE_CATEGORY_MAIN, nullptr,                  ui->checkBox_StyleUnderline, TextGetter<QCheckBox>);
+
+    REG("Root.DocumentStyle.PageNumberFont.Name",          STYLE_CATEGORY_NUMERATION, ui->label_StyleFont_2,      ui->lineEdit_StyleFont_2, nullptr);
+    REG("Root.DocumentStyle.PageNumberFont.Size",          STYLE_CATEGORY_NUMERATION, ui->label_StyleSize_2,      ui->doubleSpinBox_StyleSize_2, nullptr);
+    REG("Root.DocumentStyle.PageNumberFont.Color",         STYLE_CATEGORY_NUMERATION, ui->label_StyleColor_2,     ui->coloredPushButton_StyleColor_2, nullptr);
+    REG("Root.DocumentStyle.PageNumberFont.ColorBack",     STYLE_CATEGORY_NUMERATION, ui->label_StyleColorBack_2, ui->coloredPushButton_StyleColorBack_2, nullptr);
+    REG("Root.DocumentStyle.PageNumberFont.Bold",          STYLE_CATEGORY_NUMERATION, nullptr,                    ui->checkBox_StyleBold_2, TextGetter<QCheckBox>);
+    REG("Root.DocumentStyle.PageNumberFont.Italic",        STYLE_CATEGORY_NUMERATION, nullptr,                    ui->checkBox_StyleItalic_2, TextGetter<QCheckBox>);
+    REG("Root.DocumentStyle.PageNumberFont.Underline",     STYLE_CATEGORY_NUMERATION, nullptr,                    ui->checkBox_StyleUnderline_2, TextGetter<QCheckBox>);
+
+    REG("Root.DocumentStyle.IndividualSelectedFont.Name",          STYLE_CATEGORY_SELECTION, ui->label_StyleFont_3,       ui->lineEdit_StyleFont_3, nullptr);
+    REG("Root.DocumentStyle.IndividualSelectedFont.Size",          STYLE_CATEGORY_SELECTION, ui->label_StyleSize_3,       ui->doubleSpinBox_StyleSize_3, nullptr);
+    REG("Root.DocumentStyle.IndividualSelectedFont.Color",         STYLE_CATEGORY_SELECTION, ui->label_StyleColor_3,      ui->coloredPushButton_StyleColor_3, nullptr);
+    REG("Root.DocumentStyle.IndividualSelectedFont.ColorBack",     STYLE_CATEGORY_SELECTION, ui->label_StyleColorBack_3,  ui->coloredPushButton_StyleColorBack_3, nullptr);
+    REG("Root.DocumentStyle.IndividualSelectedFont.Bold",          STYLE_CATEGORY_SELECTION, nullptr,                     ui->checkBox_StyleBold_3, TextGetter<QCheckBox>);
+    REG("Root.DocumentStyle.IndividualSelectedFont.Italic",        STYLE_CATEGORY_SELECTION, nullptr,                     ui->checkBox_StyleItalic_3, TextGetter<QCheckBox>);
+    REG("Root.DocumentStyle.IndividualSelectedFont.Underline",     STYLE_CATEGORY_SELECTION, nullptr,                     ui->checkBox_StyleUnderline_3, TextGetter<QCheckBox>);
+
+
+    // Additional
+    REG("Root.Additional.EnableSoundTheme", STYLE_ADDITIONAL, nullptr, ui->checkBox_ExtSound, TextGetter<QCheckBox>);
+
+#undef REG
 }
 
 void Settings::on_CommitedChanges()
@@ -731,4 +744,61 @@ void Settings::on_lineEdit_ColumnEnd_textChanged(const QString &)
 void Settings::on_lineEdit_ColumnName_textChanged(const QString &)
 {
     beginChanges();
+}
+
+void SettingsTable::Register(const QString &Path, const QString &Category, QWidget *Label, QWidget *Widget, SettingsTable::GetTextFuncType GetTextFunc)
+{
+    Q_ASSERT(Widget);
+
+    //qDebug() << "Registering: " << Path;
+
+    if (GetTextFunc==nullptr)
+    {
+        Q_ASSERT(Label);
+        GetTextFunc = [](QWidget * widget) -> QString
+        {
+            auto label = qobject_cast<QLabel*>(widget);
+            Q_ASSERT(label);
+            return label->text();
+        };
+    }
+
+    Option opt;
+    opt.Path                    = Path;
+    opt.CategoryName            = Category;
+    opt.Label                   = Label;
+    opt.Widget                  = Widget;
+    opt.GetTextFunc             = GetTextFunc;
+    m_MainTable[Path]           = opt;
+}
+
+void SettingsTable::Register(const QString &Path, const QString &Category, QWidget *Widget, SettingsTable::GetTextFuncType GetTextFunc)
+{
+    Register(Path, Category, nullptr, Widget, GetTextFunc);
+}
+
+void SettingsTable::PrintFullTable() const
+{
+    for (const auto& pair : m_MainTable)
+    {
+        qDebug() << "[" << pair.first << "] = " << GetFullNameByPath(pair.first);
+    }
+}
+
+QString SettingsTable::GetFullNameByPath(const QString &Path) const
+{
+    //qDebug() << "GetFullNameByPath: " << Path;
+    const auto it = m_MainTable.find(Path);
+    if (it != m_MainTable.end())
+    {
+        const auto& obj  = it->second;
+        if (obj.GetTextFunc)
+        {
+            auto labelWidget = obj.Label;
+            if (labelWidget == nullptr)
+                labelWidget = obj.Widget;
+            return obj.CategoryName + ":" + obj.GetTextFunc(labelWidget) ;
+        }
+    }
+    return "";
 }
