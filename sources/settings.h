@@ -3,18 +3,30 @@
 
 #include <QDialog>
 #include <functional>
+#include <unordered_map>
 
 namespace Ui {
     class Settings;
 }
 
 class QDomDocument;
+class QXmlStreamWriter;
+class QDomNode;
+
+struct SettingsParsingStats
+{
+    QStringList Unrecognized;
+    unsigned Count = 0;
+};
 
 class SettingsTable
 {
 public:
     using GetTextFuncType = std::function<QString(QWidget*)>;
+    using ReaderFuncType = std::function<bool(QWidget*,const QList<QDomNode>&)>;
+    using WriterFuncType = std::function<void(QWidget*,QStringList&)>;
 
+private:
     struct Option
     {
         QString Path; // primary key
@@ -24,22 +36,28 @@ public:
         QWidget* Widget;
 
         GetTextFuncType     GetTextFunc;
-
-        // TODO: reader and writer
+        ReaderFuncType      ReaderFunc;
+        WriterFuncType      WriterFunc;
 
     };
     std::map<QString, Option> m_MainTable;
 public:
     SettingsTable() = default;
 
-    // Register with label
-    void Register(const QString& Path, const QString& Category, QWidget* Label, QWidget* Widget, GetTextFuncType GetTextFunc = nullptr);
-
-    // Register without label
-    void Register(const QString& Path, const QString& Category, QWidget* Widget, GetTextFuncType GetTextFunc);
+    void Register(
+            const QString& Path,
+            const QString& Category,
+            QWidget* Label,
+            QWidget* Widget,
+            ReaderFuncType ReaderFunc,
+            WriterFuncType WriterFunc,
+            GetTextFuncType GetTextFunc = nullptr);
 
     // Только для отладки
     void PrintFullTable() const;
+
+    void Read(SettingsParsingStats* Stats, const QDomDocument &domDoc);
+    void Write(QXmlStreamWriter& writer) const;
 
     QString GetFullNameByPath(const QString& Path) const;
 };
@@ -91,15 +109,6 @@ private slots:
 
 private:
     bool _Initialize(bool FirstAttempt);
-    void InitializeAssParsing(void* stats, const QDomDocument & domDoc);
-    void InitializeSrtParsing(void* stats,const QDomDocument & domDoc);
-    void InitializeTimingParsing(void* stats,const QDomDocument & domDoc);
-    void InitializeStyleParsing(void* stats,const QDomDocument & domDoc);
-    void InitializeStyle1Parsing(void* stats,const QDomDocument & domDoc);
-    void InitializeStyle2Parsing(void* stats,const QDomDocument & domDoc);
-    void InitializeStyle3Parsing(void* stats,const QDomDocument & domDoc);
-    void InitializeAdditionalParsing( void* stats,const QDomDocument & domDoc);
-
     void InitializeMainTable();
 
     void on_CommitedChanges();

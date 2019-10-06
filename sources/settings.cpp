@@ -56,31 +56,6 @@ void Settings::beginChanges()
     //ui->pushButton_Apply->setFocus();
 }
 
-static QString CheckBoxGetText(QCheckBox* checkBox)
-{
-    switch (checkBox->checkState())
-    {
-    case Qt::CheckState::Checked:
-        return "true";
-    case Qt::CheckState::Unchecked:
-        return "false";
-    default:
-        Q_ASSERT_X(0, "CheckBoxGetText",  "Invalid 'Qt::CheckState'");
-        break;
-    }
-    return "";
-}
-
-static void WriteAssColumnAttribute(QXmlStreamWriter& xmlWriter, const QString& attributeName, QLineEdit* lineEdit)
-{
-    const QString& text = lineEdit->text();
-    QStringList sections = text.split(",", QString::SkipEmptyParts);
-    for (const QString& section : sections)
-    {
-        xmlWriter.writeTextElement(attributeName,section.trimmed());
-    }
-}
-
 void Settings::commitChanges()
 {
     QFile file(SETTINGS_DIR);
@@ -89,73 +64,7 @@ void Settings::commitChanges()
     QXmlStreamWriter xmlWriter(&file);
     xmlWriter.setAutoFormatting(true);
     xmlWriter.writeStartDocument();
-
-    xmlWriter.writeStartElement("Root");
-    {
-        xmlWriter.writeStartElement("AssParsing");
-        {
-            xmlWriter.writeStartElement("NeededColumns");
-            {
-                WriteAssColumnAttribute(xmlWriter,"NameColumn",ui->lineEdit_ColumnName);
-                WriteAssColumnAttribute(xmlWriter,"TextColumn",ui->lineEdit_ColumnText);
-                WriteAssColumnAttribute(xmlWriter,"TimeStartColumn",ui->lineEdit_ColumnStart);
-                WriteAssColumnAttribute(xmlWriter,"TimeEndColumn",ui->lineEdit_ColumnEnd);
-            } xmlWriter.writeEndElement();
-        } xmlWriter.writeEndElement();
-
-        xmlWriter.writeStartElement("Timing");
-        {
-            xmlWriter.writeTextElement("MilisecondRoundValue",ui->spinBox_RoundValue->text());
-            xmlWriter.writeTextElement("DisableIntervals",CheckBoxGetText(ui->checkBox_DisableIntervals));
-            xmlWriter.writeStartElement("IntervalsDistributing");
-            {
-                xmlWriter.writeTextElement("VerySmall",ui->spinBox_SmallInterval->text());
-                xmlWriter.writeTextElement("Normal",ui->spinBox_NormalInterval->text());
-                xmlWriter.writeTextElement("Big",ui->spinBox_BigInterval->text());
-                xmlWriter.writeTextElement("VeryBig",ui->spinBox_VeryBigInterval->text());
-                xmlWriter.writeTextElement("VeryVeryBig",ui->spinBox_VeryVeryBigInterval->text());
-            } xmlWriter.writeEndElement();
-        } xmlWriter.writeEndElement();
-
-        /*xmlWriter.writeStartElement("DocumentStyle");
-        {
-            xmlWriter.writeTextElement("DisableTags",CheckBoxGetText(ui->checkBox_DisableTags));
-            xmlWriter.writeTextElement("DisableLinesCounter",CheckBoxGetText(ui->checkBox_DisableCounter));
-            xmlWriter.writeStartElement("MainFont");
-            {
-                xmlWriter.writeTextElement("Name",ui->lineEdit_Font->text());
-                xmlWriter.writeTextElement("Size",QString::number(ui->doubleSpinBox_Size->value()));
-            } xmlWriter.writeEndElement();
-            xmlWriter.writeStartElement("PageNumberFont");
-            {
-                xmlWriter.writeTextElement("Name",ui->lineEdit_Font_2->text());
-                xmlWriter.writeTextElement("Size",QString::number(ui->doubleSpinBox_Size_2->value()));
-            } xmlWriter.writeEndElement();
-            xmlWriter.writeStartElement("IndividualSelectedFont");
-            {
-                xmlWriter.writeTextElement("Name",ui->lineEdit_Font_3->text());
-                xmlWriter.writeTextElement("Size",QString::number(ui->doubleSpinBox_Size_3->value()));
-            } xmlWriter.writeEndElement();
-        } xmlWriter.writeEndElement();*/
-
-        xmlWriter.writeStartElement("SrtParsing");
-        {
-            xmlWriter.writeStartElement("ComplexPhrases");
-            {
-                xmlWriter.writeStartElement("TimeDistributing");
-                {
-                    xmlWriter.writeTextElement("Strategy",ui->comboBox_Distribution->currentText());
-                } xmlWriter.writeEndElement();
-            } xmlWriter.writeEndElement();
-        } xmlWriter.writeEndElement();
-
-        xmlWriter.writeStartElement("Additional");
-        {
-            xmlWriter.writeTextElement("EnableSoundTheme",CheckBoxGetText(ui->checkBox_ExtSound));
-        } xmlWriter.writeEndElement();
-
-    } xmlWriter.writeEndElement();
-
+    m_Table.Write(xmlWriter);
     xmlWriter.writeEndDocument();
     file.close();
 
@@ -226,12 +135,6 @@ void Settings::on_checkBox_DisableIntervals_stateChanged(int arg1)
     beginChanges();
 }
 
-struct ParsingStats
-{
-    QStringList Unrecognized;
-    unsigned Count = 0;
-};
-
 bool Settings::_Initialize(bool FirstAttempt)
 {
     QDomDocument domDoc;
@@ -255,12 +158,8 @@ bool Settings::_Initialize(bool FirstAttempt)
         if (domDoc.setContent(&file, true, &errorStr, &errorLine,
                               &errorColumn))
         {
-            ParsingStats stats;
-            InitializeAssParsing(&stats,domDoc);
-            InitializeSrtParsing(&stats,domDoc);
-            InitializeTimingParsing(&stats,domDoc);
-            InitializeStyleParsing(&stats,domDoc);
-            InitializeAdditionalParsing(&stats,domDoc);
+            SettingsParsingStats stats;
+            m_Table.Read(&stats, domDoc);
             if (stats.Count != 0)
             {
                 if (!stats.Unrecognized.empty())
@@ -322,12 +221,22 @@ static QList<QDomNode> elementsByTagPath(const T& doc, const QString& Path)
     return elementsByTagPath(doc, names);
 }
 
-static void AssParsingInitializeNeededColumns(ParsingStats* stats,const QDomDocument &domDoc, QLineEdit* lineEdit, const QString& Path)
+template <typename T>
+static
+QString TextGetter(QWidget* widget)
+{
+    T* casted = qobject_cast<T*>(widget);
+    Q_ASSERT(casted);
+    return casted->text();
+}
+
+static
+bool AssNeededColumnsReader(QWidget* widget, const QList<QDomNode>& nodes)
 {
     QString text;
-    QList<QDomNode> nodes = elementsByTagPath(domDoc, Path);
-    Q_ASSERT(stats);
+    QLineEdit* lineEdit = qobject_cast<QLineEdit*>(widget);
     Q_ASSERT(lineEdit);
+
     if (!nodes.empty())
     {
         for (const QDomNode& node : nodes)
@@ -340,45 +249,109 @@ static void AssParsingInitializeNeededColumns(ParsingStats* stats,const QDomDocu
         if (text.size()!=0)
         {
             lineEdit->setText(text);
-            stats->Count++;
-        }
-        else {
-            stats->Unrecognized.push_back(Path);
+            return true;
         }
     }
-    else {
-        stats->Unrecognized.push_back(Path);
-    }
+    return false;
 }
 
-static void SrtParsingInitializeTimeDistributing(ParsingStats* stats,const QDomDocument &domDoc, QComboBox* comboBox, const QString& Path)
+static
+void AssNeededColumnsWriter(QWidget* widget,QStringList& outLines)
 {
-    QList<QDomNode> nodes = elementsByTagPath(domDoc, Path);
+    QLineEdit* lineEdit = qobject_cast<QLineEdit*>(widget);
+    Q_ASSERT(lineEdit);
+
+    const QString& text = lineEdit->text();
+    QStringList sections = text.split(",", QString::SkipEmptyParts);
+    for (int i=0;i<sections.size();++i)
+    {
+        sections[i] = sections[i].trimmed();
+    }
+    std::swap(outLines, sections);
+}
+
+
+static
+bool SrtTimeDistributingReader(QWidget* widget, const QList<QDomNode>& nodes)
+{
+    QComboBox* comboBox = qobject_cast<QComboBox*>(widget);
+    Q_ASSERT(comboBox);
+
     if (nodes.size()==1)
     {
         const QString& nodeText = nodes[0].toElement().text();
         if (nodeText == "Uniform")
         {
             comboBox->setCurrentIndex(0);
-            stats->Count++;
+            return true;
         }
         else if (nodeText == "Fair")
         {
             comboBox->setCurrentIndex(1);
-            stats->Count++;
-        }
-        else {
-            stats->Unrecognized.push_back(Path);
+            return true;
         }
     }
-    else {
-        stats->Unrecognized.push_back(Path);
+    return false;
+}
+
+static
+void SrtTimeDistributingWriter(QWidget* widget,QStringList& outLines)
+{
+    QComboBox* comboBox = qobject_cast<QComboBox*>(widget);
+    Q_ASSERT(comboBox);
+
+    outLines.push_back(comboBox->currentText());
+}
+
+static
+bool CheckBoxReader(QWidget* widget, const QList<QDomNode>& nodes)
+{
+    QCheckBox* checkBox = qobject_cast<QCheckBox*>(widget);
+    Q_ASSERT(checkBox);
+
+    if (nodes.size() == 1)
+    {
+        const QString& nodeText = nodes[0].toElement().text();
+        if (nodeText=="true")
+        {
+            checkBox->setCheckState(Qt::CheckState::Checked);
+            return true;
+        }
+        else if (nodeText=="false")
+        {
+            checkBox->setCheckState(Qt::CheckState::Unchecked);
+            return true;
+        }
+    }
+    return false;
+}
+
+static
+void CheckBoxWriter(QWidget* widget,QStringList& outLines)
+{
+    QCheckBox* checkBox = qobject_cast<QCheckBox*>(widget);
+    Q_ASSERT(checkBox);
+
+    switch (checkBox->checkState())
+    {
+    case Qt::CheckState::Checked:
+        outLines.push_back("true");
+        break;
+    case Qt::CheckState::Unchecked:
+        outLines.push_back("false");
+        break;
+    default:
+        Q_ASSERT_X(0, __FUNCTION__,  "Invalid 'Qt::CheckState'");
+        break;
     }
 }
 
-static void InitializeSpinBox(ParsingStats* stats,const QDomDocument &domDoc, QSpinBox* spinBox, const QString& Path)
+static
+bool SpinBoxReader(QWidget* widget, const QList<QDomNode>& nodes)
 {
-    QList<QDomNode> nodes = elementsByTagPath(domDoc, Path);
+    QSpinBox* spinBox = qobject_cast<QSpinBox*>(widget);
+    Q_ASSERT(spinBox);
+
     if (nodes.size() == 1)
     {
         const QString& nodeText = nodes[0].toElement().text();
@@ -388,20 +361,28 @@ static void InitializeSpinBox(ParsingStats* stats,const QDomDocument &domDoc, QS
         if (castStatus)
         {
             spinBox->setValue(iValue);
-            stats->Count++;
-        }
-        else {
-            stats->Unrecognized.push_back(Path);
+            return true;
         }
     }
-    else {
-        stats->Unrecognized.push_back(Path);
-    }
+    return false;
 }
 
-static void InitializeDoubleSpinBox(ParsingStats* stats,const QDomDocument &domDoc, QDoubleSpinBox* spinBox, const QString& Path)
+// for QSpinBox, QLineEdit
+template <typename T>
+static
+void AbstractWriter(QWidget* widget,QStringList& outLines)
 {
-    QList<QDomNode> nodes = elementsByTagPath(domDoc, Path);
+    T* concrete = qobject_cast<T*>(widget);
+    Q_ASSERT(concrete);
+
+    outLines.push_back(concrete->text());
+}
+
+static
+bool SpinBoxDoubleReader(QWidget* widget, const QList<QDomNode>& nodes)
+{
+    QDoubleSpinBox* spinBox = qobject_cast<QDoubleSpinBox*>(widget);
+    Q_ASSERT(spinBox);
     if (nodes.size() == 1)
     {
         const QString& nodeText = nodes[0].toElement().text();
@@ -411,143 +392,56 @@ static void InitializeDoubleSpinBox(ParsingStats* stats,const QDomDocument &domD
         if (castStatus)
         {
             spinBox->setValue(dValue);
-            stats->Count++;
-        }
-        else {
-            stats->Unrecognized.push_back(Path);
+            return true;
         }
     }
-    else {
-        stats->Unrecognized.push_back(Path);
-    }
+    return false;
 }
 
-static void InitializeCheckBox(ParsingStats* stats,const QDomDocument &domDoc, QCheckBox* checkBox, const QString& Path)
+static
+void SpinBoxDoubleWriter(QWidget* widget,QStringList& outLines)
 {
-    QList<QDomNode> nodes = elementsByTagPath(domDoc, Path);
-    if (nodes.size() == 1)
-    {
-        const QString& nodeText = nodes[0].toElement().text();
-        if (nodeText=="true")
-        {
-            checkBox->setCheckState(Qt::CheckState::Checked);
-            stats->Count++;
-        }
-        else if (nodeText=="false")
-        {
-            checkBox->setCheckState(Qt::CheckState::Unchecked);
-            stats->Count++;
-        }
-        else {
-            stats->Unrecognized.push_back(Path);
-        }
-    }
-    else {
-        stats->Unrecognized.push_back(Path);
-    }
+    QDoubleSpinBox* spinBox = qobject_cast<QDoubleSpinBox*>(widget);
+    Q_ASSERT(spinBox);
+
+    outLines.push_back(QString::number(spinBox->value()));
 }
 
-static void InitializeLineEdit(ParsingStats* stats,const QDomDocument &domDoc, QLineEdit* lineEdit, const QString& Path)
+static
+bool LineEditReader(QWidget* widget, const QList<QDomNode>& nodes)
 {
-    QList<QDomNode> nodes = elementsByTagPath(domDoc, Path);
+    QLineEdit* lineEdit = qobject_cast<QLineEdit*>(widget);
+    Q_ASSERT(lineEdit);
+
     if (nodes.size()==1)
     {
         const QString& nodeText = nodes[0].toElement().text();
         if (nodeText.size()!=0)
         {
             lineEdit->setText(nodeText);
-            stats->Count++;
-        }
-        else {
-            stats->Unrecognized.push_back(Path);
+            return true;
         }
     }
-    else {
-        stats->Unrecognized.push_back(Path);
-    }
+    return false;
 }
 
-
-void Settings::InitializeAssParsing(void* rawStats, const QDomDocument &domDoc)
-{
-    auto stats = reinterpret_cast<ParsingStats*>(rawStats);
-    Q_ASSERT(stats);
-    AssParsingInitializeNeededColumns(stats, domDoc, ui->lineEdit_ColumnStart, "Root.AssParsing.NeededColumns.TimeStartColumn");
-    AssParsingInitializeNeededColumns(stats, domDoc, ui->lineEdit_ColumnEnd, "Root.AssParsing.NeededColumns.TimeEndColumn");
-    AssParsingInitializeNeededColumns(stats, domDoc, ui->lineEdit_ColumnName, "Root.AssParsing.NeededColumns.NameColumn");
-    AssParsingInitializeNeededColumns(stats, domDoc, ui->lineEdit_ColumnText, "Root.AssParsing.NeededColumns.TextColumn");
-}
-
-void Settings::InitializeSrtParsing(void* rawStats, const QDomDocument & domDoc)
-{
-    auto stats = reinterpret_cast<ParsingStats*>(rawStats);
-    Q_ASSERT(stats);
-    SrtParsingInitializeTimeDistributing(stats, domDoc, ui->comboBox_Distribution, "Root.SrtParsing.ComplexPhrases.TimeDistributing.Strategy");
-}
-
-void Settings::InitializeTimingParsing(void* rawStats, const QDomDocument &domDoc)
-{
-    auto stats = reinterpret_cast<ParsingStats*>(rawStats);
-    Q_ASSERT(stats);
-    InitializeSpinBox(stats, domDoc, ui->spinBox_RoundValue, "Root.Timing.MilisecondRoundValue");
-    InitializeCheckBox(stats, domDoc, ui->checkBox_DisableIntervals, "Root.Timing.DisableIntervals");
-    InitializeSpinBox(stats, domDoc, ui->spinBox_SmallInterval, "Root.Timing.IntervalsDistributing.VerySmall");
-    InitializeSpinBox(stats, domDoc, ui->spinBox_NormalInterval, "Root.Timing.IntervalsDistributing.Normal");
-    InitializeSpinBox(stats, domDoc, ui->spinBox_BigInterval, "Root.Timing.IntervalsDistributing.Big");
-    InitializeSpinBox(stats, domDoc, ui->spinBox_VeryBigInterval, "Root.Timing.IntervalsDistributing.VeryBig");
-    InitializeSpinBox(stats, domDoc, ui->spinBox_VeryVeryBigInterval, "Root.Timing.IntervalsDistributing.VeryVeryBig");
-}
-
-void Settings::InitializeStyleParsing(void* rawStats, const QDomDocument & domDoc)
-{
-    auto stats = reinterpret_cast<ParsingStats*>(rawStats);
-    Q_ASSERT(stats);
-    InitializeCheckBox(stats, domDoc, ui->checkBox_DisableTags, "Root.DocumentStyle.DisableTags");
-    InitializeCheckBox(stats, domDoc, ui->checkBox_DisableCounter, "Root.DocumentStyle.DisableLinesCounter");
-
-     InitializeStyle1Parsing(stats, domDoc);
-     InitializeStyle2Parsing(stats, domDoc);
-     InitializeStyle3Parsing(stats, domDoc);
-}
-
-void Settings::InitializeStyle1Parsing(void* rawStats, const QDomDocument &domDoc)
-{
-    /*auto stats = reinterpret_cast<ParsingStats*>(rawStats);
-    Q_ASSERT(stats);
-    InitializeLineEdit(stats, domDoc, ui->lineEdit_Font, "Root.DocumentStyle.MainFont.Name");
-    InitializeDoubleSpinBox(stats, domDoc, ui->doubleSpinBox_Size, "Root.DocumentStyle.MainFont.Size");*/
-}
-
-void Settings::InitializeStyle2Parsing(void* rawStats, const QDomDocument &domDoc)
-{
-    /*auto stats = reinterpret_cast<ParsingStats*>(rawStats);
-    Q_ASSERT(stats);
-    InitializeLineEdit(stats, domDoc, ui->lineEdit_Font_2, "Root.DocumentStyle.PageNumberFont.Name");
-    InitializeDoubleSpinBox(stats, domDoc, ui->doubleSpinBox_Size_2, "Root.DocumentStyle.PageNumberFont.Size");*/
-}
-
-void Settings::InitializeStyle3Parsing(void* rawStats, const QDomDocument &domDoc)
-{
-    /*auto stats = reinterpret_cast<ParsingStats*>(rawStats);
-    Q_ASSERT(stats);
-    InitializeLineEdit(stats, domDoc, ui->lineEdit_Font_3, "Root.DocumentStyle.IndividualSelectedFont.Name");
-    InitializeDoubleSpinBox(stats, domDoc, ui->doubleSpinBox_Size_3, "Root.DocumentStyle.IndividualSelectedFont.Size");*/
-}
-
-void Settings::InitializeAdditionalParsing(void* rawStats, const QDomDocument &domDoc)
-{
-    auto stats = reinterpret_cast<ParsingStats*>(rawStats);
-    Q_ASSERT(stats);
-    InitializeCheckBox(stats, domDoc, ui->checkBox_ExtSound, "Root.Additional.EnableSoundTheme");
-}
-
-template <typename T>
 static
-QString TextGetter(QWidget* widget)
+bool ColoredPushButtonReader(QWidget* widget, const QList<QDomNode>& nodes)
 {
-    T* casted = qobject_cast<T*>(widget);
-    Q_ASSERT(casted);
-    return casted->text();
+    ColoredPushButton* button = qobject_cast<ColoredPushButton*>(widget);
+    Q_ASSERT(button);
+
+    // TODO: implement this
+    return false;
+}
+
+static
+void ColoredPushButtonWriter(QWidget* widget,QStringList& outLines)
+{
+    ColoredPushButton* button = qobject_cast<ColoredPushButton*>(widget);
+    Q_ASSERT(button);
+
+    // TODO: implement this
 }
 
 void Settings::InitializeMainTable()
@@ -563,56 +457,169 @@ void Settings::InitializeMainTable()
 
 #define REG(...) m_Table.Register(__VA_ARGS__)
 
-    // AssParsing
-    REG("Root.AssParsing.NeededColumns.TimeStartColumn",   ASS_CATEGORY, ui->label_ColumnStart,   ui->lineEdit_ColumnStart, nullptr);
-    REG("Root.AssParsing.NeededColumns.TimeEndColumn",     ASS_CATEGORY, ui->label_ColumnEnd,     ui->lineEdit_ColumnEnd, nullptr);
-    REG("Root.AssParsing.NeededColumns.NameColumn",        ASS_CATEGORY, ui->label_ColumnName,    ui->lineEdit_ColumnName, nullptr);
-    REG("Root.AssParsing.NeededColumns.TextColumn",        ASS_CATEGORY, ui->label_ColumnText,    ui->lineEdit_ColumnText, nullptr);
+    /*******************************************************************
+    * AssParsing
+    *******************************************************************/
+    REG("Root.AssParsing.NeededColumns.TimeStartColumn",
+        ASS_CATEGORY, ui->label_ColumnStart,
+        ui->lineEdit_ColumnStart, AssNeededColumnsReader, AssNeededColumnsWriter, nullptr);
 
-    // SrtParsing
-    REG("Root.SrtParsing.ComplexPhrases.TimeDistributing.Strategy", SRT_CATEGORY, ui->label_Distribution, ui->comboBox_Distribution, nullptr);
+    REG("Root.AssParsing.NeededColumns.TimeEndColumn",
+        ASS_CATEGORY, ui->label_ColumnEnd,
+        ui->lineEdit_ColumnEnd, AssNeededColumnsReader, AssNeededColumnsWriter, nullptr);
 
-    // Timing
-    REG("Root.Timing.MilisecondRoundValue",                TIMING_CATEGORY, ui->label_RoundValue,             ui->spinBox_RoundValue, nullptr);
-    REG("Root.Timing.DisableIntervals",                    TIMING_CATEGORY, nullptr,                          ui->checkBox_DisableIntervals, TextGetter<QCheckBox>);
+    REG("Root.AssParsing.NeededColumns.NameColumn",
+        ASS_CATEGORY, ui->label_ColumnName,
+        ui->lineEdit_ColumnName, AssNeededColumnsReader, AssNeededColumnsWriter, nullptr);
 
-    REG("Root.Timing.IntervalsDistributing.VerySmall",     TIMING_CATEGORY, ui->label_SmallInterval,          ui->spinBox_SmallInterval, nullptr);
-    REG("Root.Timing.IntervalsDistributing.Normal",        TIMING_CATEGORY, ui->label_NormalInterval,         ui->spinBox_NormalInterval, nullptr);
-    REG("Root.Timing.IntervalsDistributing.Big",           TIMING_CATEGORY, ui->label_BigInterval,            ui->spinBox_BigInterval, nullptr);
-    REG("Root.Timing.IntervalsDistributing.VeryBig",       TIMING_CATEGORY, ui->label_VeryBigInterval,        ui->spinBox_VeryBigInterval, nullptr);
-    REG("Root.Timing.IntervalsDistributing.VeryVeryBig",   TIMING_CATEGORY, ui->label_VeryVeryBigInterval,    ui->spinBox_VeryVeryBigInterval, nullptr);
+    REG("Root.AssParsing.NeededColumns.TextColumn",
+        ASS_CATEGORY, ui->label_ColumnText,
+        ui->lineEdit_ColumnText, AssNeededColumnsReader, AssNeededColumnsWriter, nullptr);
 
-    // DocumentStyle
-    REG("Root.DocumentStyle.DisableTags",                  STYLE_CATEGORY, nullptr, ui->checkBox_DisableTags, TextGetter<QCheckBox>);
-    REG("Root.DocumentStyle.DisableLinesCounter",          STYLE_CATEGORY, nullptr, ui->checkBox_DisableCounter, TextGetter<QCheckBox>);
+    /*******************************************************************
+    * SrtParsing
+    *******************************************************************/
+    REG("Root.SrtParsing.ComplexPhrases.TimeDistributing.Strategy",
+        SRT_CATEGORY, ui->label_Distribution,
+        ui->comboBox_Distribution, SrtTimeDistributingReader, SrtTimeDistributingWriter, nullptr);
 
-    REG("Root.DocumentStyle.MainFont.Name",                STYLE_CATEGORY_MAIN, ui->label_StyleFont,      ui->lineEdit_StyleFont, nullptr);
-    REG("Root.DocumentStyle.MainFont.Size",                STYLE_CATEGORY_MAIN, ui->label_StyleSize,      ui->doubleSpinBox_StyleSize, nullptr);
-    REG("Root.DocumentStyle.MainFont.Color",               STYLE_CATEGORY_MAIN, ui->label_StyleColor,     ui->coloredPushButton_StyleColor, nullptr);
-    REG("Root.DocumentStyle.MainFont.ColorBack",           STYLE_CATEGORY_MAIN, ui->label_StyleColorBack, ui->coloredPushButton_StyleColorBack, nullptr);
-    REG("Root.DocumentStyle.MainFont.Bold",                STYLE_CATEGORY_MAIN, nullptr,                  ui->checkBox_StyleBold, TextGetter<QCheckBox>);
-    REG("Root.DocumentStyle.MainFont.Italic",              STYLE_CATEGORY_MAIN, nullptr,                  ui->checkBox_StyleItalic, TextGetter<QCheckBox>);
-    REG("Root.DocumentStyle.MainFont.Underline",           STYLE_CATEGORY_MAIN, nullptr,                  ui->checkBox_StyleUnderline, TextGetter<QCheckBox>);
+    /*******************************************************************
+    * Timing
+    *******************************************************************/
+    REG("Root.Timing.MilisecondRoundValue",
+        TIMING_CATEGORY, ui->label_RoundValue,
+        ui->spinBox_RoundValue, SpinBoxReader, AbstractWriter<QSpinBox>, nullptr);
 
-    REG("Root.DocumentStyle.PageNumberFont.Name",          STYLE_CATEGORY_NUMERATION, ui->label_StyleFont_2,      ui->lineEdit_StyleFont_2, nullptr);
-    REG("Root.DocumentStyle.PageNumberFont.Size",          STYLE_CATEGORY_NUMERATION, ui->label_StyleSize_2,      ui->doubleSpinBox_StyleSize_2, nullptr);
-    REG("Root.DocumentStyle.PageNumberFont.Color",         STYLE_CATEGORY_NUMERATION, ui->label_StyleColor_2,     ui->coloredPushButton_StyleColor_2, nullptr);
-    REG("Root.DocumentStyle.PageNumberFont.ColorBack",     STYLE_CATEGORY_NUMERATION, ui->label_StyleColorBack_2, ui->coloredPushButton_StyleColorBack_2, nullptr);
-    REG("Root.DocumentStyle.PageNumberFont.Bold",          STYLE_CATEGORY_NUMERATION, nullptr,                    ui->checkBox_StyleBold_2, TextGetter<QCheckBox>);
-    REG("Root.DocumentStyle.PageNumberFont.Italic",        STYLE_CATEGORY_NUMERATION, nullptr,                    ui->checkBox_StyleItalic_2, TextGetter<QCheckBox>);
-    REG("Root.DocumentStyle.PageNumberFont.Underline",     STYLE_CATEGORY_NUMERATION, nullptr,                    ui->checkBox_StyleUnderline_2, TextGetter<QCheckBox>);
+    REG("Root.Timing.DisableIntervals",
+        TIMING_CATEGORY, nullptr,
+        ui->checkBox_DisableIntervals, CheckBoxReader, CheckBoxWriter, TextGetter<QCheckBox>);
 
-    REG("Root.DocumentStyle.IndividualSelectedFont.Name",          STYLE_CATEGORY_SELECTION, ui->label_StyleFont_3,       ui->lineEdit_StyleFont_3, nullptr);
-    REG("Root.DocumentStyle.IndividualSelectedFont.Size",          STYLE_CATEGORY_SELECTION, ui->label_StyleSize_3,       ui->doubleSpinBox_StyleSize_3, nullptr);
-    REG("Root.DocumentStyle.IndividualSelectedFont.Color",         STYLE_CATEGORY_SELECTION, ui->label_StyleColor_3,      ui->coloredPushButton_StyleColor_3, nullptr);
-    REG("Root.DocumentStyle.IndividualSelectedFont.ColorBack",     STYLE_CATEGORY_SELECTION, ui->label_StyleColorBack_3,  ui->coloredPushButton_StyleColorBack_3, nullptr);
-    REG("Root.DocumentStyle.IndividualSelectedFont.Bold",          STYLE_CATEGORY_SELECTION, nullptr,                     ui->checkBox_StyleBold_3, TextGetter<QCheckBox>);
-    REG("Root.DocumentStyle.IndividualSelectedFont.Italic",        STYLE_CATEGORY_SELECTION, nullptr,                     ui->checkBox_StyleItalic_3, TextGetter<QCheckBox>);
-    REG("Root.DocumentStyle.IndividualSelectedFont.Underline",     STYLE_CATEGORY_SELECTION, nullptr,                     ui->checkBox_StyleUnderline_3, TextGetter<QCheckBox>);
+    REG("Root.Timing.IntervalsDistributing.VerySmall",
+        TIMING_CATEGORY, ui->label_SmallInterval,
+        ui->spinBox_SmallInterval, SpinBoxReader, AbstractWriter<QSpinBox>, nullptr);
+
+    REG("Root.Timing.IntervalsDistributing.Normal",
+        TIMING_CATEGORY, ui->label_NormalInterval,
+        ui->spinBox_NormalInterval, SpinBoxReader, AbstractWriter<QSpinBox>, nullptr);
+
+    REG("Root.Timing.IntervalsDistributing.Big",
+        TIMING_CATEGORY, ui->label_BigInterval,
+        ui->spinBox_BigInterval, SpinBoxReader, AbstractWriter<QSpinBox>, nullptr);
+
+    REG("Root.Timing.IntervalsDistributing.VeryBig",
+        TIMING_CATEGORY, ui->label_VeryBigInterval,
+        ui->spinBox_VeryBigInterval, SpinBoxReader, AbstractWriter<QSpinBox>, nullptr);
+
+    REG("Root.Timing.IntervalsDistributing.VeryVeryBig",
+        TIMING_CATEGORY, ui->label_VeryVeryBigInterval,
+        ui->spinBox_VeryVeryBigInterval, SpinBoxReader, AbstractWriter<QSpinBox>, nullptr);
+
+    /*******************************************************************
+    * DocumentStyle
+    *******************************************************************/
+    REG("Root.DocumentStyle.DisableTags",
+        STYLE_CATEGORY, nullptr,
+        ui->checkBox_DisableTags, CheckBoxReader, CheckBoxWriter, TextGetter<QCheckBox>);
+
+    REG("Root.DocumentStyle.DisableLinesCounter",
+        STYLE_CATEGORY, nullptr,
+        ui->checkBox_DisableCounter, CheckBoxReader, CheckBoxWriter, TextGetter<QCheckBox>);
 
 
-    // Additional
-    REG("Root.Additional.EnableSoundTheme", STYLE_ADDITIONAL, nullptr, ui->checkBox_ExtSound, TextGetter<QCheckBox>);
+    REG("Root.DocumentStyle.MainFont.Name",
+        STYLE_CATEGORY_MAIN, ui->label_StyleFont,
+        ui->lineEdit_StyleFont, LineEditReader, AbstractWriter<QLineEdit>, nullptr);
+
+    REG("Root.DocumentStyle.MainFont.Size",
+        STYLE_CATEGORY_MAIN, ui->label_StyleSize,
+        ui->doubleSpinBox_StyleSize, SpinBoxDoubleReader, SpinBoxDoubleWriter, nullptr);
+
+    REG("Root.DocumentStyle.MainFont.Color",
+        STYLE_CATEGORY_MAIN, ui->label_StyleColor,
+        ui->coloredPushButton_StyleColor, ColoredPushButtonReader, ColoredPushButtonWriter, nullptr);
+
+    REG("Root.DocumentStyle.MainFont.ColorBack",
+        STYLE_CATEGORY_MAIN, ui->label_StyleColorBack,
+        ui->coloredPushButton_StyleColorBack, ColoredPushButtonReader, ColoredPushButtonWriter, nullptr);
+
+    REG("Root.DocumentStyle.MainFont.Bold",
+        STYLE_CATEGORY_MAIN, nullptr,
+        ui->checkBox_StyleBold, CheckBoxReader, CheckBoxWriter, TextGetter<QCheckBox>);
+
+    REG("Root.DocumentStyle.MainFont.Italic",
+        STYLE_CATEGORY_MAIN, nullptr,
+        ui->checkBox_StyleItalic, CheckBoxReader, CheckBoxWriter, TextGetter<QCheckBox>);
+
+    REG("Root.DocumentStyle.MainFont.Underline",
+        STYLE_CATEGORY_MAIN, nullptr,
+        ui->checkBox_StyleUnderline, CheckBoxReader, CheckBoxWriter, TextGetter<QCheckBox>);
+
+
+    REG("Root.DocumentStyle.PageNumberFont.Name",
+        STYLE_CATEGORY_NUMERATION, ui->label_StyleFont_2,
+        ui->lineEdit_StyleFont_2, LineEditReader, AbstractWriter<QLineEdit>, nullptr);
+
+    REG("Root.DocumentStyle.PageNumberFont.Size",
+        STYLE_CATEGORY_NUMERATION, ui->label_StyleSize_2,
+        ui->doubleSpinBox_StyleSize_2, SpinBoxDoubleReader, SpinBoxDoubleWriter, nullptr);
+
+    REG("Root.DocumentStyle.PageNumberFont.Color",
+        STYLE_CATEGORY_NUMERATION, ui->label_StyleColor_2,
+        ui->coloredPushButton_StyleColor_2, ColoredPushButtonReader, ColoredPushButtonWriter, nullptr);
+
+    REG("Root.DocumentStyle.PageNumberFont.ColorBack",
+        STYLE_CATEGORY_NUMERATION, ui->label_StyleColorBack_2,
+        ui->coloredPushButton_StyleColorBack_2, ColoredPushButtonReader, ColoredPushButtonWriter, nullptr);
+
+    REG("Root.DocumentStyle.PageNumberFont.Bold",
+        STYLE_CATEGORY_NUMERATION, nullptr,
+        ui->checkBox_StyleBold_2, CheckBoxReader, CheckBoxWriter, TextGetter<QCheckBox>);
+
+    REG("Root.DocumentStyle.PageNumberFont.Italic",
+        STYLE_CATEGORY_NUMERATION, nullptr,
+        ui->checkBox_StyleItalic_2, CheckBoxReader, CheckBoxWriter, TextGetter<QCheckBox>);
+
+
+    REG("Root.DocumentStyle.PageNumberFont.Underline",
+        STYLE_CATEGORY_NUMERATION, nullptr,
+        ui->checkBox_StyleUnderline_2, CheckBoxReader, CheckBoxWriter, TextGetter<QCheckBox>);
+
+
+    REG("Root.DocumentStyle.IndividualSelectedFont.Name",
+        STYLE_CATEGORY_SELECTION, ui->label_StyleFont_3,
+        ui->lineEdit_StyleFont_3, LineEditReader, AbstractWriter<QLineEdit>, nullptr);
+
+    REG("Root.DocumentStyle.IndividualSelectedFont.Size",
+        STYLE_CATEGORY_SELECTION, ui->label_StyleSize_3,
+        ui->doubleSpinBox_StyleSize_3, SpinBoxDoubleReader, SpinBoxDoubleWriter, nullptr);
+
+    REG("Root.DocumentStyle.IndividualSelectedFont.Color",
+        STYLE_CATEGORY_SELECTION, ui->label_StyleColor_3,
+        ui->coloredPushButton_StyleColor_3, ColoredPushButtonReader, ColoredPushButtonWriter, nullptr);
+
+    REG("Root.DocumentStyle.IndividualSelectedFont.ColorBack",
+        STYLE_CATEGORY_SELECTION, ui->label_StyleColorBack_3,
+        ui->coloredPushButton_StyleColorBack_3, ColoredPushButtonReader, ColoredPushButtonWriter, nullptr);
+
+    REG("Root.DocumentStyle.IndividualSelectedFont.Bold",
+        STYLE_CATEGORY_SELECTION, nullptr,
+        ui->checkBox_StyleBold_3, CheckBoxReader, CheckBoxWriter, TextGetter<QCheckBox>);
+
+    REG("Root.DocumentStyle.IndividualSelectedFont.Italic",
+        STYLE_CATEGORY_SELECTION, nullptr,
+        ui->checkBox_StyleItalic_3, CheckBoxReader, CheckBoxWriter, TextGetter<QCheckBox>);
+
+    REG("Root.DocumentStyle.IndividualSelectedFont.Underline",
+        STYLE_CATEGORY_SELECTION, nullptr,
+        ui->checkBox_StyleUnderline_3, CheckBoxReader, CheckBoxWriter, TextGetter<QCheckBox>);
+
+
+
+
+    /*******************************************************************
+    * Additional
+    *******************************************************************/
+    REG("Root.Additional.EnableSoundTheme", STYLE_ADDITIONAL, nullptr, ui->checkBox_ExtSound, CheckBoxReader, CheckBoxWriter, TextGetter<QCheckBox>);
 
 #undef REG
 }
@@ -746,11 +753,18 @@ void Settings::on_lineEdit_ColumnName_textChanged(const QString &)
     beginChanges();
 }
 
-void SettingsTable::Register(const QString &Path, const QString &Category, QWidget *Label, QWidget *Widget, SettingsTable::GetTextFuncType GetTextFunc)
+void SettingsTable::Register(
+        const QString &Path,
+        const QString &Category,
+        QWidget *Label,
+        QWidget *Widget,
+        ReaderFuncType ReaderFunc,
+        WriterFuncType WriterFunc,
+        GetTextFuncType GetTextFunc)
 {
     Q_ASSERT(Widget);
-
-    //qDebug() << "Registering: " << Path;
+    Q_ASSERT(ReaderFunc);
+    Q_ASSERT(WriterFunc);
 
     if (GetTextFunc==nullptr)
     {
@@ -769,12 +783,9 @@ void SettingsTable::Register(const QString &Path, const QString &Category, QWidg
     opt.Label                   = Label;
     opt.Widget                  = Widget;
     opt.GetTextFunc             = GetTextFunc;
+    opt.ReaderFunc              = ReaderFunc;
+    opt.WriterFunc              = WriterFunc;
     m_MainTable[Path]           = opt;
-}
-
-void SettingsTable::Register(const QString &Path, const QString &Category, QWidget *Widget, SettingsTable::GetTextFuncType GetTextFunc)
-{
-    Register(Path, Category, nullptr, Widget, GetTextFunc);
 }
 
 void SettingsTable::PrintFullTable() const
@@ -783,6 +794,26 @@ void SettingsTable::PrintFullTable() const
     {
         qDebug() << "[" << pair.first << "] = " << GetFullNameByPath(pair.first);
     }
+}
+
+void SettingsTable::Read(SettingsParsingStats *Stats, const QDomDocument &domDoc)
+{
+    for (const auto& pair : m_MainTable)
+    {
+        const auto& value = pair.second;
+        QList<QDomNode> nodes = elementsByTagPath(domDoc, value.Path);
+        if (value.ReaderFunc(value.Widget, nodes))
+            (Stats->Count)++;
+        else
+        {
+            Stats->Unrecognized.push_back(value.Path);
+        }
+    }
+}
+
+void SettingsTable::Write(QXmlStreamWriter &writer) const
+{
+    // TODO: implement this
 }
 
 QString SettingsTable::GetFullNameByPath(const QString &Path) const
