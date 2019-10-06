@@ -5,7 +5,7 @@
 #include <QEvent>
 #include <QSortFilterProxyModel>
 
-#include "MainTableModel.h"
+#include "maintablemodel.h"
 
 namespace Ui {
 class MainWindow;

@@ -4,7 +4,7 @@
 #include <QDebug>
 #include <QMessageBox>
 #include <sstream>
-#include "ConverterWaiting.h"
+#include "converterwaiting.h"
 
 // TODO: make normal path
 #define SETTINGS_DIR "settings.xml"
@@ -49,14 +49,17 @@ static QString PrintConfigPath(const QString& Path)
         return "Стиль документа:Отключить тэги";
     else if (Path == "Root.DocumentStyle.DisableLinesCounter")
         return "Стиль документа:Отключить подсчет строк";
+
     else if (Path == "Root.DocumentStyle.MainFont.Name")
         return "Стиль документа:Главное:Шрифт";
     else if (Path == "Root.DocumentStyle.MainFont.Size")
         return "Стиль документа:Главное:Размер";
+
     else if (Path == "Root.DocumentStyle.PageNumberFont.Name")
         return "Стиль документа:Нумерация:Шрифт";
     else if (Path == "Root.DocumentStyle.PageNumberFont.Size")
         return "Стиль документа:Нумерация:Размер";
+
     else if (Path == "Root.DocumentStyle.IndividualSelectedFont.Name")
         return "Стиль документа:Выделенные:Шрифт";
     else if (Path =="Root.DocumentStyle.IndividualSelectedFont.Size")

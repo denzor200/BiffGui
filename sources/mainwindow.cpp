@@ -16,10 +16,10 @@
 #include <fstream>
 #include <QDebug>
 
-#include "Settings.h"
+#include "settings.h"
 #include "generating.h"
 
-#include "DirectoriesRegistry.h"
+#include "directoriesregistry.h"
 #include "maintabledelegates.h"
 #include "utils.h"
 #include "convertersyncapi.h"
@@ -643,10 +643,20 @@ void MainWindow::on_action_register_software_triggered()
 
 void MainWindow::on_action_add_triggered()
 {
+    if (m_IsReversed)
+    {
+        QMessageBox::critical(nullptr, "Ошибка", "Нельзя добавлять новых персонажей. Список персонажей должен соответствовать списку из субтитров.");
+        return;
+    }
     InsertRow();
 }
 
 void MainWindow::on_action_remove_triggered()
 {
+    if (m_IsReversed)
+    {
+        QMessageBox::critical(nullptr, "Ошибка", "Нельзя удалять персонажей. Список персонажей должен соответствовать списку из субтитров.");
+        return;
+    }
     RemoveAllSelectedRows();
 }
