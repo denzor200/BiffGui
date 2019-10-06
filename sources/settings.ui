@@ -23,9 +23,9 @@
       <property name="geometry">
        <rect>
         <x>0</x>
-        <y>0</y>
+        <y>-323</y>
         <width>625</width>
-        <height>703</height>
+        <height>830</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -372,7 +372,7 @@
                  <item row="0" column="0">
                   <widget class="QLabel" name="label_Font">
                    <property name="text">
-                    <string>Шрифт</string>
+                    <string>Гарнитура</string>
                    </property>
                    <property name="alignment">
                     <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
@@ -385,7 +385,7 @@
                  <item row="1" column="0">
                   <widget class="QLabel" name="label_Size">
                    <property name="text">
-                    <string>Размер</string>
+                    <string>Кегль</string>
                    </property>
                    <property name="alignment">
                     <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
@@ -402,18 +402,64 @@
                    </property>
                   </widget>
                  </item>
+                 <item row="2" column="1">
+                  <widget class="ColoredPushButton" name="coloredPushButton_Color">
+                   <property name="text">
+                    <string/>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="3" column="0">
+                  <widget class="QLabel" name="label">
+                   <property name="text">
+                    <string>Цвет подсветки</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="3" column="1">
+                  <widget class="ColoredPushButton" name="coloredPushButton_ColorBack">
+                   <property name="text">
+                    <string/>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="4" column="1">
+                  <widget class="QCheckBox" name="checkBox_Bold">
+                   <property name="text">
+                    <string>Жирный</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="5" column="1">
+                  <widget class="QCheckBox" name="checkBox_Italic">
+                   <property name="text">
+                    <string>Курсив</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="6" column="1">
+                  <widget class="QCheckBox" name="checkBox_Underline">
+                   <property name="text">
+                    <string>Подчеркивание</string>
+                   </property>
+                  </widget>
+                 </item>
                  <item row="2" column="0">
+                  <widget class="QLabel" name="label_2">
+                   <property name="text">
+                    <string>Цвет шрифта</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="5" column="0">
                   <spacer name="horizontalSpacer_5">
                    <property name="orientation">
                     <enum>Qt::Horizontal</enum>
                    </property>
-                   <property name="sizeType">
-                    <enum>QSizePolicy::Fixed</enum>
-                   </property>
                    <property name="sizeHint" stdset="0">
                     <size>
                      <width>272</width>
-                     <height>0</height>
+                     <height>20</height>
                     </size>
                    </property>
                   </spacer>
@@ -430,14 +476,14 @@
                 <property name="title">
                  <string>2. Нумерация</string>
                 </property>
-                <layout class="QFormLayout" name="formLayout_9">
+                <layout class="QFormLayout" name="formLayout_8">
                  <property name="labelAlignment">
                   <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
                  </property>
                  <item row="0" column="0">
                   <widget class="QLabel" name="label_Font_2">
                    <property name="text">
-                    <string>Шрифт</string>
+                    <string>Гарнитура</string>
                    </property>
                    <property name="alignment">
                     <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
@@ -450,7 +496,7 @@
                  <item row="1" column="0">
                   <widget class="QLabel" name="label_Size_2">
                    <property name="text">
-                    <string>Размер</string>
+                    <string>Кегль</string>
                    </property>
                    <property name="alignment">
                     <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
@@ -468,20 +514,66 @@
                   </widget>
                  </item>
                  <item row="2" column="0">
-                  <spacer name="horizontalSpacer_4">
+                  <widget class="QLabel" name="label_4">
+                   <property name="text">
+                    <string>Цвет шрифта</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="2" column="1">
+                  <widget class="ColoredPushButton" name="coloredPushButton_Color_2">
+                   <property name="text">
+                    <string/>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="3" column="0">
+                  <widget class="QLabel" name="label_3">
+                   <property name="text">
+                    <string>Цвет подсветки</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="3" column="1">
+                  <widget class="ColoredPushButton" name="coloredPushButton_ColorBack_2">
+                   <property name="text">
+                    <string/>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="4" column="1">
+                  <widget class="QCheckBox" name="checkBox_Bold_2">
+                   <property name="text">
+                    <string>Жирный</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="5" column="0">
+                  <spacer name="horizontalSpacer_8">
                    <property name="orientation">
                     <enum>Qt::Horizontal</enum>
-                   </property>
-                   <property name="sizeType">
-                    <enum>QSizePolicy::Fixed</enum>
                    </property>
                    <property name="sizeHint" stdset="0">
                     <size>
                      <width>272</width>
-                     <height>0</height>
+                     <height>20</height>
                     </size>
                    </property>
                   </spacer>
+                 </item>
+                 <item row="5" column="1">
+                  <widget class="QCheckBox" name="checkBox_Italic_2">
+                   <property name="text">
+                    <string>Курсив</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="6" column="1">
+                  <widget class="QCheckBox" name="checkBox_Underline_2">
+                   <property name="text">
+                    <string>Подчеркивание</string>
+                   </property>
+                  </widget>
                  </item>
                 </layout>
                </widget>
@@ -502,7 +594,7 @@
                  <item row="0" column="0">
                   <widget class="QLabel" name="label_Font_3">
                    <property name="text">
-                    <string>Шрифт</string>
+                    <string>Гарнитура</string>
                    </property>
                    <property name="alignment">
                     <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
@@ -515,7 +607,7 @@
                  <item row="1" column="0">
                   <widget class="QLabel" name="label_Size_3">
                    <property name="text">
-                    <string>Размер</string>
+                    <string>Кегль</string>
                    </property>
                    <property name="alignment">
                     <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
@@ -533,20 +625,66 @@
                   </widget>
                  </item>
                  <item row="2" column="0">
-                  <spacer name="horizontalSpacer_3">
+                  <widget class="QLabel" name="label_6">
+                   <property name="text">
+                    <string>Цвет шрифта</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="2" column="1">
+                  <widget class="ColoredPushButton" name="coloredPushButton_Color_3">
+                   <property name="text">
+                    <string/>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="3" column="0">
+                  <widget class="QLabel" name="label_5">
+                   <property name="text">
+                    <string>Цвет подсветки</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="3" column="1">
+                  <widget class="ColoredPushButton" name="coloredPushButton_ColorBack_3">
+                   <property name="text">
+                    <string/>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="4" column="1">
+                  <widget class="QCheckBox" name="checkBox_Bold_3">
+                   <property name="text">
+                    <string>Жирный</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="5" column="0">
+                  <spacer name="horizontalSpacer_9">
                    <property name="orientation">
                     <enum>Qt::Horizontal</enum>
-                   </property>
-                   <property name="sizeType">
-                    <enum>QSizePolicy::Fixed</enum>
                    </property>
                    <property name="sizeHint" stdset="0">
                     <size>
                      <width>272</width>
-                     <height>0</height>
+                     <height>20</height>
                     </size>
                    </property>
                   </spacer>
+                 </item>
+                 <item row="5" column="1">
+                  <widget class="QCheckBox" name="checkBox_Italic_3">
+                   <property name="text">
+                    <string>Курсив</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="6" column="1">
+                  <widget class="QCheckBox" name="checkBox_Underline_3">
+                   <property name="text">
+                    <string>Подчеркивание</string>
+                   </property>
+                  </widget>
                  </item>
                 </layout>
                </widget>
@@ -733,6 +871,13 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>ColoredPushButton</class>
+   <extends>QPushButton</extends>
+   <header>coloredpushbutton.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

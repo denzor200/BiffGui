@@ -26,6 +26,7 @@ CONFIG += c++11
 
 SOURCES += \
         ActorName.cpp \
+        coloredpushbutton.cpp \
         commandlineparser.cpp \
         convertersyncapi.cpp \
         converterwaiting.cpp \
@@ -44,6 +45,7 @@ SOURCES += \
 HEADERS += \
         ActorName.h \
         build_defs.h \
+        coloredpushbutton.h \
         commandlineparser.h \
         controlinfo.h \
         convertersyncapi.h \

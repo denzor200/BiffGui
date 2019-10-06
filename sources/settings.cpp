@@ -116,7 +116,7 @@ void Settings::beginChanges()
 {
     ui->pushButton_OK->setEnabled(true);
     ui->pushButton_Apply->setEnabled(true);
-    ui->pushButton_Apply->setFocus();
+    //ui->pushButton_Apply->setFocus();
 }
 
 static QString CheckBoxGetText(QCheckBox* checkBox)
