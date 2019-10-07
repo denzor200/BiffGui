@@ -15,6 +15,9 @@ public:
     // QWidget interface
 protected:
     virtual void mousePressEvent(QMouseEvent* event) override;
+private:
+    QColor m_Color;
+    bool m_ColorInitialized = false;
 };
 
 #endif // COLOREDPUSHBUTTON_H

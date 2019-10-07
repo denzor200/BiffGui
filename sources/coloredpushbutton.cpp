@@ -1,27 +1,40 @@
 #include "coloredpushbutton.h"
+#include <QColorDialog>
+#include <QDebug>
 
 ColoredPushButton::ColoredPushButton(QWidget *parent) :
     QPushButton(parent)
 {
+    SetColor(QColor(Qt::black));
 }
 
 void ColoredPushButton::SetColor(const QColor &color)
 {
-    // TODO: implement this
+    // qDebug() << "ColoredPushButton::SetColor";
+    setAutoFillBackground(true);
+    setStyleSheet("background-color: " + color.name() + "");
+    m_Color = color;
+    m_ColorInitialized = true;
 }
 
 QColor ColoredPushButton::GetColor() const
 {
-    // TODO: implement this
-    return QColor("#FFFFFF");
+    // qDebug() << "ColoredPushButton::GetColor";
+    Q_ASSERT(m_ColorInitialized);
+    return m_Color;
 }
 
 void ColoredPushButton::mousePressEvent(QMouseEvent *event)
 {
-
-    // do something..
-
     QPushButton::mousePressEvent(event);
+
+    auto dialog = new QColorDialog(GetColor(), this);
+    dialog->setWindowFlags( Qt::Widget );
+    auto color = dialog->getColor();
+    if (color.isValid())
+    {
+        SetColor(color);
+    }
 }
 
 
