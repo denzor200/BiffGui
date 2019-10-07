@@ -5,16 +5,14 @@
 ColoredPushButton::ColoredPushButton(QWidget *parent) :
     QPushButton(parent)
 {
-    SetColor(QColor(Qt::black));
+    _setColor(QColor(Qt::black));
 }
 
 void ColoredPushButton::SetColor(const QColor &color)
 {
     // qDebug() << "ColoredPushButton::SetColor";
-    setAutoFillBackground(true);
-    setStyleSheet("background-color: " + color.name() + "");
-    m_Color = color;
-    m_ColorInitialized = true;
+    _setColor(color);
+    emit colorChanged(m_Color);
 }
 
 QColor ColoredPushButton::GetColor() const
@@ -35,6 +33,14 @@ void ColoredPushButton::mousePressEvent(QMouseEvent *event)
     {
         SetColor(color);
     }
+}
+
+void ColoredPushButton::_setColor(const QColor &color)
+{
+    setAutoFillBackground(true);
+    setStyleSheet("background-color: " + color.name() + "");
+    m_Color = color;
+    m_ColorInitialized = true;
 }
 
 

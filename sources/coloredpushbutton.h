@@ -12,9 +12,16 @@ public:
     void SetColor(const QColor& color);
     QColor GetColor() const;
 
-    // QWidget interface
+
+signals:
+    void colorChanged(const QColor& color);
+
 protected:
     virtual void mousePressEvent(QMouseEvent* event) override;
+
+private:
+    void _setColor(const QColor &color);
+
 private:
     QColor m_Color;
     bool m_ColorInitialized = false;
