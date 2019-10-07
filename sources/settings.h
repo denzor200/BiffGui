@@ -73,7 +73,7 @@ public:
     bool Reset();
 
     void beginChanges();
-    void commitChanges();
+    bool commitChanges();
 
 private slots:
     void on_toolButton_stackedWidgetPrev_clicked();

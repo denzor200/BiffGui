@@ -57,13 +57,10 @@ void Settings::beginChanges()
     //ui->pushButton_Apply->setFocus();
 }
 
-void Settings::commitChanges()
+bool Settings::commitChanges()
 {
     QFile file(SETTINGS_DIR);
-    // TODO: проверяй успешность открытия файла
-    // TODO: отступай табами, пробелы не нужны
-    // TODO: добавь запись xml заголовка
-    file.open(QIODevice::WriteOnly);
+    if (file.open(QIODevice::WriteOnly))
     {
         QTextStream streamFileOut(&file);
         streamFileOut.setCodec("UTF-8");
@@ -71,12 +68,15 @@ void Settings::commitChanges()
         //streamFileOut.setGenerateByteOrderMark(true);
         {
             QDomDocument xmlDoc;
+            xmlDoc.setContent(QString() + "<?xml version=\"1.0\" encoding=\"utf-8\"?>");
             m_Table.Write(xmlDoc);
             streamFileOut << xmlDoc.toString();
         } streamFileOut.flush();
-    } file.close();
-
-    this->on_CommitedChanges();
+        file.close();
+        this->on_CommitedChanges();
+        return true;
+    }
+    return false;
 }
 
 
@@ -180,7 +180,7 @@ bool Settings::_Initialize(bool FirstAttempt)
                         ss << "\t\t" << m_Table.GetFullNameByPath(Value).toUtf8().data() << std::endl;
                     }
                     ss << "Вам следует самим проставить эти значения, или вернуть опции к состоянию по умолчанию" << std::endl;
-                    QMessageBox::warning(QApplication::activeWindow(), "Обратите внимание..", ss.str().c_str());
+                    QMessageBox::warning(this, "Обратите внимание..", ss.str().c_str());
                 }
                 return true;
             }
@@ -625,13 +625,21 @@ void Settings::on_pushButton_SetDefault_clicked()
 
 void Settings::on_pushButton_OK_clicked()
 {
-    commitChanges();
-    close();
+    if (commitChanges())
+        close();
+    else {
+        QMessageBox::critical(this, "Ошибка", "Не удалось открыть файл конфига на запись");
+    }
 }
 
 void Settings::on_pushButton_Apply_clicked()
 {
-    commitChanges();
+    if (commitChanges())
+    {
+    }
+    else {
+        QMessageBox::critical(this, "Ошибка", "Не удалось открыть файл конфига на запись");
+    }
 }
 
 void Settings::on_spinBox_RoundValue_valueChanged(int )
