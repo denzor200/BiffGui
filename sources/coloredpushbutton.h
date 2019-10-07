@@ -9,6 +9,9 @@ class ColoredPushButton : public QPushButton
 public:
     explicit ColoredPushButton(QWidget *parent = nullptr);
 
+    void SetColor(const QColor& color);
+    QColor GetColor() const;
+
     // QWidget interface
 protected:
     virtual void mousePressEvent(QMouseEvent* event) override;

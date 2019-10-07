@@ -5,6 +5,7 @@
 #include <QMessageBox>
 #include <sstream>
 #include "converterwaiting.h"
+#include "xmlsmartkeysprovider.h"
 
 // TODO: make normal path
 #define SETTINGS_DIR "settings.xml"
@@ -59,14 +60,21 @@ void Settings::beginChanges()
 void Settings::commitChanges()
 {
     QFile file(SETTINGS_DIR);
+    // TODO: проверяй успешность открытия файла
+    // TODO: отступай табами, пробелы не нужны
+    // TODO: добавь запись xml заголовка
     file.open(QIODevice::WriteOnly);
-
-    QXmlStreamWriter xmlWriter(&file);
-    xmlWriter.setAutoFormatting(true);
-    xmlWriter.writeStartDocument();
-    m_Table.Write(xmlWriter);
-    xmlWriter.writeEndDocument();
-    file.close();
+    {
+        QTextStream streamFileOut(&file);
+        streamFileOut.setCodec("UTF-8");
+        // для xml не нужен BOM
+        //streamFileOut.setGenerateByteOrderMark(true);
+        {
+            QDomDocument xmlDoc;
+            m_Table.Write(xmlDoc);
+            streamFileOut << xmlDoc.toString();
+        } streamFileOut.flush();
+    } file.close();
 
     this->on_CommitedChanges();
 }
@@ -185,41 +193,6 @@ bool Settings::_Initialize(bool FirstAttempt)
     return HandleError();
 }
 
-
-template <typename T>
-static QList<QDomNode> elementsByTagPath(const T& doc, QStringList& names)
-{
-    QList<QDomNode> Returned;
-    if (!names.empty())
-    {
-        QString name = names[0];
-        QDomNodeList nodes = doc.elementsByTagName(name);
-        if (names.size()==1)
-        {
-            for (int x = 0; x < nodes.count(); x++)
-            {
-                QDomElement node = nodes.at(x).toElement();
-                Returned += node;
-            }
-        }
-        else {
-            for (int x = 0; x < nodes.count(); x++)
-            {
-                QDomElement node = nodes.at(x).toElement();
-                names.pop_front();
-                Returned += elementsByTagPath(node, names);
-            }
-        }
-    }
-    return Returned;
-}
-
-template <typename T>
-static QList<QDomNode> elementsByTagPath(const T& doc, const QString& Path)
-{
-    QStringList names = Path.split(".");
-    return elementsByTagPath(doc, names);
-}
 
 template <typename T>
 static
@@ -431,7 +404,15 @@ bool ColoredPushButtonReader(QWidget* widget, const QList<QDomNode>& nodes)
     ColoredPushButton* button = qobject_cast<ColoredPushButton*>(widget);
     Q_ASSERT(button);
 
-    // TODO: implement this
+    if (nodes.size()==1)
+    {
+        const QString& nodeText = nodes[0].toElement().text();
+        if (QColor::isValidColor(nodeText))
+        {
+            button->SetColor(QColor(nodeText));
+            return true;
+        }
+    }
     return false;
 }
 
@@ -441,7 +422,7 @@ void ColoredPushButtonWriter(QWidget* widget,QStringList& outLines)
     ColoredPushButton* button = qobject_cast<ColoredPushButton*>(widget);
     Q_ASSERT(button);
 
-    // TODO: implement this
+    outLines.push_back(button->GetColor().name());
 }
 
 void Settings::InitializeMainTable()
@@ -801,7 +782,7 @@ void SettingsTable::Read(SettingsParsingStats *Stats, const QDomDocument &domDoc
     for (const auto& pair : m_MainTable)
     {
         const auto& value = pair.second;
-        QList<QDomNode> nodes = elementsByTagPath(domDoc, value.Path);
+        QList<QDomNode> nodes = XmlSmartKeysProvider::elementsByTagPath(domDoc, value.Path);
         if (value.ReaderFunc(value.Widget, nodes))
             (Stats->Count)++;
         else
@@ -811,9 +792,15 @@ void SettingsTable::Read(SettingsParsingStats *Stats, const QDomDocument &domDoc
     }
 }
 
-void SettingsTable::Write(QXmlStreamWriter &writer) const
+void SettingsTable::Write(QDomDocument &writer) const
 {
-    // TODO: implement this
+    for (const auto& pair : m_MainTable)
+    {
+        const auto& value = pair.second;
+        QStringList outValues;
+        value.WriterFunc(value.Widget, outValues);
+        XmlSmartKeysProvider::writeTextElement(writer, value.Path, outValues);
+    }
 }
 
 QString SettingsTable::GetFullNameByPath(const QString &Path) const

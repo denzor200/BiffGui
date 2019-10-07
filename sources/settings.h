@@ -57,7 +57,7 @@ public:
     void PrintFullTable() const;
 
     void Read(SettingsParsingStats* Stats, const QDomDocument &domDoc);
-    void Write(QXmlStreamWriter& writer) const;
+    void Write(QDomDocument& writer) const;
 
     QString GetFullNameByPath(const QString& Path) const;
 };

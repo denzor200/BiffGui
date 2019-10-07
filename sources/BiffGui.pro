@@ -40,7 +40,8 @@ SOURCES += \
         maintablemodel_verifier.cpp \
         mainwindow.cpp \
         settings.cpp \
-        utils.cpp
+        utils.cpp \
+        xmlsmartkeysprovider.cpp
 
 HEADERS += \
         ActorName.h \
@@ -60,7 +61,8 @@ HEADERS += \
         maintablemodel.h \
         mainwindow.h \
         settings.h \
-        utils.h
+        utils.h \
+        xmlsmartkeysprovider.h
 
 FORMS += \
         converterwaiting.ui \

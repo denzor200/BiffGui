@@ -5,6 +5,17 @@ ColoredPushButton::ColoredPushButton(QWidget *parent) :
 {
 }
 
+void ColoredPushButton::SetColor(const QColor &color)
+{
+    // TODO: implement this
+}
+
+QColor ColoredPushButton::GetColor() const
+{
+    // TODO: implement this
+    return QColor("#FFFFFF");
+}
+
 void ColoredPushButton::mousePressEvent(QMouseEvent *event)
 {
 
