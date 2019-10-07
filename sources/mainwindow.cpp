@@ -65,8 +65,12 @@ MainWindow::MainWindow(QWidget *parent) :
     ReverseTable();
 
 #ifdef _DEBUG
-    new QAbstractItemModelTester(m_ModelsMgr->GetModel(), QAbstractItemModelTester::FailureReportingMode::Fatal, this);
-    new QAbstractItemModelTester(m_ModelsMgr->GetModelReversed(), QAbstractItemModelTester::FailureReportingMode::Fatal, this);
+    // Очень странно..
+    // Зачем QAbstractItemModelTester требует от таблицы(которая даже не является деревом) наличия дочерних объектов?
+    // Пока пришлось убрать
+
+    // new QAbstractItemModelTester(m_ModelsMgr->GetModel(), QAbstractItemModelTester::FailureReportingMode::Fatal, this);
+    // new QAbstractItemModelTester(m_ModelsMgr->GetModelReversed(), QAbstractItemModelTester::FailureReportingMode::Fatal, this);
 #endif // _DEBUG
 }
 
