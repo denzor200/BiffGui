@@ -9,8 +9,8 @@ class ColoredPushButton : public QPushButton
 public:
     explicit ColoredPushButton(QWidget *parent = nullptr);
 
-    void SetColor(const QColor& color);
-    QColor GetColor() const;
+    void setColor(const QColor& color);
+    QColor color() const;
 
 
 signals:

@@ -23,9 +23,9 @@
       <property name="geometry">
        <rect>
         <x>0</x>
-        <y>-398</y>
+        <y>-392</y>
         <width>625</width>
-        <height>830</height>
+        <height>824</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -356,7 +356,7 @@
           <item>
            <widget class="QStackedWidget" name="stackedWidget">
             <property name="currentIndex">
-             <number>0</number>
+             <number>2</number>
             </property>
             <widget class="QWidget" name="page">
              <layout class="QHBoxLayout" name="horizontalLayout_2">
@@ -416,13 +416,6 @@
                    </property>
                   </widget>
                  </item>
-                 <item row="3" column="1">
-                  <widget class="ColoredPushButton" name="coloredPushButton_StyleColorBack">
-                   <property name="text">
-                    <string/>
-                   </property>
-                  </widget>
-                 </item>
                  <item row="4" column="1">
                   <widget class="QCheckBox" name="checkBox_StyleBold">
                    <property name="text">
@@ -463,6 +456,9 @@
                     </size>
                    </property>
                   </spacer>
+                 </item>
+                 <item row="3" column="1">
+                  <widget class="ColorListEditor" name="comboBox_StyleColorBack"/>
                  </item>
                 </layout>
                </widget>
@@ -534,13 +530,6 @@
                    </property>
                   </widget>
                  </item>
-                 <item row="3" column="1">
-                  <widget class="ColoredPushButton" name="coloredPushButton_StyleColorBack_2">
-                   <property name="text">
-                    <string/>
-                   </property>
-                  </widget>
-                 </item>
                  <item row="4" column="1">
                   <widget class="QCheckBox" name="checkBox_StyleBold_2">
                    <property name="text">
@@ -574,6 +563,9 @@
                     <string>Подчеркивание</string>
                    </property>
                   </widget>
+                 </item>
+                 <item row="3" column="1">
+                  <widget class="ColorListEditor" name="comboBox_StyleColorBack_2"/>
                  </item>
                 </layout>
                </widget>
@@ -638,13 +630,6 @@
                    </property>
                   </widget>
                  </item>
-                 <item row="3" column="1">
-                  <widget class="ColoredPushButton" name="coloredPushButton_StyleColorBack_3">
-                   <property name="text">
-                    <string/>
-                   </property>
-                  </widget>
-                 </item>
                  <item row="4" column="1">
                   <widget class="QCheckBox" name="checkBox_StyleBold_3">
                    <property name="text">
@@ -685,6 +670,9 @@
                     <string>Цвет шрифта</string>
                    </property>
                   </widget>
+                 </item>
+                 <item row="3" column="1">
+                  <widget class="ColorListEditor" name="comboBox_StyleColorBack_3"/>
                  </item>
                 </layout>
                </widget>
@@ -876,6 +864,11 @@
    <class>ColoredPushButton</class>
    <extends>QPushButton</extends>
    <header>coloredpushbutton.h</header>
+  </customwidget>
+  <customwidget>
+   <class>ColorListEditor</class>
+   <extends>QComboBox</extends>
+   <header>colorlisteditor.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

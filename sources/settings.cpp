@@ -398,31 +398,33 @@ bool LineEditReader(QWidget* widget, const QList<QDomNode>& nodes)
     return false;
 }
 
+template <typename T>
 static
-bool ColoredPushButtonReader(QWidget* widget, const QList<QDomNode>& nodes)
+bool ColorableReader(QWidget* widget, const QList<QDomNode>& nodes)
 {
-    ColoredPushButton* button = qobject_cast<ColoredPushButton*>(widget);
-    Q_ASSERT(button);
+    T* editor = qobject_cast<T*>(widget);
+    Q_ASSERT(editor);
 
     if (nodes.size()==1)
     {
         const QString& nodeText = nodes[0].toElement().text();
         if (QColor::isValidColor(nodeText))
         {
-            button->SetColor(QColor(nodeText));
+            editor->setColor(QColor(nodeText));
             return true;
         }
     }
     return false;
 }
 
+template <typename T>
 static
-void ColoredPushButtonWriter(QWidget* widget,QStringList& outLines)
+void ColorableWriter(QWidget* widget,QStringList& outLines)
 {
-    ColoredPushButton* button = qobject_cast<ColoredPushButton*>(widget);
-    Q_ASSERT(button);
+    T* editor = qobject_cast<T*>(widget);
+    Q_ASSERT(editor);
 
-    outLines.push_back(button->GetColor().name());
+    outLines.push_back(editor->color().name());
 }
 
 void Settings::InitializeMainTable()
@@ -517,11 +519,11 @@ void Settings::InitializeMainTable()
 
     REG("Root.DocumentStyle.MainFont.Color",
         STYLE_CATEGORY_MAIN, ui->label_StyleColor,
-        ui->coloredPushButton_StyleColor, ColoredPushButtonReader, ColoredPushButtonWriter, nullptr);
+        ui->coloredPushButton_StyleColor, ColorableReader<ColoredPushButton>, ColorableWriter<ColoredPushButton>, nullptr);
 
     REG("Root.DocumentStyle.MainFont.ColorBack",
         STYLE_CATEGORY_MAIN, ui->label_StyleColorBack,
-        ui->coloredPushButton_StyleColorBack, ColoredPushButtonReader, ColoredPushButtonWriter, nullptr);
+        ui->comboBox_StyleColorBack, ColorableReader<ColorListEditor>, ColorableWriter<ColorListEditor>, nullptr);
 
     REG("Root.DocumentStyle.MainFont.Bold",
         STYLE_CATEGORY_MAIN, nullptr,
@@ -546,11 +548,11 @@ void Settings::InitializeMainTable()
 
     REG("Root.DocumentStyle.PageNumberFont.Color",
         STYLE_CATEGORY_NUMERATION, ui->label_StyleColor_2,
-        ui->coloredPushButton_StyleColor_2, ColoredPushButtonReader, ColoredPushButtonWriter, nullptr);
+        ui->coloredPushButton_StyleColor_2, ColorableReader<ColoredPushButton>, ColorableWriter<ColoredPushButton>, nullptr);
 
     REG("Root.DocumentStyle.PageNumberFont.ColorBack",
         STYLE_CATEGORY_NUMERATION, ui->label_StyleColorBack_2,
-        ui->coloredPushButton_StyleColorBack_2, ColoredPushButtonReader, ColoredPushButtonWriter, nullptr);
+        ui->comboBox_StyleColorBack_2, ColorableReader<ColorListEditor>, ColorableWriter<ColorListEditor>, nullptr);
 
     REG("Root.DocumentStyle.PageNumberFont.Bold",
         STYLE_CATEGORY_NUMERATION, nullptr,
@@ -576,11 +578,11 @@ void Settings::InitializeMainTable()
 
     REG("Root.DocumentStyle.IndividualSelectedFont.Color",
         STYLE_CATEGORY_SELECTION, ui->label_StyleColor_3,
-        ui->coloredPushButton_StyleColor_3, ColoredPushButtonReader, ColoredPushButtonWriter, nullptr);
+        ui->coloredPushButton_StyleColor_3, ColorableReader<ColoredPushButton>, ColorableWriter<ColoredPushButton>, nullptr);
 
     REG("Root.DocumentStyle.IndividualSelectedFont.ColorBack",
         STYLE_CATEGORY_SELECTION, ui->label_StyleColorBack_3,
-        ui->coloredPushButton_StyleColorBack_3, ColoredPushButtonReader, ColoredPushButtonWriter, nullptr);
+        ui->comboBox_StyleColorBack_3, ColorableReader<ColorListEditor>, ColorableWriter<ColorListEditor>, nullptr);
 
     REG("Root.DocumentStyle.IndividualSelectedFont.Bold",
         STYLE_CATEGORY_SELECTION, nullptr,

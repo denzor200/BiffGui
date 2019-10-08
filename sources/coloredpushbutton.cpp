@@ -8,16 +8,16 @@ ColoredPushButton::ColoredPushButton(QWidget *parent) :
     _setColor(QColor(Qt::black));
 }
 
-void ColoredPushButton::SetColor(const QColor &color)
+void ColoredPushButton::setColor(const QColor &color)
 {
-    // qDebug() << "ColoredPushButton::SetColor";
+    // qDebug() << "ColoredPushButton::setColor";
     _setColor(color);
     emit colorChanged(m_Color);
 }
 
-QColor ColoredPushButton::GetColor() const
+QColor ColoredPushButton::color() const
 {
-    // qDebug() << "ColoredPushButton::GetColor";
+    // qDebug() << "ColoredPushButton::color";
     Q_ASSERT(m_ColorInitialized);
     return m_Color;
 }
@@ -26,12 +26,12 @@ void ColoredPushButton::mousePressEvent(QMouseEvent *event)
 {
     QPushButton::mousePressEvent(event);
 
-    auto dialog = new QColorDialog(GetColor(), this);
+    auto dialog = new QColorDialog(color(), this);
     dialog->setWindowFlags( Qt::Widget );
     auto color = dialog->getColor();
     if (color.isValid())
     {
-        SetColor(color);
+        setColor(color);
     }
 }
 
