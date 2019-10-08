@@ -1095,15 +1095,17 @@ void MainTableModelsManager::SavePersons(QByteArray *StreamOut, bool DisableDeni
     streamFileOut.flush();
 }
 
-void MainTableModelsManager::LoadPersons(const QStringList &Persons)
+int MainTableModelsManager::LoadPersons(const QStringList &Persons)
 {
+    int count = 0;
     QStringList unrecognised;
 
     m_Model->beginResetModel();
     m_ModelReversed->beginResetModel();
     for (const QString& person : Persons) {
         try {
-            m_Registry.AddPerson(ActorName(person));
+            if (m_Registry.AddPerson(ActorName(person)))
+                count += 1;
         }
         catch (const ActorNameStringEmpty&) {
         }
@@ -1115,6 +1117,7 @@ void MainTableModelsManager::LoadPersons(const QStringList &Persons)
     m_Model->endResetModel();
     m_ModelReversed->endResetModel();
     HandleUnrecognisedPersons(unrecognised);
+    return count;
 }
 
 void MainTableModelsManager::ClearAll()

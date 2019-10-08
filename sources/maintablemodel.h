@@ -365,7 +365,7 @@ public:
 
     bool SavePersons(const QString& fileName, bool DisableDenied = false) const;
     void SavePersons(QByteArray* StreamOut, bool DisableDenied = false) const;
-    void LoadPersons(const QStringList& Persons);
+    int LoadPersons(const QStringList& Persons);
 
     bool OpenTable(const QString& Path);
     bool SaveTable(const QString& fileName, bool DisableDenied = false) const;
