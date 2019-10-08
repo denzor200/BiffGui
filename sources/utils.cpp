@@ -69,6 +69,21 @@ QString Utils::GetNewTempFilename()
     return "";
 }
 
+int Utils::stoi(
+        const std::string& value,int def,size_t* idx,int base)
+{
+    try {
+        return std::stoi(value, idx, base);
+    }
+    catch (const std::invalid_argument&)
+    {
+    }
+    catch (const std::out_of_range&)
+    {
+    }
+    return def;
+}
+
 std::string Utils::hexStr(unsigned char *data, int len)
 {
   std::stringstream ss;

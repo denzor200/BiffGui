@@ -2,6 +2,7 @@
 #define CONVERTERWAITING_H
 
 #include <QDialog>
+#include "srt.h"
 
 namespace Ui {
 class ConverterWaiting;
@@ -45,6 +46,7 @@ public:
 
     bool GetCRC(QString& out) const;
     const QStringList& GetUsersDecisions() const { return m_UsersDecisions; }
+    bool GetMarkupType(SrtFormat::MarkupType& mt) const;
 
 private slots:
     void slotDataOnStdout();
@@ -56,9 +58,15 @@ private:
 
 private:
     QStringList m_UsersDecisions; // специально для субтитров .srt
+
     QString m_CRC;
     bool m_CRC_Initialized = false;
+
+    SrtFormat::MarkupType m_MarkupType;
+    bool m_MarkupType_Initialized = false;
+
     QStringList& m_Persons;
+
     int m_ProcessStatus = -1;
 };
 

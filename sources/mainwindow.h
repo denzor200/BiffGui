@@ -6,6 +6,7 @@
 #include <QSortFilterProxyModel>
 
 #include "maintablemodel.h"
+#include "srt.h"
 
 namespace Ui {
 class MainWindow;
@@ -85,7 +86,12 @@ private:
     {
         QString FileName;
         QString CtrlData;
-        QStringList UsersDecisions; // специально для субтитров .srt
+
+        // Следующие поля актуальны только для формата .srt
+        QStringList UsersDecisions;
+
+        SrtFormat::MarkupType MarkupType;
+        bool MarkupTypeInitialized;
     };
     SubbtitleContext*           m_OpenedSubbtitle = nullptr;
 };

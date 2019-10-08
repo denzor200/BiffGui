@@ -134,6 +134,8 @@ void MainWindow::makeDoc()
                 Params.push_back({"-z", PrintControlInfo(ctrlTable)});
                 Params.push_back({"-d", PrintControlInfo(ctrlDecisions)});
                 Params.push_back({"-c", m_OpenedSubbtitle->CtrlData});
+                if (m_OpenedSubbtitle->MarkupTypeInitialized)
+                    Params.push_back({"-m", QString::number(static_cast<int>(m_OpenedSubbtitle->MarkupType))});
                 w.StartProcess(m_OpenedSubbtitle->FileName, tempDecisionsFilename, tempTableFilename, OutDir, Params);
                 w.exec();
 
@@ -376,34 +378,41 @@ void MainWindow::on_action_open_triggered()
         Settings.setValue(DirectoriesRegistry::SUBBTITLES_INDIR,
                     CurrentDir.absoluteFilePath(subbtitleFilename));
 
-        QStringList personsList;
-        QString CRC;
+        QStringList     personsList;
+        QString         CRC;
+        SrtFormat::MarkupType mt;
         ConverterWaiting_ShowPersonList waiting(personsList);
         waiting.StartProcess( subbtitleFilename);
-        int execStatus = waiting.exec();
-        bool isCanceled = waiting.IsCanceledByUser();
-        int procStatus = waiting.GetProcessStatus();
-        bool isCRC_Inited = waiting.GetCRC(CRC);
+
+        int execStatus              = waiting.exec();
+        bool isCanceled             = waiting.IsCanceledByUser();
+        int procStatus              = waiting.GetProcessStatus();
+        bool isCRC_Inited           = waiting.GetCRC(CRC);
+        bool isMarkupType_Inited    = waiting.GetMarkupType(mt);
+
         if (!isCanceled)
         {
-            if (isCRC_Inited)
+
+            if (!isCRC_Inited)
             {
-                if (0 == execStatus && 0 == procStatus)
-                {
-                    m_ModelsMgr->LoadPersons(personsList);
-                    SubbtitleContext* ctx = new SubbtitleContext();
-                    ctx->FileName = subbtitleFilename;
-                    ctx->CtrlData = CRC;
-                    ctx->UsersDecisions = waiting.GetUsersDecisions();
-                    m_OpenedSubbtitle = ctx;
-                    setWindowTitle(subbtitleFilename + " - " + QApplication::applicationName());
-                }
-                else {
-                    QMessageBox::critical(this, "Что-то пошло не так..", "Не удалось сгенерировать список персонажей");
-                }
+                QMessageBox::critical(this, "Что-то пошло не так..", "Дочерний процесс не послал контрольную сумму входного файла");
+                return ;
+            }
+
+            if (0 == execStatus && 0 == procStatus)
+            {
+                m_ModelsMgr->LoadPersons(personsList);
+                SubbtitleContext* ctx = new SubbtitleContext();
+                ctx->FileName = subbtitleFilename;
+                ctx->CtrlData = CRC;
+                ctx->UsersDecisions = waiting.GetUsersDecisions();
+                ctx->MarkupTypeInitialized = isMarkupType_Inited;
+                ctx->MarkupType = mt;
+                m_OpenedSubbtitle = ctx;
+                setWindowTitle(subbtitleFilename + " - " + QApplication::applicationName());
             }
             else {
-                QMessageBox::critical(this, "Что-то пошло не так..", "Дочерний процесс не послал контрольную сумму входного файла");
+                QMessageBox::critical(this, "Что-то пошло не так..", "Не удалось сгенерировать список персонажей");
             }
         }
     }

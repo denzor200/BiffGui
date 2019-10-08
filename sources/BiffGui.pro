@@ -63,6 +63,7 @@ HEADERS += \
         maintablemodel.h \
         mainwindow.h \
         settings.h \
+        srt.h \
         utils.h \
         xmlsmartkeysprovider.h
 

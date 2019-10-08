@@ -17,6 +17,12 @@ namespace Utils
     // Ответственность за удаление временного файла переносится на пользователя
     QString GetNewTempFilename();
 
+    int stoi(
+            const std::string& value,
+            int def,
+            size_t* idx = nullptr,
+            int base = 10);
+
     std::string hexStr(unsigned char *data, int len);
 
     class TempFilenameGuard

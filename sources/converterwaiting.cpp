@@ -1,6 +1,8 @@
 #include "commandlineparser.h"
 #include "converterwaiting.h"
 #include "ui_converterwaiting.h"
+#include "utils.h"
+#include "srt.h"
 
 #include <QLabel>
 #include <QMovie>
@@ -108,6 +110,14 @@ bool ConverterWaiting_ShowPersonList::GetCRC(QString &out) const
     return true;
 }
 
+bool ConverterWaiting_ShowPersonList::GetMarkupType(SrtFormat::MarkupType &mt) const
+{
+    if (!m_MarkupType_Initialized)
+        return false;
+    mt = m_MarkupType;
+    return true;
+}
+
 void ConverterWaiting_ShowPersonList::slotDataOnStdout()
 {
     if (!StdoutReadLines())
@@ -179,6 +189,19 @@ bool ConverterWaiting_ShowPersonList::HandleCommandFromConverter(int argc, char 
                             + "\"" + line+ "\" "
                             + "\"" + status+ "\" "
                             + "\"" + always+ "\"");
+            }
+        }
+        else if (strcmp(argv[0], "markup_type")==0)
+        {
+            if (argc >= 2)
+            {
+                auto type = argv[1];
+                auto mt = static_cast<SrtFormat::MarkupType>(Utils::stoi(type, -1));
+                if (SrtFormat::CheckMarkupType(mt))
+                {
+                    m_MarkupType = mt;
+                    m_MarkupType_Initialized = true;
+                }
             }
         }
     }
