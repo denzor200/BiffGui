@@ -10,7 +10,7 @@
 // 4. upper
 
 ActorName::ActorName(const QString& Name)
-    : m_Name(Name.simplified())
+    : m_Name(Name.trimmed())
 {
     if (m_Name.size()==0)
         throw ActorNameStringEmpty();
