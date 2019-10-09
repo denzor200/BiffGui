@@ -99,7 +99,7 @@ void ConverterWaiting_ShowPersonList::StartProcess(const QString &SubbtitlePath)
     Arguments.push_back(SubbtitlePath);
     Arguments.push_back("");
     // TODO: make normal path
-    getProcess()->start("D:\\repos\\subtitles\\Debug\\converter", Arguments);
+    getProcess()->start("converter", Arguments);
 }
 
 bool ConverterWaiting_ShowPersonList::GetCRC(QString &out) const
@@ -232,7 +232,7 @@ void ConverterWaiting_SaveSubbtitle::StartProcess(const QString &InFile, const Q
         Arguments.push_back(pair.second);
     }
     // TODO: make normal path
-    getProcess()->start("D:\\repos\\subtitles\\Debug\\converter", Arguments);
+    getProcess()->start("converter", Arguments);
 }
 
 void ConverterWaiting_SaveSubbtitle::slotFinished(int Status, QProcess::ExitStatus)
@@ -258,7 +258,7 @@ void ConverterWaiting_ResetSetting::StartProcess()
     Arguments.reserve(1);
     Arguments.push_back("reset_settings");
     // TODO: make normal path
-    getProcess()->start("D:\\repos\\subtitles\\Debug\\converter", Arguments);
+    getProcess()->start("converter", Arguments);
 }
 
 void ConverterWaiting_ResetSetting::slotFinished(int Status, QProcess::ExitStatus)

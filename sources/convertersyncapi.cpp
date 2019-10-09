@@ -13,7 +13,7 @@ int ConverterSyncAPI::ShowPersonList(QStringList& PersonsList,const QString &Sub
     Arguments.reserve(2);
     Arguments.push_back("-show_person_list");
     Arguments.push_back(SubbtitlePath);
-    process.start("D:\\repos\\subtitles\\Debug\\converter", Arguments);
+    process.start("converter", Arguments);
     process.setReadChannel(QProcess::StandardOutput);
     process.waitForReadyRead();
     while (process.canReadLine())

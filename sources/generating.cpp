@@ -64,7 +64,7 @@ void Generating::StartProcess(const QString &InFile, const QString& Decisions, c
         Arguments.push_back(pair.first);
         Arguments.push_back(pair.second);
     }
-    m_Process->start("D:\\repos\\subtitles\\Debug\\converter", Arguments);
+    m_Process->start("converter", Arguments);
 }
 
 void Generating::StdoutReadLines()
