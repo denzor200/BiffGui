@@ -14,16 +14,12 @@ class ColorListEditor : public QComboBox
 public:
     ColorListEditor(QWidget *widget = 0);
 
-signals:
-    void colorChanged(const QColor& color);
-
 public:
     QColor color() const;
     void setColor(QColor c);
 
 private:
     void populateList();
-    void _setColor(QColor c);
 };
 
 #endif

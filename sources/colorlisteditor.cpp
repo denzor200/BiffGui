@@ -5,7 +5,7 @@
 ColorListEditor::ColorListEditor(QWidget *widget) : QComboBox(widget)
 {
     populateList();
-    _setColor(Qt::white);
+    setColor(Qt::white);
 }
 
 QColor ColorListEditor::color() const
@@ -16,8 +16,7 @@ QColor ColorListEditor::color() const
 void ColorListEditor::setColor(QColor c)
 {
     //qDebug() << "ColorListEditor::setColor: " << c;
-    _setColor(c);
-    emit colorChanged(color());
+    setCurrentIndex(findData(c, int(Qt::DecorationRole)));
 }
 
 // #define NEED_COLOR_NAMES_TABLE
@@ -65,9 +64,4 @@ void ColorListEditor::populateList()
         qDebug() << "-------------End color names table-------------";
 #endif // NEED_COLOR_NAMES_TABLE
 
-}
-
-void ColorListEditor::_setColor(QColor c)
-{
-    setCurrentIndex(findData(c, int(Qt::DecorationRole)));
 }
