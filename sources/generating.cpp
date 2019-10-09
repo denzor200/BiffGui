@@ -3,7 +3,7 @@
 #include <QProcess>
 #include <sstream>
 #include <ctime>
-#include "CommandLineParser.h"
+#include "commandlineparser.h"
 #include <QDebug>
 #include <QMessageBox>
 
@@ -33,6 +33,18 @@ Generating::Generating(QWidget *parent) :
 Generating::~Generating()
 {
     delete ui;
+}
+
+void Generating::Log(const QString &line)
+{
+    ui->listWidget_Log->addItem(line);
+    ui->listWidget_Log->scrollToBottom();
+}
+
+void Generating::LogStage(const QString &line)
+{
+    ui->listWidget_Stages->addItem(line);
+    ui->listWidget_Stages->scrollToBottom();
 }
 
 void Generating::StartProcess(const QString &InFile, const QString& Decisions, const QString& TableFile, const QString &OutDir, const QVector<QPair<QString,QString>>& params)
@@ -79,7 +91,7 @@ void Generating::StderrReadLines()
         Value.remove("\r\n");
         Value.remove('\r');
         Value.remove('\n');
-        ui->listWidget_Log->addItem(Value);
+        this->Log(Value);
     }
 }
 
@@ -103,13 +115,13 @@ void Generating::HandleCommandFromConverter(int argc, char **argv)
                 strcat_s(Buffer, sizeof(Buffer), "----------");
                 strcat_s(Buffer, sizeof(Buffer), argv[1]);
                 //strcat_s(Buffer, sizeof(Buffer), "----------");
-                ui->listWidget_Log->addItem(Buffer);
+                this->Log(Buffer);
             }
             else {
                 char Buffer[MAX_PATH+64] = {0};
                 strcat_s(Buffer, sizeof(Buffer), "----------");
                 //strcat_s(Buffer, sizeof(Buffer), "----------");
-                ui->listWidget_Log->addItem(Buffer);
+                this->Log(Buffer);
             }
 
             if (argc > 1)
@@ -118,7 +130,7 @@ void Generating::HandleCommandFromConverter(int argc, char **argv)
                 strcat_s(Buffer, sizeof(Buffer), "--:--:-- * ");
                 strcat_s(Buffer, sizeof(Buffer), argv[1]);
                 int DocumentID = ui->listWidget_Stages->count();
-                ui->listWidget_Stages->addItem(Buffer);
+                this->LogStage(Buffer);
                 m_DomentIds[argv[1]] = DocumentID;
             }
         }
@@ -158,7 +170,7 @@ void Generating::HandleCommandFromConverter(int argc, char **argv)
         else if (strcmp(argv[0], "info")==0)
         {
             for (int i=1;i<argc;++i)
-                ui->listWidget_Log->addItem(argv[i]);
+                this->Log(argv[i]);
         }
     }
 }
@@ -187,8 +199,8 @@ void Generating::slotFinished(int exitCode, QProcess::ExitStatus exitStatus)
         ui->progressBar->setEnabled(false);
         ui->pushButton_OK->setEnabled(true);
         ui->pushButton_Cancel->setEnabled(false);
-        ui->listWidget_Log->addItem("Создание монтажных листов успешно завершено\n");
         ui->label_Status->setText("Успешно");
+        this->Log("Создание монтажных листов успешно завершено\n");
         break;
     case 499:
         close();
@@ -198,10 +210,10 @@ void Generating::slotFinished(int exitCode, QProcess::ExitStatus exitStatus)
         ui->progressBar->setEnabled(false);
         ui->pushButton_OK->setEnabled(true);
         ui->pushButton_Cancel->setEnabled(false);
+        ui->label_Status->setText("Что-то пошло не так..");
         std::stringstream ss;
         ss << "Создание монтажных листов было завершено с ошибкой (код ошибки: " << exitCode << ")\n";
-        ui->listWidget_Log->addItem(ss.str().c_str());
-        ui->label_Status->setText("Что-то пошло не так..");
+        this->Log(ss.str().c_str());
         break;
     }
 }
