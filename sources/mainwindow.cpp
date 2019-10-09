@@ -131,11 +131,20 @@ void MainWindow::makeDoc()
                 Generating w(this);
                 QVector<QPair<QString,QString>> Params;
                 // TODO: завести список "коротких" параметров где нибудь в h-нике
+
+                // Control information
                 Params.push_back({"-z", PrintControlInfo(ctrlTable)});
                 Params.push_back({"-d", PrintControlInfo(ctrlDecisions)});
                 Params.push_back({"-c", m_OpenedSubbtitle->CtrlData});
+
+                // Optional parameters
                 if (m_OpenedSubbtitle->MarkupTypeInitialized)
                     Params.push_back({"-m", QString::number(static_cast<int>(m_OpenedSubbtitle->MarkupType))});
+                if (!ui->action_make_shared_flag->isChecked())
+                    Params.push_back({"-s", "true"});
+                if (!ui->action_make_individual_flag->isChecked())
+                    Params.push_back({"-i", "true"});
+
                 w.StartProcess(m_OpenedSubbtitle->FileName, tempDecisionsFilename, tempTableFilename, OutDir, Params);
                 w.exec();
 
