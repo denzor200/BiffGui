@@ -29,7 +29,7 @@ Settings::~Settings()
 bool Settings::Initialize()
 {
     bool Status = _Initialize(true);
-    ui->pushButton_OK->setEnabled(false);
+    // ui->pushButton_OK->setEnabled(false);
     ui->pushButton_Apply->setEnabled(false);
     ui->pushButton_Cancel->setFocus();
     return Status;
@@ -55,7 +55,7 @@ bool Settings::Reset()
 
 void Settings::beginChanges()
 {
-    ui->pushButton_OK->setEnabled(true);
+    //ui->pushButton_OK->setEnabled(true);
     ui->pushButton_Apply->setEnabled(true);
     //ui->pushButton_Apply->setFocus();
 }
@@ -788,7 +788,7 @@ void Settings::InitializeMainTable()
 
 void Settings::on_CommitedChanges()
 {
-    ui->pushButton_OK->setEnabled(false);
+    //ui->pushButton_OK->setEnabled(false);
     ui->pushButton_Apply->setEnabled(false);
     ui->pushButton_Cancel->setFocus();
 }
