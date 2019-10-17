@@ -22,8 +22,9 @@ public:
     bool IsCanceledByUser() const {return m_CanceledByUser || GetProcessStatus() == 499 ;}
 
 private slots:
-    void ButtonClicked(bool);
     void slotFinished(int, QProcess::ExitStatus);
+
+    void on_pushButton_clicked();
 
 protected:
     QProcess* getProcess() {return m_Process;}

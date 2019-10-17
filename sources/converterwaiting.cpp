@@ -21,35 +21,11 @@ ConverterWaiting::ConverterWaiting(bool DisableCancel,QWidget *parent) :
 {
     ui->setupUi(this);
 
-    // TODO: гифка не должна лежать рядом с exe
-    QLabel *lbl = new QLabel(this);
-    QMovie *movie = new QMovie("ajax-loader.gif");
-    lbl->setMovie(movie);
-    movie->start();
-    lbl->show();
-
-    QPushButton* b = nullptr;
-    if (!DisableCancel)
-    {
-        b = new QPushButton(this);
-        b->setText("Отмена");
-        b->setGeometry(0, lbl->height(), b->width(),b->height());
-        this->setFixedSize(lbl->width(), lbl->height()+b->height());
-    }
-    else {
-        this->setFixedSize(lbl->width(), lbl->height());
-    }
-    /*this->move(
-        (QApplication::activeWindow()->width() - width()) / 2 + QApplication::activeWindow()->x(),
-        (QApplication::activeWindow()->height() - height()) / 2 + QApplication::activeWindow()->y());*/
-    this->setWindowTitle(" ");
-    setWindowFlags(Qt::Dialog | Qt::Desktop );
-
-    if (!DisableCancel)
-        connect(b, SIGNAL(clicked(bool)), SLOT(ButtonClicked(bool)) );
+    this->setWindowFlags (this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
+    if (DisableCancel)
+        ui->pushButton->hide();
 
     m_Process = new QProcess(this);
-
     connect(m_Process,
                     SIGNAL(finished(int, QProcess::ExitStatus)),
                     SLOT(slotFinished(int, QProcess::ExitStatus))
@@ -61,7 +37,7 @@ ConverterWaiting::~ConverterWaiting()
     delete ui;
 }
 
-void ConverterWaiting::ButtonClicked(bool)
+void ConverterWaiting::on_pushButton_clicked()
 {
     cancel();
 }
