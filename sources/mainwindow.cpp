@@ -342,13 +342,19 @@ void MainWindow::SaveSubbtitle(const QString &outFileName, bool isIndividual)
         {
             ConverterWaiting_SaveSubbtitle waiting;
             QVector<QPair<QString,QString>> Params;
+
             Params.push_back({"-c", m_OpenedSubbtitle->CtrlData});
             Params.push_back({"-d", PrintControlInfo(ctrlDecisions)});
+
+            // Optional parameters
+            if (m_OpenedSubbtitle->MarkupTypeInitialized)
+                Params.push_back({"-m", QString::number(static_cast<int>(m_OpenedSubbtitle->MarkupType))});
             if (isIndividual)
             {
                 Params.push_back({"-p", tempPersonsFilename});
                 Params.push_back({"-x", PrintControlInfo(ctrlPersons)});
             }
+
             waiting.StartProcess( m_OpenedSubbtitle->FileName, tempDecisionsFilename, outFileName, Params);
             int execStatus = waiting.exec();
             bool isCanceled = waiting.IsCanceledByUser();
