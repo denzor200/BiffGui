@@ -31,7 +31,7 @@
      <item>
       <widget class="QLabel" name="label_Status">
        <property name="text">
-        <string>Создание монтажных листов..</string>
+        <string/>
        </property>
        <property name="alignment">
         <set>Qt::AlignCenter</set>

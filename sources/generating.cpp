@@ -28,6 +28,8 @@ Generating::Generating(QWidget *parent) :
                     SIGNAL(finished(int, QProcess::ExitStatus)),
                     SLOT(slotFinished(int, QProcess::ExitStatus))
                    );
+
+    SetMainStatus("Создание монтажных листов..");
 }
 
 Generating::~Generating()
@@ -45,6 +47,12 @@ void Generating::LogStage(const QString &line)
 {
     ui->listWidget_Stages->addItem(line);
     ui->listWidget_Stages->scrollToBottom();
+}
+
+void Generating::SetMainStatus(const QString &line)
+{
+    ui->label_Status->setText(line);
+    this->setWindowTitle(line);
 }
 
 void Generating::StartProcess(const QString &InFile, const QString& Decisions, const QString& TableFile, const QString &OutDir, const QVector<QPair<QString,QString>>& params)
@@ -199,7 +207,7 @@ void Generating::slotFinished(int exitCode, QProcess::ExitStatus exitStatus)
         ui->progressBar->setEnabled(false);
         ui->pushButton_OK->setEnabled(true);
         ui->pushButton_Cancel->setEnabled(false);
-        ui->label_Status->setText("Успешно");
+        SetMainStatus("Успешно");
         this->Log("Создание монтажных листов успешно завершено\n");
         break;
     case 499:
@@ -210,7 +218,7 @@ void Generating::slotFinished(int exitCode, QProcess::ExitStatus exitStatus)
         ui->progressBar->setEnabled(false);
         ui->pushButton_OK->setEnabled(true);
         ui->pushButton_Cancel->setEnabled(false);
-        ui->label_Status->setText("Что-то пошло не так..");
+        SetMainStatus("Что-то пошло не так..");
         std::stringstream ss;
         ss << "Создание монтажных листов было завершено с ошибкой (код ошибки: " << exitCode << ")\n";
         this->Log(ss.str().c_str());

@@ -18,6 +18,8 @@ public:
     void Log(const QString& line);
     void LogStage(const QString& line);
 
+    void SetMainStatus(const QString& line);
+
     void StartProcess(const QString& InFile, const QString& Decisions, const QString& TableFile, const QString& OutDir, const QVector<QPair<QString,QString>>& params);
 
 private:
