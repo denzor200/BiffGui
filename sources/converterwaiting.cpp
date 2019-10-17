@@ -21,7 +21,7 @@ ConverterWaiting::ConverterWaiting(bool DisableCancel,QWidget *parent) :
 {
     ui->setupUi(this);
 
-    this->setWindowFlags (this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
+    this->setWindowFlags (this->windowFlags() & ~Qt::WindowContextHelpButtonHint & ~Qt::WindowCloseButtonHint);
     if (DisableCancel)
         ui->pushButton->hide();
 
