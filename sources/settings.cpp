@@ -19,6 +19,7 @@ Settings::Settings(QWidget *parent) :
     // Всегда начинаем с первой страницы..
     // Не важно, что у нас там в редакторе осталось
     ui->stackedWidget->setCurrentIndex(0);
+    ui->tabWidget->setCurrentIndex(0);
 }
 
 Settings::~Settings()
