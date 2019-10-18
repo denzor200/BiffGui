@@ -36,7 +36,9 @@ public:
 
     void SaveDecisions(QByteArray* StreamOut) const;
 
-    void SaveSubbtitle(const QString& outFileName, bool isIndividual);
+    void SaveSubbtitle(const QString& outFileName, const QString& ext, bool isIndividual);
+
+    void ExportIndividualSubbtitles(const QString& ext);
 
 private slots:
     void on_action_open_triggered();
@@ -55,8 +57,6 @@ private slots:
 
     void on_action_generate_doc_triggered();
 
-    void on_action_save_individual_triggered();
-
     void on_action_make_shared_flag_triggered();
     void on_action_make_individual_flag_triggered();
 
@@ -74,6 +74,10 @@ private slots:
     void on_action_register_software_triggered();
     void on_action_add_triggered();
     void on_action_remove_triggered();
+
+    void on_action_ass_triggered();
+
+    void on_action_srt_triggered();
 
 private:
     Ui::MainWindow* ui;

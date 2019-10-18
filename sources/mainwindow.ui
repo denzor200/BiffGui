@@ -152,9 +152,16 @@
     <property name="title">
      <string>Файл</string>
     </property>
+    <widget class="QMenu" name="menu_4">
+     <property name="title">
+      <string>Сохранить субтитры как индивидуальные</string>
+     </property>
+     <addaction name="action_ass"/>
+     <addaction name="action_srt"/>
+    </widget>
     <addaction name="action_open"/>
     <addaction name="action_save"/>
-    <addaction name="action_save_individual"/>
+    <addaction name="menu_4"/>
     <addaction name="action_close"/>
     <addaction name="separator"/>
     <addaction name="action_open_table"/>
@@ -275,11 +282,6 @@
     <string>Начать генерацию монтажных листов</string>
    </property>
   </action>
-  <action name="action_save_individual">
-   <property name="text">
-    <string>Сохранить субтитры как индивидуальные</string>
-   </property>
-  </action>
   <action name="action_make_shared_flag">
    <property name="checkable">
     <bool>true</bool>
@@ -352,6 +354,16 @@
    </property>
    <property name="shortcut">
     <string>Del</string>
+   </property>
+  </action>
+  <action name="action_ass">
+   <property name="text">
+    <string>=&gt; .ass</string>
+   </property>
+  </action>
+  <action name="action_srt">
+   <property name="text">
+    <string>=&gt; .srt</string>
    </property>
   </action>
  </widget>

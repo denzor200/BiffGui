@@ -326,19 +326,20 @@ void MainWindow::SaveDecisions(QByteArray *StreamOut) const
     streamFileOut.flush();
 }
 
-void MainWindow::SaveSubbtitle(const QString &outFileName, bool isIndividual)
+// параметр ext актуален только для индивидуальных субтитров
+void MainWindow::SaveSubbtitle(const QString &outFileName, const QString& ext, bool isIndividual)
 {
-    // TODO: не забудь убедиться, что контрольная сумма у tempPersonsFilename проверяется
+    // TODO: не забудь убедиться, что контрольная сумма у tempTableFilename проверяется
     bool isFull = !isIndividual;
     Utils::TempFilenameGuard tempDecisionsFilename;
-    Utils::TempFilenameGuard tempPersonsFilename;
+    Utils::TempFilenameGuard tempTableFilename;
     ControlInfo ctrlDecisions;
-    ControlInfo ctrlPersons;
-    if (static_cast<QString>(tempDecisionsFilename) != "" && (isFull || static_cast<QString>(tempPersonsFilename) != ""))
+    ControlInfo ctrlTable;
+    if (static_cast<QString>(tempDecisionsFilename) != "" && (isFull || static_cast<QString>(tempTableFilename) != ""))
     {
         if (
                 tempDecisionsFilename.Write([&](auto W){SaveDecisions(W);}, &ctrlDecisions) &&
-                (isFull || tempPersonsFilename.Write([&](auto W){m_ModelsMgr->SavePersons(W, true);}, &ctrlPersons)))
+                (isFull || tempTableFilename.Write([&](auto W){m_ModelsMgr->SaveTable(W, true);}, &ctrlTable)))
         {
             ConverterWaiting_SaveSubbtitle waiting;
             QVector<QPair<QString,QString>> Params;
@@ -351,8 +352,9 @@ void MainWindow::SaveSubbtitle(const QString &outFileName, bool isIndividual)
                 Params.push_back({"-m", QString::number(static_cast<int>(m_OpenedSubbtitle->MarkupType))});
             if (isIndividual)
             {
-                Params.push_back({"-p", tempPersonsFilename});
-                Params.push_back({"-x", PrintControlInfo(ctrlPersons)});
+                Params.push_back({"-a", tempTableFilename});
+                Params.push_back({"-z", PrintControlInfo(ctrlTable)});
+                Params.push_back({"-e", ext});
             }
 
             waiting.StartProcess( m_OpenedSubbtitle->FileName, tempDecisionsFilename, outFileName, Params);
@@ -374,6 +376,33 @@ void MainWindow::SaveSubbtitle(const QString &outFileName, bool isIndividual)
         }
     }
     showTempFileOpenWError();
+}
+
+void MainWindow::ExportIndividualSubbtitles(const QString &ext)
+{
+    if (!m_OpenedSubbtitle)
+        return;
+
+    if (m_ModelsMgr->constRegistryAPI()->getRealActorsCount() > 0)
+    {
+        QString OutDir;
+
+        QSettings Settings;
+        OutDir = QFileDialog::getExistingDirectory(this, "Сохранить субтитры как индивидуальные", Settings.value(DirectoriesRegistry::SUBBTITLES_INDIVIDUAL_OUTDIR).toString());
+
+        if (OutDir!="")
+        {
+            QDir CurrentDir;
+            Settings.setValue(DirectoriesRegistry::SUBBTITLES_INDIVIDUAL_OUTDIR,
+                CurrentDir.absoluteFilePath(OutDir));
+
+            SaveSubbtitle(OutDir, ext, true);
+        }
+    }
+    else {
+        QMessageBox::critical(this, "Ошибка", "Вы не можете экспортировать индивидуальные субтитры, поскольку не прописали ни одного актера в таблице");
+    }
+
 }
 
 void MainWindow::on_action_open_triggered()
@@ -454,7 +483,7 @@ void MainWindow::on_action_save_triggered()
             Settings.setValue(DirectoriesRegistry::SUBBTITLES_OUTDIR,
                         CurrentDir.absoluteFilePath(outFileName));
 
-            SaveSubbtitle(outFileName, false);
+            SaveSubbtitle(outFileName, "", false);
         }
     }
 }
@@ -559,28 +588,6 @@ void MainWindow::on_action_save_table_triggered()
         }
         else {
             QMessageBox::critical(this, "Что-то пошло не так..", "Вы не можете сохранить таблицу, поскольку не прописали в ней ни одного актера");
-        }
-    }
-}
-
-void MainWindow::on_action_save_individual_triggered()
-{
-    // TODO: блокируем кнопку вообще, если ничего не открыто
-    if (m_OpenedSubbtitle)
-    {
-        QSettings Settings;
-        QString outFileName = QFileDialog::getSaveFileName(this,
-            tr("Сохранить субтитры как индивидуальные"),
-            Settings.value(DirectoriesRegistry::SUBBTITLES_OUTDIR).toString(),
-            tr(SUBBTITLES_EXTENSIONS));
-
-        if (outFileName!="")
-        {
-            QDir CurrentDir;
-            Settings.setValue(DirectoriesRegistry::SUBBTITLES_OUTDIR,
-                        CurrentDir.absoluteFilePath(outFileName));
-
-            SaveSubbtitle(outFileName, true);
         }
     }
 }
@@ -691,4 +698,14 @@ void MainWindow::on_action_remove_triggered()
         return;
     }
     RemoveAllSelectedRows();
+}
+
+void MainWindow::on_action_ass_triggered()
+{
+    ExportIndividualSubbtitles(".ass");
+}
+
+void MainWindow::on_action_srt_triggered()
+{
+    ExportIndividualSubbtitles(".srt");
 }
