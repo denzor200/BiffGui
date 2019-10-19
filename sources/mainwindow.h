@@ -79,6 +79,8 @@ private slots:
 
     void on_action_srt_triggered();
 
+    void on_action_make_clean_flag_triggered();
+
 private:
     Ui::MainWindow* ui;
     MainTableModelsManager*     m_ModelsMgr;

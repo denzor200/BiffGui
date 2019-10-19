@@ -64,8 +64,9 @@ MainWindow::MainWindow(QWidget *parent) :
     // под конец решили, что перевернутая таблица по умолчанию все же лучше..
     ReverseTable();
 
-    ui->action_make_shared_flag->setChecked(QSettings().value(SettingsRegistry::MAKE_SHARED_FLAG).toBool());
-    ui->action_make_individual_flag->setChecked(QSettings().value(SettingsRegistry::MAKE_INDIVIDUAL_FLAG).toBool());
+    ui->action_make_shared_flag->setChecked(QSettings().value(SettingsRegistry::MAKE_SHARED_FLAG, true).toBool());
+    ui->action_make_individual_flag->setChecked(QSettings().value(SettingsRegistry::MAKE_INDIVIDUAL_FLAG, true).toBool());
+    ui->action_make_clean_flag->setChecked(QSettings().value(SettingsRegistry::MAKE_CLEAN_FLAG, false).toBool());
 
 #ifdef _DEBUG
     // Очень странно..
@@ -145,6 +146,8 @@ void MainWindow::makeDoc()
                     Params.push_back({"-s", "true"});
                 if (!ui->action_make_individual_flag->isChecked())
                     Params.push_back({"-i", "true"});
+                if (!ui->action_make_clean_flag->isChecked())
+                    Params.push_back({"-p", "true"});
 
                 w.StartProcess(m_OpenedSubbtitle->FileName, tempDecisionsFilename, tempTableFilename, OutDir, Params);
                 w.exec();
@@ -599,8 +602,13 @@ void MainWindow::on_action_make_shared_flag_triggered()
 
 void MainWindow::on_action_make_individual_flag_triggered()
 {
-    QSettings().setValue(SettingsRegistry::MAKE_INDIVIDUAL_FLAG,
-        ui->action_make_individual_flag->isChecked());
+    QSettings().setValue(SettingsRegistry::MAKE_CLEAN_FLAG,
+        ui->action_make_clean_flag->isChecked());
+}
+
+void MainWindow::on_action_make_clean_flag_triggered()
+{
+
 }
 
 void MainWindow::on_toolButton_Insert_clicked()

@@ -194,6 +194,7 @@
      </property>
      <addaction name="action_make_shared_flag"/>
      <addaction name="action_make_individual_flag"/>
+     <addaction name="action_make_clean_flag"/>
     </widget>
     <addaction name="action_settings"/>
     <addaction name="menu_2"/>
@@ -364,6 +365,14 @@
   <action name="action_srt">
    <property name="text">
     <string>=&gt; .srt</string>
+   </property>
+  </action>
+  <action name="action_make_clean_flag">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Создавать чистый</string>
    </property>
   </action>
  </widget>

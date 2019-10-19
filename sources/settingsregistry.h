@@ -19,6 +19,7 @@ namespace SettingsRegistry {
 
     static const QString MAKE_SHARED_FLAG("make_shared_flag");
     static const QString MAKE_INDIVIDUAL_FLAG("make_individual_flag");
+    static const QString MAKE_CLEAN_FLAG("make_clean_flag");
 };
 
 #endif // SETTINGSREGISTRY_H
