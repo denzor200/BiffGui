@@ -15,6 +15,7 @@ Settings::Settings(QWidget *parent) :
 {
     ui->setupUi(this);
     InitializeMainTable();
+    IntervalsInvalidateEnabledState();
 
     // Всегда начинаем с первой страницы..
     // Не важно, что у нас там в редакторе осталось
@@ -804,6 +805,41 @@ void Settings::InitializeMainTable()
 #undef REG
 }
 
+void Settings::IntervalsInvalidateEnabledState()
+{
+    switch (ui->comboBox_PackingMethod->currentIndex())
+    {
+    case 0:
+    case 1:
+        ui->spinBox_SmallInterval->setEnabled(false);
+        ui->spinBox_NormalInterval->setEnabled(false);
+        ui->spinBox_BigInterval->setEnabled(false);
+        ui->spinBox_VeryBigInterval->setEnabled(false);
+        ui->spinBox_VeryVeryBigInterval->setEnabled(false);
+        ui->label_SmallInterval->setEnabled(false);
+        ui->label_NormalInterval->setEnabled(false);
+        ui->label_BigInterval->setEnabled(false);
+        ui->label_VeryBigInterval->setEnabled(false);
+        ui->label_VeryVeryBigInterval->setEnabled(false);
+        break;
+    case 2:
+        ui->spinBox_SmallInterval->setEnabled(true);
+        ui->spinBox_NormalInterval->setEnabled(true);
+        ui->spinBox_BigInterval->setEnabled(true);
+        ui->spinBox_VeryBigInterval->setEnabled(true);
+        ui->spinBox_VeryVeryBigInterval->setEnabled(true);
+        ui->label_SmallInterval->setEnabled(true);
+        ui->label_NormalInterval->setEnabled(true);
+        ui->label_BigInterval->setEnabled(true);
+        ui->label_VeryBigInterval->setEnabled(true);
+        ui->label_VeryVeryBigInterval->setEnabled(true);
+        break;
+    default:
+        Q_ASSERT_X(0, __FUNCTION__,  "Invalid index");
+        break;
+    }
+}
+
 void Settings::on_CommitedChanges()
 {
     //ui->pushButton_OK->setEnabled(false);
@@ -936,35 +972,5 @@ QString SettingsTable::GetFullNameByPath(const QString &Path) const
 
 void Settings::on_comboBox_PackingMethod_currentIndexChanged(int index)
 {
-    switch (index)
-    {
-    case 0:
-    case 1:
-        ui->spinBox_SmallInterval->setEnabled(false);
-        ui->spinBox_NormalInterval->setEnabled(false);
-        ui->spinBox_BigInterval->setEnabled(false);
-        ui->spinBox_VeryBigInterval->setEnabled(false);
-        ui->spinBox_VeryVeryBigInterval->setEnabled(false);
-        ui->label_SmallInterval->setEnabled(false);
-        ui->label_NormalInterval->setEnabled(false);
-        ui->label_BigInterval->setEnabled(false);
-        ui->label_VeryBigInterval->setEnabled(false);
-        ui->label_VeryVeryBigInterval->setEnabled(false);
-        break;
-    case 2:
-        ui->spinBox_SmallInterval->setEnabled(true);
-        ui->spinBox_NormalInterval->setEnabled(true);
-        ui->spinBox_BigInterval->setEnabled(true);
-        ui->spinBox_VeryBigInterval->setEnabled(true);
-        ui->spinBox_VeryVeryBigInterval->setEnabled(true);
-        ui->label_SmallInterval->setEnabled(true);
-        ui->label_NormalInterval->setEnabled(true);
-        ui->label_BigInterval->setEnabled(true);
-        ui->label_VeryBigInterval->setEnabled(true);
-        ui->label_VeryVeryBigInterval->setEnabled(true);
-        break;
-    default:
-        Q_ASSERT_X(0, __FUNCTION__,  "Invalid index");
-        break;
-    }
+    IntervalsInvalidateEnabledState();
 }

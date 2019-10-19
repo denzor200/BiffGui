@@ -92,6 +92,8 @@ private:
     bool _Initialize(bool FirstAttempt);
     void InitializeMainTable();
 
+    void IntervalsInvalidateEnabledState();
+
     void on_CommitedChanges();
 
 private:
