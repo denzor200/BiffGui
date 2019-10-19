@@ -333,7 +333,6 @@ void MainWindow::SaveDecisions(QByteArray *StreamOut) const
 // параметр ext актуален только для индивидуальных субтитров
 void MainWindow::SaveSubbtitle(const QString &outFileName, const QString& ext, bool isIndividual)
 {
-    // TODO: не забудь убедиться, что контрольная сумма у tempTableFilename проверяется
     bool isFull = !isIndividual;
     Utils::TempFilenameGuard tempDecisionsFilename;
     Utils::TempFilenameGuard tempTableFilename;
