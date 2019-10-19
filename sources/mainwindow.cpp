@@ -64,6 +64,9 @@ MainWindow::MainWindow(QWidget *parent) :
     // под конец решили, что перевернутая таблица по умолчанию все же лучше..
     ReverseTable();
 
+    ui->action_make_shared_flag->setChecked(QSettings().value(SettingsRegistry::MAKE_SHARED_FLAG).toBool());
+    ui->action_make_individual_flag->setChecked(QSettings().value(SettingsRegistry::MAKE_INDIVIDUAL_FLAG).toBool());
+
 #ifdef _DEBUG
     // Очень странно..
     // Зачем QAbstractItemModelTester требует от таблицы(которая даже не является деревом) наличия дочерних объектов?
@@ -107,14 +110,12 @@ void MainWindow::makeDoc()
     }
 
     QString OutDir;
-	
-    QSettings Settings;
-    OutDir = QFileDialog::getExistingDirectory(this, "Создать монтажные листы", Settings.value(SettingsRegistry::DOC_OUTDIR).toString());
+    OutDir = QFileDialog::getExistingDirectory(this, "Создать монтажные листы", QSettings().value(SettingsRegistry::DOC_OUTDIR).toString());
 
     if (OutDir!="")
     {
         QDir CurrentDir;
-        Settings.setValue(SettingsRegistry::DOC_OUTDIR,
+        QSettings().setValue(SettingsRegistry::DOC_OUTDIR,
             CurrentDir.absoluteFilePath(OutDir));
 
         Utils::TempFilenameGuard tempTableFilename;
@@ -386,14 +387,12 @@ void MainWindow::ExportIndividualSubbtitles(const QString &ext)
     if (m_ModelsMgr->constRegistryAPI()->getRealActorsCount() > 0)
     {
         QString OutDir;
-
-        QSettings Settings;
-        OutDir = QFileDialog::getExistingDirectory(this, "Сохранить субтитры как индивидуальные", Settings.value(SettingsRegistry::SUBBTITLES_INDIVIDUAL_OUTDIR).toString());
+        OutDir = QFileDialog::getExistingDirectory(this, "Сохранить субтитры как индивидуальные", QSettings().value(SettingsRegistry::SUBBTITLES_INDIVIDUAL_OUTDIR).toString());
 
         if (OutDir!="")
         {
             QDir CurrentDir;
-            Settings.setValue(SettingsRegistry::SUBBTITLES_INDIVIDUAL_OUTDIR,
+            QSettings().setValue(SettingsRegistry::SUBBTITLES_INDIVIDUAL_OUTDIR,
                 CurrentDir.absoluteFilePath(OutDir));
 
             SaveSubbtitle(OutDir, ext, true);
@@ -410,16 +409,15 @@ void MainWindow::on_action_open_triggered()
     if (!tryCloseFile())
         return;
 
-    QSettings Settings;
     QString subbtitleFilename = QFileDialog::getOpenFileName(this,
         tr("Открыть субтитры"),
-        Settings.value(SettingsRegistry::SUBBTITLES_INDIR).toString(),
+        QSettings().value(SettingsRegistry::SUBBTITLES_INDIR).toString(),
         tr(SUBBTITLES_EXTENSIONS));
 
     if (subbtitleFilename!="")
     {
         QDir CurrentDir;
-        Settings.setValue(SettingsRegistry::SUBBTITLES_INDIR,
+        QSettings().setValue(SettingsRegistry::SUBBTITLES_INDIR,
                     CurrentDir.absoluteFilePath(subbtitleFilename));
 
         QStringList     personsList;
@@ -471,16 +469,15 @@ void MainWindow::on_action_save_triggered()
     // TODO: блокируем кнопку вообще, если ничего не открыто
     if (m_OpenedSubbtitle)
     {
-        QSettings Settings;
         QString outFileName = QFileDialog::getSaveFileName(this,
             tr("Сохранить субтитры"),
-            Settings.value(SettingsRegistry::SUBBTITLES_OUTDIR).toString(),
+            QSettings().value(SettingsRegistry::SUBBTITLES_OUTDIR).toString(),
             tr(SUBBTITLES_EXTENSIONS));
 
         if (outFileName!="")
         {
             QDir CurrentDir;
-            Settings.setValue(SettingsRegistry::SUBBTITLES_OUTDIR,
+            QSettings().setValue(SettingsRegistry::SUBBTITLES_OUTDIR,
                         CurrentDir.absoluteFilePath(outFileName));
 
             SaveSubbtitle(outFileName, "", false);
@@ -516,16 +513,15 @@ void MainWindow::on_action_save_persons_triggered()
     const int personsCount = m_ModelsMgr->constRegistryAPI()->getRealPersonsCount();
     if (personsCount > 0)
     {
-        QSettings Settings;
         QString fileName = QFileDialog::getSaveFileName(this,
             tr("Сохранить список персонажей"),
-            Settings.value(SettingsRegistry::PERSONS_OUTDIR).toString(),
+            QSettings().value(SettingsRegistry::PERSONS_OUTDIR).toString(),
             tr("Text files (*.txt)"));
 
         if (fileName!="")
         {
             QDir CurrentDir;
-            Settings.setValue(SettingsRegistry::PERSONS_OUTDIR,
+            QSettings().setValue(SettingsRegistry::PERSONS_OUTDIR,
                         CurrentDir.absoluteFilePath(fileName));
 
             if (!m_ModelsMgr->SavePersons(fileName))
@@ -543,16 +539,15 @@ void MainWindow::on_action_open_table_triggered()
     }
 
     {
-        QSettings Settings;
         QString fileName = QFileDialog::getOpenFileName(this,
             tr("Открыть таблицу"),
-            Settings.value(SettingsRegistry::TABLE_INDIR).toString(),
+            QSettings().value(SettingsRegistry::TABLE_INDIR).toString(),
             tr("Config files (*.cfg)"));
 
         if (fileName!="")
         {
             QDir CurrentDir;
-            Settings.setValue(SettingsRegistry::TABLE_INDIR,
+            QSettings().setValue(SettingsRegistry::TABLE_INDIR,
                         CurrentDir.absoluteFilePath(fileName));
 
             if (!m_ModelsMgr->OpenTable(fileName))
@@ -570,16 +565,15 @@ void MainWindow::on_action_save_table_triggered()
     {
         if (actorsCount > 0)
         {
-            QSettings Settings;
             QString fileName = QFileDialog::getSaveFileName(this,
                 tr("Сохранить таблицу"),
-                Settings.value(SettingsRegistry::TABLE_OUTDIR).toString(),
+                QSettings().value(SettingsRegistry::TABLE_OUTDIR).toString(),
                 tr("Config files (*.cfg)"));
 
             if (fileName!="")
             {
                 QDir CurrentDir;
-                Settings.setValue(SettingsRegistry::TABLE_OUTDIR,
+                QSettings().setValue(SettingsRegistry::TABLE_OUTDIR,
                             CurrentDir.absoluteFilePath(fileName));
 
                 if (!m_ModelsMgr->SaveTable(fileName))
@@ -599,12 +593,14 @@ void MainWindow::on_action_generate_doc_triggered()
 
 void MainWindow::on_action_make_shared_flag_triggered()
 {
-
+    QSettings().setValue(SettingsRegistry::MAKE_SHARED_FLAG,
+        ui->action_make_shared_flag->isChecked());
 }
 
 void MainWindow::on_action_make_individual_flag_triggered()
 {
-
+    QSettings().setValue(SettingsRegistry::MAKE_INDIVIDUAL_FLAG,
+        ui->action_make_individual_flag->isChecked());
 }
 
 void MainWindow::on_toolButton_Insert_clicked()
