@@ -53,7 +53,6 @@ HEADERS += \
         controlinfo.h \
         convertersyncapi.h \
         converterwaiting.h \
-        directoriesregistry.h \
         generating.h \
         libqxt/core/qxtglobal.h \
         libqxt/core/qxtnamespace.h \
@@ -63,6 +62,7 @@ HEADERS += \
         maintablemodel.h \
         mainwindow.h \
         settings.h \
+        settingsregistry.h \
         srt.h \
         utils.h \
         xmlsmartkeysprovider.h

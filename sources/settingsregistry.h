@@ -1,9 +1,9 @@
-#ifndef DIRECTORIESREGISTRY_H
-#define DIRECTORIESREGISTRY_H
+#ifndef SETTINGSREGISTRY_H
+#define SETTINGSREGISTRY_H
 
 #include <QString>
 
-namespace DirectoriesRegistry {
+namespace SettingsRegistry {
     static const QString DOC_OUTDIR("doc_outdir");
 
     static const QString PERSONS_INDIR("persons_indir");
@@ -18,4 +18,4 @@ namespace DirectoriesRegistry {
     static const QString SUBBTITLES_INDIVIDUAL_OUTDIR("subbtitles_individual_outdir");
 };
 
-#endif // DIRECTORIESREGISTRY_H
+#endif // SETTINGSREGISTRY_H
