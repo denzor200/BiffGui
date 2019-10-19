@@ -79,14 +79,14 @@ private slots:
     void on_toolButton_stackedWidgetPrev_clicked();
     void on_toolButton_stackedWidgetNext_clicked();
 
-    void on_checkBox_DisableIntervals_stateChanged(int arg1);
-
     void on_pushButton_Cancel_clicked();
     void on_pushButton_SetDefault_clicked();
     void on_pushButton_OK_clicked();
     void on_pushButton_Apply_clicked();
 
     void on_AnyValueEdited();
+
+    void on_comboBox_PackingMethod_currentIndexChanged(int index);
 
 private:
     bool _Initialize(bool FirstAttempt);

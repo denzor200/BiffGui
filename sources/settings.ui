@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>662</width>
+    <width>659</width>
     <height>483</height>
    </rect>
   </property>
@@ -60,9 +60,9 @@
           <property name="geometry">
            <rect>
             <x>0</x>
-            <y>0</y>
-            <width>607</width>
-            <height>765</height>
+            <y>-34</y>
+            <width>604</width>
+            <height>771</height>
            </rect>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -264,35 +264,6 @@
                 </property>
                </widget>
               </item>
-              <item row="1" column="0">
-               <spacer name="horizontalSpacer_DisableIntervals">
-                <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
-                </property>
-                <property name="sizeType">
-                 <enum>QSizePolicy::Fixed</enum>
-                </property>
-                <property name="sizeHint" stdset="0">
-                 <size>
-                  <width>290</width>
-                  <height>20</height>
-                 </size>
-                </property>
-               </spacer>
-              </item>
-              <item row="1" column="1">
-               <widget class="QCheckBox" name="checkBox_DisableIntervals">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="text">
-                 <string>Отключить интервалы</string>
-                </property>
-               </widget>
-              </item>
               <item row="2" column="0">
                <widget class="QLabel" name="label_SmallInterval">
                 <property name="text">
@@ -377,6 +348,48 @@
                  <number>600000</number>
                 </property>
                </widget>
+              </item>
+              <item row="1" column="1">
+               <widget class="QComboBox" name="comboBox_PackingMethod">
+                <item>
+                 <property name="text">
+                  <string>Не упаковывать</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Упаковывать</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Упаковывать по интервалам</string>
+                 </property>
+                </item>
+               </widget>
+              </item>
+              <item row="1" column="0">
+               <widget class="QLabel" name="label_PackingMethod">
+                <property name="text">
+                 <string>Упаковка подряд идущих фраз персонажа</string>
+                </property>
+               </widget>
+              </item>
+              <item row="7" column="0">
+               <spacer name="horizontalSpacer_3">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeType">
+                 <enum>QSizePolicy::Fixed</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>290</width>
+                  <height>0</height>
+                 </size>
+                </property>
+               </spacer>
               </item>
              </layout>
             </widget>
@@ -822,7 +835,7 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>624</width>
+            <width>621</width>
             <height>393</height>
            </rect>
           </property>
@@ -951,7 +964,7 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>624</width>
+            <width>621</width>
             <height>393</height>
            </rect>
           </property>

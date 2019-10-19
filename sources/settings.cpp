@@ -111,40 +111,6 @@ void Settings::on_toolButton_stackedWidgetNext_clicked()
 
 
 
-void Settings::on_checkBox_DisableIntervals_stateChanged(int arg1)
-{
-    switch (static_cast<Qt::CheckState>(arg1))
-    {
-    case Qt::CheckState::Checked:
-        ui->spinBox_SmallInterval->setEnabled(false);
-        ui->spinBox_NormalInterval->setEnabled(false);
-        ui->spinBox_BigInterval->setEnabled(false);
-        ui->spinBox_VeryBigInterval->setEnabled(false);
-        ui->spinBox_VeryVeryBigInterval->setEnabled(false);
-        ui->label_SmallInterval->setEnabled(false);
-        ui->label_NormalInterval->setEnabled(false);
-        ui->label_BigInterval->setEnabled(false);
-        ui->label_VeryBigInterval->setEnabled(false);
-        ui->label_VeryVeryBigInterval->setEnabled(false);
-        break;
-    case Qt::CheckState::Unchecked:
-        ui->spinBox_SmallInterval->setEnabled(true);
-        ui->spinBox_NormalInterval->setEnabled(true);
-        ui->spinBox_BigInterval->setEnabled(true);
-        ui->spinBox_VeryBigInterval->setEnabled(true);
-        ui->spinBox_VeryVeryBigInterval->setEnabled(true);
-        ui->label_SmallInterval->setEnabled(true);
-        ui->label_NormalInterval->setEnabled(true);
-        ui->label_BigInterval->setEnabled(true);
-        ui->label_VeryBigInterval->setEnabled(true);
-        ui->label_VeryVeryBigInterval->setEnabled(true);
-        break;
-    default:
-        Q_ASSERT_X(0, "checkBoxStateChanged",  "Invalid 'Qt::CheckState'");
-        break;
-    }
-}
-
 bool Settings::_Initialize(bool FirstAttempt)
 {
     QDomDocument domDoc;
@@ -276,6 +242,57 @@ void SrtTimeDistributingWriter(QWidget* widget,QStringList& outLines)
     Q_ASSERT(comboBox);
 
     outLines.push_back(comboBox->currentText());
+}
+
+static
+bool PackingMethodReader(QWidget* widget, const QList<QDomNode>& nodes)
+{
+    QComboBox* comboBox = qobject_cast<QComboBox*>(widget);
+    Q_ASSERT(comboBox);
+
+    if (nodes.size()==1)
+    {
+        const QString& nodeText = nodes[0].toElement().text();
+        if (nodeText == "disable")
+        {
+            comboBox->setCurrentIndex(0);
+            return true;
+        }
+        else if (nodeText == "enable")
+        {
+            comboBox->setCurrentIndex(1);
+            return true;
+        }
+        else if (nodeText == "enable_intervals")
+        {
+            comboBox->setCurrentIndex(2);
+            return true;
+        }
+    }
+    return false;
+}
+
+static
+void PackingMethodWriter(QWidget* widget,QStringList& outLines)
+{
+    QComboBox* comboBox = qobject_cast<QComboBox*>(widget);
+    Q_ASSERT(comboBox);
+
+    switch (comboBox->currentIndex())
+    {
+    case 0:
+        outLines.push_back("disable");
+        break;
+    case 1:
+        outLines.push_back("enable");
+        break;
+    case 2:
+        outLines.push_back("enable_intervals");
+        break;
+    default:
+        Q_ASSERT_X(0, __FUNCTION__,  "Invalid index");
+        break;
+    }
 }
 
 static
@@ -506,11 +523,11 @@ void Settings::InitializeMainTable()
                     &Settings::on_AnyValueEdited
                    );
 
-    REG("Root.Timing.DisableIntervals",
-        TIMING_CATEGORY, nullptr,
-        ui->checkBox_DisableIntervals, CheckBoxReader, CheckBoxWriter, TextGetter<QCheckBox>);
-    connect(ui->checkBox_DisableIntervals,
-                    &QCheckBox::stateChanged,
+    REG("Root.Timing.PackingMethod",
+        TIMING_CATEGORY, ui->label_PackingMethod,
+        ui->comboBox_PackingMethod, PackingMethodReader, PackingMethodWriter, nullptr);
+    connect(ui->comboBox_PackingMethod,
+                    &QComboBox::currentTextChanged,
                     this,
                     &Settings::on_AnyValueEdited
                    );
@@ -915,4 +932,39 @@ QString SettingsTable::GetFullNameByPath(const QString &Path) const
         }
     }
     return "";
+}
+
+void Settings::on_comboBox_PackingMethod_currentIndexChanged(int index)
+{
+    switch (index)
+    {
+    case 0:
+    case 1:
+        ui->spinBox_SmallInterval->setEnabled(false);
+        ui->spinBox_NormalInterval->setEnabled(false);
+        ui->spinBox_BigInterval->setEnabled(false);
+        ui->spinBox_VeryBigInterval->setEnabled(false);
+        ui->spinBox_VeryVeryBigInterval->setEnabled(false);
+        ui->label_SmallInterval->setEnabled(false);
+        ui->label_NormalInterval->setEnabled(false);
+        ui->label_BigInterval->setEnabled(false);
+        ui->label_VeryBigInterval->setEnabled(false);
+        ui->label_VeryVeryBigInterval->setEnabled(false);
+        break;
+    case 2:
+        ui->spinBox_SmallInterval->setEnabled(true);
+        ui->spinBox_NormalInterval->setEnabled(true);
+        ui->spinBox_BigInterval->setEnabled(true);
+        ui->spinBox_VeryBigInterval->setEnabled(true);
+        ui->spinBox_VeryVeryBigInterval->setEnabled(true);
+        ui->label_SmallInterval->setEnabled(true);
+        ui->label_NormalInterval->setEnabled(true);
+        ui->label_BigInterval->setEnabled(true);
+        ui->label_VeryBigInterval->setEnabled(true);
+        ui->label_VeryVeryBigInterval->setEnabled(true);
+        break;
+    default:
+        Q_ASSERT_X(0, __FUNCTION__,  "Invalid index");
+        break;
+    }
 }
