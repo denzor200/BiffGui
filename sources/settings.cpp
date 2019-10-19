@@ -600,6 +600,15 @@ void Settings::InitializeMainTable()
                     &Settings::on_AnyValueEdited
                    );
 
+    REG("Root.DocumentStyle.ParagraphInterval",
+        STYLE_CATEGORY, ui->label_ParagraphInterval,
+        ui->doubleSpinBox_ParagraphInterval, SpinBoxDoubleReader, SpinBoxDoubleWriter, nullptr);
+    connect(ui->doubleSpinBox_ParagraphInterval,
+                    static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
+                    this,
+                    &Settings::on_AnyValueEdited
+                   );
+
     REG("Root.DocumentStyle.MainFont.Name",
         STYLE_CATEGORY_MAIN, ui->label_StyleFont,
         ui->lineEdit_StyleFont, LineEditReader, AbstractWriter<QLineEdit>, nullptr);
