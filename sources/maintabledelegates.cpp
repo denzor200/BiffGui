@@ -7,6 +7,9 @@
 #include <QLineEdit>
 #include <QStandardItemModel>
 
+#include "config.h"
+#include "settingsregistry.h"
+
 #define RU_YES_TEXT "Да"
 #define RU_NO_TEXT "Нет"
 #define SEPARATOR ", "
@@ -89,11 +92,17 @@ void CChoiceLinksDelegate::setEditorData(QWidget *editor, const QModelIndex &ind
             }
             for (const QVariant& variantIndex : CheckedOtherList)
             {
-                QFont font;
-                font.setItalic(true);
-                font.setBold(true);
+                QFont font(ConfigHelpers::getString(SettingsRegistry::BUSY_ROLES_FONT));
+                if (ConfigHelpers::getBoolean(SettingsRegistry::BUSY_ROLES_ITALIC))
+                    font.setItalic(true);
+                if (ConfigHelpers::getBoolean(SettingsRegistry::BUSY_ROLES_BOLD))
+                    font.setBold(true);
+                if (ConfigHelpers::getBoolean(SettingsRegistry::BUSY_ROLES_UNDERLINE))
+                    font.setUnderline(true);
+                font.setPointSize(ConfigHelpers::getInt(SettingsRegistry::BUSY_ROLES_SIZE));
                 ccBox->setItemData(variantIndex.toInt()+offset, font, Qt::FontRole);
-                ccBox->setItemData(variantIndex.toInt()+offset, QBrush(Qt::blue), Qt::TextColorRole);
+                ccBox->setItemData(variantIndex.toInt()+offset, QBrush(ConfigHelpers::getColor(SettingsRegistry::BUSY_ROLES_COLOR)), Qt::TextColorRole);
+                ccBox->setItemData(variantIndex.toInt()+offset, QBrush(ConfigHelpers::getColor(SettingsRegistry::BUSY_ROLES_HIGHLIGHT)), Qt::BackgroundColorRole);
             }
         }
     }

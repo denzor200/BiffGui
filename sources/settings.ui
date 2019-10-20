@@ -26,7 +26,7 @@
       <enum>QTabWidget::Rounded</enum>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
      <property name="elideMode">
       <enum>Qt::ElideNone</enum>
@@ -886,16 +886,6 @@
                 </property>
                </widget>
               </item>
-              <item row="1" column="1">
-               <widget class="QDoubleSpinBox" name="doubleSpinBox_StyleSize_SelectedRole">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-               </widget>
-              </item>
               <item row="2" column="1">
                <widget class="ColoredPushButton" name="coloredPushButton_StyleColor_SelectedRole">
                 <property name="text">
@@ -952,7 +942,14 @@
                </widget>
               </item>
               <item row="3" column="1">
-               <widget class="ColorListEditor" name="comboBox_StyleColorBack_SelectedRole"/>
+               <widget class="ColoredPushButton" name="coloredPushButton_StyleColorBack_SelectedRole">
+                <property name="text">
+                 <string/>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="1">
+               <widget class="QSpinBox" name="spinBox_StyleSize_SelectedRole"/>
               </item>
              </layout>
             </widget>

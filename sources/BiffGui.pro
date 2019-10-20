@@ -29,6 +29,7 @@ SOURCES += \
         coloredpushbutton.cpp \
         colorlisteditor.cpp \
         commandlineparser.cpp \
+        config.cpp \
         convertersyncapi.cpp \
         converterwaiting.cpp \
         crc32.c \
@@ -50,6 +51,7 @@ HEADERS += \
         coloredpushbutton.h \
         colorlisteditor.h \
         commandlineparser.h \
+        config.h \
         controlinfo.h \
         convertersyncapi.h \
         converterwaiting.h \
