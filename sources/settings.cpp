@@ -6,6 +6,8 @@
 #include <sstream>
 #include "converterwaiting.h"
 #include "xmlsmartkeysprovider.h"
+#include "config.h"
+#include "settingsregistry.h"
 
 #define SETTINGS_DIR "settings.xml"
 
@@ -48,6 +50,9 @@ bool Settings::Reset()
 
     if (0 == execStatus && 0 == procStatus)
     {
+        // Файл был успешно возвращен к исходному состоянию
+        // Можно начинать откатывать реестр
+        ConfigHelpers::MakeDefaultConfig();
     }
     else {
         QMessageBox::critical(this, "Что-то пошло не так..", "Не удалось сбросить настройки по умолчанию");
@@ -62,11 +67,26 @@ void Settings::beginChanges()
     //ui->pushButton_Apply->setFocus();
 }
 
+static bool CheckStateToBool(Qt::CheckState value)
+{
+    switch (value)
+    {
+    case Qt::Unchecked:
+        return false;
+    case Qt::Checked:
+        return true;
+    }
+    Q_ASSERT_X(0, __FUNCTION__, "Invalid CheckState");
+    return false;
+}
+
 bool Settings::commitChanges()
 {
     QFile file(SETTINGS_DIR);
     if (file.open(QIODevice::WriteOnly))
     {
+
+        // Выполняем коммит в файл
         QTextStream streamFileOut(&file);
         streamFileOut.setCodec("UTF-8");
         // для xml не нужен BOM
@@ -78,6 +98,16 @@ bool Settings::commitChanges()
             streamFileOut << xmlDoc.toString();
         } streamFileOut.flush();
         file.close();
+
+        // Выполняем коммит в системный реестр
+        ConfigHelpers::setValue(SettingsRegistry::BUSY_ROLES_FONT, ui->lineEdit_StyleFont_SelectedRole->text());
+        ConfigHelpers::setValue(SettingsRegistry::BUSY_ROLES_SIZE, ui->spinBox_StyleSize_SelectedRole->value());
+        ConfigHelpers::setValue(SettingsRegistry::BUSY_ROLES_COLOR, ui->coloredPushButton_StyleColor_SelectedRole->color());
+        ConfigHelpers::setValue(SettingsRegistry::BUSY_ROLES_HIGHLIGHT, ui->coloredPushButton_StyleColorBack_SelectedRole->color());
+        ConfigHelpers::setValue(SettingsRegistry::BUSY_ROLES_BOLD, CheckStateToBool(ui->checkBox_StyleBold_SelectedRole->checkState()));
+        ConfigHelpers::setValue(SettingsRegistry::BUSY_ROLES_ITALIC, CheckStateToBool(ui->checkBox_StyleItalic_SelectedRole->checkState()));
+        ConfigHelpers::setValue(SettingsRegistry::BUSY_ROLES_UNDERLINE, CheckStateToBool(ui->checkBox_StyleUnderline_SelectedRole->checkState()));
+
         this->on_CommitedChanges();
         return true;
     }
@@ -151,6 +181,24 @@ bool Settings::_Initialize(bool FirstAttempt)
                     ss << "Вам следует самим проставить эти значения, или вернуть опции к состоянию по умолчанию" << std::endl;
                     QMessageBox::warning(this, "Обратите внимание..", ss.str().c_str());
                 }
+
+                // Значения из файла были проинициализированы успешно..
+                // Можем приступать к инициализации значений из системного реестра
+                ui->lineEdit_StyleFont_SelectedRole->setText(
+                            ConfigHelpers::getString(SettingsRegistry::BUSY_ROLES_FONT));
+                ui->spinBox_StyleSize_SelectedRole->setValue(
+                            ConfigHelpers::getInt(SettingsRegistry::BUSY_ROLES_SIZE));
+                ui->coloredPushButton_StyleColor_SelectedRole->setColor(
+                            ConfigHelpers::getColor(SettingsRegistry::BUSY_ROLES_COLOR));
+                ui->coloredPushButton_StyleColorBack_SelectedRole->setColor(
+                            ConfigHelpers::getColor(SettingsRegistry::BUSY_ROLES_HIGHLIGHT));
+                ui->checkBox_StyleBold_SelectedRole->setCheckState(
+                            ConfigHelpers::getBoolean(SettingsRegistry::BUSY_ROLES_BOLD) ? Qt::Checked : Qt::Unchecked);
+                ui->checkBox_StyleItalic_SelectedRole->setCheckState(
+                            ConfigHelpers::getBoolean(SettingsRegistry::BUSY_ROLES_ITALIC) ? Qt::Checked : Qt::Unchecked);
+                ui->checkBox_StyleUnderline_SelectedRole->setCheckState(
+                            ConfigHelpers::getBoolean(SettingsRegistry::BUSY_ROLES_UNDERLINE) ? Qt::Checked : Qt::Unchecked);
+
                 return true;
             }
         }
@@ -806,6 +854,47 @@ void Settings::InitializeMainTable()
     *******************************************************************/
     REG("Root.Additional.EnableSoundTheme", STYLE_ADDITIONAL, nullptr, ui->checkBox_ExtSound, CheckBoxReader, CheckBoxWriter, TextGetter<QCheckBox>);
     connect(ui->checkBox_ExtSound,
+                    &QCheckBox::stateChanged,
+                    this,
+                    &Settings::on_AnyValueEdited
+                   );
+
+
+    /*******************************************************************
+    * Значения из системного реестра
+    * Тут все гораздо проще, достаточно совершить коннект к сигналу
+    *******************************************************************/
+    connect(ui->lineEdit_StyleFont_SelectedRole,
+                    &QLineEdit::textChanged,
+                    this,
+                    &Settings::on_AnyValueEdited
+                   );
+    connect(ui->spinBox_StyleSize_SelectedRole,
+                    static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged),
+                    this,
+                    &Settings::on_AnyValueEdited
+                   );
+    connect(ui->coloredPushButton_StyleColor_SelectedRole,
+                    &ColoredPushButton::colorChanged,
+                    this,
+                    &Settings::on_AnyValueEdited
+                   );
+    connect(ui->coloredPushButton_StyleColorBack_SelectedRole,
+                    &ColoredPushButton::colorChanged,
+                    this,
+                    &Settings::on_AnyValueEdited
+                   );
+    connect(ui->checkBox_StyleBold_SelectedRole,
+                    &QCheckBox::stateChanged,
+                    this,
+                    &Settings::on_AnyValueEdited
+                   );
+    connect(ui->checkBox_StyleItalic_SelectedRole,
+                    &QCheckBox::stateChanged,
+                    this,
+                    &Settings::on_AnyValueEdited
+                   );
+    connect(ui->checkBox_StyleUnderline_SelectedRole,
                     &QCheckBox::stateChanged,
                     this,
                     &Settings::on_AnyValueEdited

@@ -60,6 +60,8 @@ private:
 
 namespace ConfigHelpers
 {
+    void MakeDefaultConfig();
+
     void setValue(const QString& key, const QVariant& value);
 
     QColor getColor(const QString& key);

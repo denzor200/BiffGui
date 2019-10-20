@@ -47,6 +47,16 @@ QVariant ConfigStructure::value(const QString &key) const
     return QSettings().value(key, def);
 }
 
+void ConfigHelpers::MakeDefaultConfig()
+{
+    if (auto inst = ConfigStructure::Instance().lock())
+    {
+        inst->MakeDefaultConfig();
+        return;
+    }
+    throw ConfigStructure::NotAvailable();
+}
+
 void ConfigHelpers::setValue(const QString &key, const QVariant &value)
 {
     if (auto inst = ConfigStructure::Instance().lock())
