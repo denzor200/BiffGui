@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>Dialog</class>
- <widget class="QDialog" name="Dialog">
+ <class>Registration</class>
+ <widget class="QDialog" name="Registration">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -108,7 +108,7 @@
       <number>4</number>
      </property>
      <item>
-      <widget class="QLabel" name="label_8">
+      <widget class="QLabel" name="label_Desc">
        <property name="layoutDirection">
         <enum>Qt::LeftToRight</enum>
        </property>
@@ -121,7 +121,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="label_9">
+      <widget class="QLabel" name="label_Desc_1">
        <property name="text">
         <string>Вам следует отправить этот файл менеджеру проекта чтобы получить сертификат:</string>
        </property>
@@ -131,9 +131,9 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="label_11">
+      <widget class="QLabel" name="label_Desc_2">
        <property name="text">
-        <string>https://vk.com/che_rskov</string>
+        <string>&lt;reserved&gt;</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -141,9 +141,9 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="label_10">
+      <widget class="QLabel" name="label_Desc_3">
        <property name="text">
-        <string>che.rskov@yandex.ru</string>
+        <string>&lt;reserved&gt;</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>

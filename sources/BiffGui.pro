@@ -41,6 +41,7 @@ SOURCES += \
         maintablemodel.cpp \
         maintablemodel_verifier.cpp \
         mainwindow.cpp \
+        registration.cpp \
         settings.cpp \
         utils.cpp \
         xmlsmartkeysprovider.cpp
@@ -63,6 +64,7 @@ HEADERS += \
         maintabledelegates.h \
         maintablemodel.h \
         mainwindow.h \
+        registration.h \
         settings.h \
         settingsregistry.h \
         srt.h \

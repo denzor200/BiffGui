@@ -25,6 +25,7 @@
 #include "convertersyncapi.h"
 #include "converterwaiting.h"
 #include "controlinfo.h"
+#include "registration.h"
 
 #ifdef _DEBUG
 #include <QAbstractItemModelTester>
@@ -680,7 +681,8 @@ void MainWindow::on_action_remove_all_links_triggered()
 
 void MainWindow::on_action_register_software_triggered()
 {
-
+    Registration w;
+    w.exec();
 }
 
 void MainWindow::on_action_add_triggered()
