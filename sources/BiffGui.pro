@@ -26,6 +26,7 @@ CONFIG += c++11
 
 SOURCES += \
         ActorName.cpp \
+        auth.cpp \
         coloredpushbutton.cpp \
         colorlisteditor.cpp \
         commandlineparser.cpp \
@@ -48,6 +49,7 @@ SOURCES += \
 
 HEADERS += \
         ActorName.h \
+        auth.h \
         build_defs.h \
         coloredpushbutton.h \
         colorlisteditor.h \
@@ -72,6 +74,7 @@ HEADERS += \
         xmlsmartkeysprovider.h
 
 FORMS += \
+        auth.ui \
         converterwaiting.ui \
         generating.ui \
         mainwindow.ui \

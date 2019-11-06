@@ -23,6 +23,11 @@ Registration::Registration(QWidget *parent) :
     ui->label_Desc_3->setOpenExternalLinks(true);
 }
 
+Registration::~Registration()
+{
+    delete ui;
+}
+
 void Registration::on_pushButton_Continue_clicked()
 {
     close();

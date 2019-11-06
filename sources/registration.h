@@ -13,6 +13,7 @@ class Registration : public QDialog
     Q_OBJECT
 public:
     explicit Registration(QWidget *parent = nullptr);
+    ~Registration();
 private slots:
     void on_pushButton_Continue_clicked();
 
