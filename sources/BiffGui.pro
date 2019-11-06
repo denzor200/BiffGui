@@ -73,6 +73,7 @@ FORMS += \
         converterwaiting.ui \
         generating.ui \
         mainwindow.ui \
+        registration.ui \
         settings.ui
 
 DEFINES += BUILD_QXT QXT_STATIC
