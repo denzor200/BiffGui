@@ -14,9 +14,9 @@ class Registration : public QDialog
 public:
     explicit Registration(QWidget *parent = nullptr);
     ~Registration();
+    QString getCountryName() const;
 private slots:
     void on_pushButton_Continue_clicked();
-
     void on_pushButton_2_clicked();
 
 private:

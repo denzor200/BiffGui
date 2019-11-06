@@ -10,6 +10,7 @@ class ConverterWaiting;
 
 #include <QProcess>
 
+// TODO: переименовать базовый класс
 class ConverterWaiting : public QDialog
 {
     Q_OBJECT
@@ -94,6 +95,45 @@ public:
     explicit ConverterWaiting_ResetSetting(QWidget *parent = nullptr);
 
     void StartProcess();
+    int GetProcessStatus() const override {return m_ProcessStatus;}
+
+private slots:
+    void slotFinished(int, QProcess::ExitStatus);
+
+private:
+    int m_ProcessStatus = -1;
+};
+
+//
+class OpensslWaiting_Genrsa : public ConverterWaiting
+{
+    Q_OBJECT
+public:
+    explicit OpensslWaiting_Genrsa(QWidget *parent = nullptr);
+
+    void StartProcess();
+    int GetProcessStatus() const override {return m_ProcessStatus;}
+
+private slots:
+    void slotFinished(int, QProcess::ExitStatus);
+
+private:
+    int m_ProcessStatus = -1;
+};
+
+class OpensslWaiting_Req : public ConverterWaiting
+{
+    Q_OBJECT
+public:
+    explicit OpensslWaiting_Req(QWidget *parent = nullptr);
+
+    void StartProcess(const QString& FileName,
+                      const QString& Country,
+                      const QString& Union,
+                      const QString& City,
+                      const QString& Company,
+                      const QString& Department,
+                      const QString& Email);
     int GetProcessStatus() const override {return m_ProcessStatus;}
 
 private slots:

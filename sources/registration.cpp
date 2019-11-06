@@ -1,6 +1,9 @@
 #include "registration.h"
 #include "ui_registration.h"
 #include <QWidget>
+#include <QFileDialog>
+#include <QMessageBox>
+#include "converterwaiting.h"
 
 static const char* s_Manager = "https://vk.com/che_rskov";
 static const char* s_ManagerEmail = "che.rskov@yandex.ru";
@@ -28,9 +31,68 @@ Registration::~Registration()
     delete ui;
 }
 
+QString Registration::getCountryName() const
+{
+    switch (ui->comboBox_Country->currentIndex())
+    {
+    case 0:
+        return "RU";
+    case 1:
+        return "UA";
+    case 2:
+        return "BY";
+    case 3:
+        return "EE";
+    }
+    return "";
+}
+
 void Registration::on_pushButton_Continue_clicked()
 {
-    close();
+    QString outFileName = QFileDialog::getSaveFileName(this,
+        tr("Создать заявку"),
+        "",
+        "");
+    if (outFileName != "")
+    {
+        OpensslWaiting_Genrsa waiting;
+        waiting.StartProcess();
+        int execStatus = waiting.exec();
+        bool isCanceled = waiting.IsCanceledByUser();
+        int procStatus = waiting.GetProcessStatus();
+        Q_ASSERT(!isCanceled);
+
+        if (0 == execStatus && 0 == procStatus)
+        {
+            // Ключ был сгенерирован успешно
+            // Можно приступать к созданию заявки
+            OpensslWaiting_Req waiting;
+            waiting.StartProcess(
+                        outFileName,
+                        getCountryName(),
+                        ui->lineEdit_State->text(),
+                        ui->lineEdit_City->text(),
+                        ui->lineEdit_Company->text(),
+                        ui->lineEdit_Department->text(),
+                        ui->lineEdit_Email->text());
+            int execStatus = waiting.exec();
+            bool isCanceled = waiting.IsCanceledByUser();
+            int procStatus = waiting.GetProcessStatus();
+            Q_ASSERT(!isCanceled);
+            if (0 == execStatus && 0 == procStatus)
+            {
+                // Заявка создана успешно
+
+                close();
+            }
+            else {
+                QMessageBox::critical(this, "Что-то пошло не так..", "Не удалось создать заявку");
+            }
+        }
+        else {
+            QMessageBox::critical(this, "Что-то пошло не так..", "Не удалось сгенерировать закрытый ключ");
+        }
+    }
 }
 
 void Registration::on_pushButton_2_clicked()

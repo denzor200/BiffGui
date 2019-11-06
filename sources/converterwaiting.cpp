@@ -74,7 +74,6 @@ void ConverterWaiting_ShowPersonList::StartProcess(const QString &SubbtitlePath)
     Arguments.push_back("show_person_list");
     Arguments.push_back(SubbtitlePath);
     Arguments.push_back("");
-    // TODO: make normal path
     getProcess()->start("converter", Arguments);
 }
 
@@ -207,7 +206,6 @@ void ConverterWaiting_SaveSubbtitle::StartProcess(const QString &InFile, const Q
         Arguments.push_back(pair.first);
         Arguments.push_back(pair.second);
     }
-    // TODO: make normal path
     getProcess()->start("converter", Arguments);
 }
 
@@ -233,11 +231,48 @@ void ConverterWaiting_ResetSetting::StartProcess()
     QStringList Arguments;
     Arguments.reserve(1);
     Arguments.push_back("reset_settings");
-    // TODO: make normal path
     getProcess()->start("converter", Arguments);
 }
 
 void ConverterWaiting_ResetSetting::slotFinished(int Status, QProcess::ExitStatus)
+{
+    m_ProcessStatus = Status;
+}
+
+OpensslWaiting_Genrsa::OpensslWaiting_Genrsa(QWidget *parent) :
+    ConverterWaiting(true,parent)
+{
+    connect(getProcess(),
+                    SIGNAL(finished(int, QProcess::ExitStatus)),
+                    SLOT(slotFinished(int, QProcess::ExitStatus))
+                   );
+}
+
+void OpensslWaiting_Genrsa::StartProcess()
+{
+    getProcess()->start("openssl genrsa -out client.key 2048");
+}
+
+void OpensslWaiting_Genrsa::slotFinished(int Status, QProcess::ExitStatus)
+{
+    m_ProcessStatus = Status;
+}
+
+OpensslWaiting_Req::OpensslWaiting_Req(QWidget *parent) :
+    ConverterWaiting(true,parent)
+{
+    connect(getProcess(),
+                    SIGNAL(finished(int, QProcess::ExitStatus)),
+                    SLOT(slotFinished(int, QProcess::ExitStatus))
+                   );
+}
+
+void OpensslWaiting_Req::StartProcess(const QString &FileName, const QString &Country, const QString &Union, const QString &City, const QString &Company, const QString &Department, const QString &Email)
+{
+    getProcess()->start(QString() + "openssl req -new -key client.key -out \"" + FileName + "\"");
+}
+
+void OpensslWaiting_Req::slotFinished(int Status, QProcess::ExitStatus)
 {
     m_ProcessStatus = Status;
 }
