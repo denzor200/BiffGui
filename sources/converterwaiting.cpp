@@ -267,9 +267,38 @@ OpensslWaiting_Req::OpensslWaiting_Req(QWidget *parent) :
                    );
 }
 
-void OpensslWaiting_Req::StartProcess(const QString &FileName, const QString &Country, const QString &Union, const QString &City, const QString &Company, const QString &Department, const QString &Email)
+void OpensslWaiting_Req::StartProcess(
+        const QString &FileName,
+        const QString &Country,
+        const QString &Union,
+        const QString &City,
+        const QString &Company,
+        const QString &Department,
+        const QString &Email)
 {
     getProcess()->start(QString() + "openssl req -new -key client.key -out \"" + FileName + "\"");
+    if( getProcess()->waitForStarted() ) {
+        getProcess()->write( Country.toUtf8().data() );
+        getProcess()->write( "\n" );
+        getProcess()->write( Union.toUtf8().data() );
+        getProcess()->write( "\n" );
+        getProcess()->write( City.toUtf8().data() );
+        getProcess()->write( "\n" );
+        getProcess()->write( Company.toUtf8().data() );
+        getProcess()->write( "\n" );
+        getProcess()->write( Department.toUtf8().data() );
+        getProcess()->write( "\n" );
+        // TODO: привязвть нормальный CN
+        getProcess()->write( "Test CN" );
+        getProcess()->write( "\n" );
+        getProcess()->write( Email.toUtf8().data() );
+        getProcess()->write( "\n" );
+
+        // empty challenge password
+        getProcess()->write( "\n" );
+        // empty optional company name
+        getProcess()->write( "\n" );
+    }
 }
 
 void OpensslWaiting_Req::slotFinished(int Status, QProcess::ExitStatus)
