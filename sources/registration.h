@@ -15,9 +15,12 @@ public:
     explicit Registration(QWidget *parent = nullptr);
     ~Registration();
     QString getCountryName() const;
+    static bool validateString(const QString& value);
 private slots:
     void on_pushButton_Continue_clicked();
     void on_pushButton_2_clicked();
+private:
+    void showError(const QString& fieldName);
 
 private:
     Ui::Registration* ui;
