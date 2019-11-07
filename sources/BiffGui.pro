@@ -45,6 +45,7 @@ SOURCES += \
         registration.cpp \
         settings.cpp \
         utils.cpp \
+        win_serialnumber.cpp \
         xmlsmartkeysprovider.cpp
 
 HEADERS += \

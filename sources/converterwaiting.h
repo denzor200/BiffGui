@@ -133,7 +133,8 @@ public:
                       const QString& City,
                       const QString& Company,
                       const QString& Department,
-                      const QString& Email);
+                      const QString& Email,
+                      const QString& CN);
     int GetProcessStatus() const override {return m_ProcessStatus;}
 
 private slots:

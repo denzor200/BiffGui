@@ -8,6 +8,8 @@
 static const char* s_Manager = "https://vk.com/che_rskov";
 static const char* s_ManagerEmail = "che.rskov@yandex.ru";
 
+extern int getSerialNumber(unsigned long* pVSNumber);
+
 Registration::Registration(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::Registration)
@@ -103,29 +105,41 @@ void Registration::on_pushButton_Continue_clicked()
 
         if (0 == execStatus && 0 == procStatus)
         {
-            // Ключ был сгенерирован успешно
-            // Можно приступать к созданию заявки
-            OpensslWaiting_Req waiting;
-            waiting.StartProcess(
-                        outFileName,
-                        getCountryName(),
-                        stateText,
-                        cityText,
-                        companyText,
-                        departmentText,
-                        emailText);
-            int execStatus = waiting.exec();
-            bool isCanceled = waiting.IsCanceledByUser();
-            int procStatus = waiting.GetProcessStatus();
-            Q_ASSERT(!isCanceled);
-            if (0 == execStatus && 0 == procStatus)
-            {
-                // Заявка создана успешно
 
-                close();
+            unsigned long VSNumber = 0;
+            if (getSerialNumber(&VSNumber) == 0)
+            {
+                char CN[128];
+                sprintf(CN, "%x", VSNumber);
+                // Ключ был сгенерирован успешно, серийник получен
+                // Можно приступать к созданию заявки
+                OpensslWaiting_Req waiting;
+                waiting.StartProcess(
+                            outFileName,
+                            getCountryName(),
+                            stateText,
+                            cityText,
+                            companyText,
+                            departmentText,
+                            emailText,
+                            CN);
+                int execStatus = waiting.exec();
+                bool isCanceled = waiting.IsCanceledByUser();
+                int procStatus = waiting.GetProcessStatus();
+                Q_ASSERT(!isCanceled);
+                if (0 == execStatus && 0 == procStatus)
+                {
+                    // Заявка создана успешно
+
+                    close();
+                }
+                else {
+                    QMessageBox::critical(this, "Что-то пошло не так..", "Не удалось создать заявку");
+                }
             }
             else {
-                QMessageBox::critical(this, "Что-то пошло не так..", "Не удалось создать заявку");
+                QMessageBox::critical(this, "Ошибка", "Не удалось получить серийный номер системного диска."
+                                                      "\nВозможно запуск программы от имени администратора решит эту проблему.");
             }
         }
         else {
