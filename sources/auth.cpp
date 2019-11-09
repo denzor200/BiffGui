@@ -2,6 +2,9 @@
 #include "ui_auth.h"
 #include "registration.h"
 #include <QFileDialog>
+#include "converterwaiting.h"
+#include <QMessageBox>
+#include <QDebug>
 
 Auth::Auth(QWidget *parent) :
     QDialog(parent),
@@ -26,7 +29,33 @@ void Auth::on_commandLinkButton_Continue_clicked()
     QString certFilename = ui->lineEdit_CertFile->text();
     if (certFilename != "")
     {
+        // копируем файл сертификата..
+        if (QFile::exists("user.crt"))
+        {
+            QFile::remove("user.crt");
+        }
+        QFile::copy(certFilename, "user.crt");
 
+        // вызываем дочерний процесс чтобы проверить операцию на успешность
+        ConverterWaiting_VerifyCert waiting;
+        waiting.StartProcess();
+        int execStatus = waiting.exec();
+        bool isCanceled = waiting.IsCanceledByUser();
+        int procStatus = waiting.GetProcessStatus();
+        Q_ASSERT(!isCanceled);
+
+        if (0 == execStatus)
+        {
+            if (0 == procStatus)
+            {
+                QMessageBox::information(this, "Успешно", "Активация прошла успешно!");
+                close();
+            }
+            // else .. Дочерний процесс должен вывести сообщение
+        }
+        else {
+            QMessageBox::critical(this, "Что-то пошло не так..", "Активация не удалась");
+        }
     }
 }
 

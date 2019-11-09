@@ -305,3 +305,29 @@ void OpensslWaiting_Req::slotFinished(int Status, QProcess::ExitStatus)
 {
     m_ProcessStatus = Status;
 }
+
+ConverterWaiting_VerifyCert::ConverterWaiting_VerifyCert(QWidget *parent) :
+    ConverterWaiting(true,parent)
+{
+    connect(getProcess(),
+                    SIGNAL(finished(int, QProcess::ExitStatus)),
+                    SLOT(slotFinished(int, QProcess::ExitStatus))
+                   );
+}
+
+void ConverterWaiting_VerifyCert::StartProcess(bool silent)
+{
+    QStringList Arguments;
+    Arguments.reserve(2);
+    Arguments.push_back("verify_cert");
+    if (silent)
+    {
+        Arguments.push_back("-s");
+    }
+    getProcess()->start("converter", Arguments);
+}
+
+void ConverterWaiting_VerifyCert::slotFinished(int Status, QProcess::ExitStatus)
+{
+    m_ProcessStatus = Status;
+}

@@ -681,6 +681,27 @@ void MainWindow::on_action_remove_all_links_triggered()
 
 void MainWindow::on_action_register_software_triggered()
 {
+    ConverterWaiting_VerifyCert waiting;
+    waiting.StartProcess(true);
+    int execStatus = waiting.exec();
+    bool isCanceled = waiting.IsCanceledByUser();
+    int procStatus = waiting.GetProcessStatus();
+    Q_ASSERT(!isCanceled);
+
+    if (0 == execStatus)
+    {
+        if (0 == procStatus)
+        {
+            QMessageBox::information(this, "Порядок", "Ваша копия Biff Tannen уже активирована!");
+            return ;
+        }
+
+    }
+    else {
+        // anomal case..
+        return;
+    }
+
     Auth w;
     w.exec();
 }

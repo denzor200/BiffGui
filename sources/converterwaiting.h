@@ -104,6 +104,22 @@ private:
     int m_ProcessStatus = -1;
 };
 
+class ConverterWaiting_VerifyCert : public ConverterWaiting
+{
+    Q_OBJECT
+public:
+    explicit ConverterWaiting_VerifyCert(QWidget *parent = nullptr);
+
+    void StartProcess(bool silent = false);
+    int GetProcessStatus() const override {return m_ProcessStatus;}
+
+private slots:
+    void slotFinished(int, QProcess::ExitStatus);
+
+private:
+    int m_ProcessStatus = -1;
+};
+
 //
 class OpensslWaiting_Genrsa : public ConverterWaiting
 {
