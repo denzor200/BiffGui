@@ -35,7 +35,7 @@ void Auth::on_toolButton_CertFile_clicked()
     QString certFilename = QFileDialog::getOpenFileName(this,
         tr("Открыть сертификат"),
         "",
-        "");
+        tr("Файлы сертификатов (*.crt)"));
     if (certFilename != "")
     {
         ui->lineEdit_CertFile->setText(certFilename);
