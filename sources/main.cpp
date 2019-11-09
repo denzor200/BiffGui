@@ -4,6 +4,8 @@
 #include <QMenuBar>
 #include <QProcess>
 
+#pragma comment(linker, "/SUBSYSTEM:windows /ENTRY:mainCRTStartup")
+
 int main(int argc, char *argv[])
 {
     // Перед запуском прогоняем openssl вхолостую

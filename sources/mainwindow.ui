@@ -262,7 +262,10 @@
   </action>
   <action name="action_close">
    <property name="text">
-    <string>Закрыть субтитру</string>
+    <string>Закрыть субтитры</string>
+   </property>
+   <property name="toolTip">
+    <string>Закрыть субтитры</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+W</string>
