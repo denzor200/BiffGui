@@ -2,9 +2,14 @@
 #include <QApplication>
 #include <QtGui>
 #include <QMenuBar>
+#include <QProcess>
 
 int main(int argc, char *argv[])
 {
+    // Перед запуском прогоняем openssl вхолостую
+    // Это нужно чтобы выявить косяки с рантайм-библиотеками на более ранней стадии
+    QProcess::startDetached("openssl\\bin\\openssl.exe", {"help"});
+
     // Creating QApplication and setting params..
     QApplication app(argc, argv);
     QApplication::setOrganizationName("Denzor and Che");

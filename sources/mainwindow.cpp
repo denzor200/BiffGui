@@ -702,7 +702,9 @@ void MainWindow::on_action_register_software_triggered()
     int execStatus = waiting.exec();
     bool isCanceled = waiting.IsCanceledByUser();
     int procStatus = waiting.GetProcessStatus();
-    Q_ASSERT(!isCanceled);
+	
+	if (isCanceled)
+		return;
 
     if (0 == execStatus)
     {

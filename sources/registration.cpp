@@ -101,7 +101,9 @@ void Registration::on_pushButton_Continue_clicked()
         int execStatus = waiting.exec();
         bool isCanceled = waiting.IsCanceledByUser();
         int procStatus = waiting.GetProcessStatus();
-        Q_ASSERT(!isCanceled);
+        
+		if (isCanceled)
+			return;
 
         if (0 == execStatus && 0 == procStatus)
         {
@@ -126,16 +128,19 @@ void Registration::on_pushButton_Continue_clicked()
                 int execStatus = waiting.exec();
                 bool isCanceled = waiting.IsCanceledByUser();
                 int procStatus = waiting.GetProcessStatus();
-                Q_ASSERT(!isCanceled);
-                if (0 == execStatus && 0 == procStatus)
-                {
-                    // Заявка создана успешно
+				
+				if (isCanceled)
+					return;
+				
+				if (0 == execStatus && 0 == procStatus)
+				{
+					// Заявка создана успешно
 
-                    close();
-                }
-                else {
-                    QMessageBox::critical(this, "Что-то пошло не так..", "Не удалось создать заявку");
-                }
+					close();
+				}
+				else {
+					QMessageBox::critical(this, "Что-то пошло не так..", "Не удалось создать заявку");
+				}
             }
             else {
                 QMessageBox::critical(this, "Ошибка", "Не удалось получить серийный номер системного диска."

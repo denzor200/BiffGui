@@ -42,7 +42,8 @@ void Auth::on_commandLinkButton_Continue_clicked()
         int execStatus = waiting.exec();
         bool isCanceled = waiting.IsCanceledByUser();
         int procStatus = waiting.GetProcessStatus();
-        Q_ASSERT(!isCanceled);
+		if (isCanceled)
+			return;
 
         if (0 == execStatus)
         {

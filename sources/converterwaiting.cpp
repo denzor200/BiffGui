@@ -239,8 +239,34 @@ void ConverterWaiting_ResetSetting::slotFinished(int Status, QProcess::ExitStatu
     m_ProcessStatus = Status;
 }
 
+ConverterWaiting_VerifyCert::ConverterWaiting_VerifyCert(QWidget *parent) :
+    ConverterWaiting(false,parent)
+{
+    connect(getProcess(),
+                    SIGNAL(finished(int, QProcess::ExitStatus)),
+                    SLOT(slotFinished(int, QProcess::ExitStatus))
+                   );
+}
+
+void ConverterWaiting_VerifyCert::StartProcess(bool silent)
+{
+    QStringList Arguments;
+    Arguments.reserve(2);
+    Arguments.push_back("verify_cert");
+    if (silent)
+    {
+        Arguments.push_back("-s");
+    }
+    getProcess()->start("converter", Arguments);
+}
+
+void ConverterWaiting_VerifyCert::slotFinished(int Status, QProcess::ExitStatus)
+{
+    m_ProcessStatus = Status;
+}
+
 OpensslWaiting_Genrsa::OpensslWaiting_Genrsa(QWidget *parent) :
-    ConverterWaiting(true,parent)
+    ConverterWaiting(false,parent)
 {
     connect(getProcess(),
                     SIGNAL(finished(int, QProcess::ExitStatus)),
@@ -250,7 +276,7 @@ OpensslWaiting_Genrsa::OpensslWaiting_Genrsa(QWidget *parent) :
 
 void OpensslWaiting_Genrsa::StartProcess()
 {
-    getProcess()->start("openssl genrsa -out client.key 2048");
+    getProcess()->start("openssl\\bin\\openssl.exe genrsa -out client.key 2048");
 }
 
 void OpensslWaiting_Genrsa::slotFinished(int Status, QProcess::ExitStatus)
@@ -259,7 +285,7 @@ void OpensslWaiting_Genrsa::slotFinished(int Status, QProcess::ExitStatus)
 }
 
 OpensslWaiting_Req::OpensslWaiting_Req(QWidget *parent) :
-    ConverterWaiting(true,parent)
+    ConverterWaiting(false,parent)
 {
     connect(getProcess(),
                     SIGNAL(finished(int, QProcess::ExitStatus)),
@@ -277,7 +303,7 @@ void OpensslWaiting_Req::StartProcess(
         const QString &Email,
         const QString& CN)
 {
-    getProcess()->start(QString() + "openssl req -new -key client.key -out \"" + FileName + "\"");
+    getProcess()->start(QString() + "openssl\\bin\\openssl.exe req -new -key client.key -out \"" + FileName + "\"");
     if( getProcess()->waitForStarted() ) {
         getProcess()->write( Country.toUtf8().data() );
         getProcess()->write( "\n" );
@@ -302,32 +328,6 @@ void OpensslWaiting_Req::StartProcess(
 }
 
 void OpensslWaiting_Req::slotFinished(int Status, QProcess::ExitStatus)
-{
-    m_ProcessStatus = Status;
-}
-
-ConverterWaiting_VerifyCert::ConverterWaiting_VerifyCert(QWidget *parent) :
-    ConverterWaiting(true,parent)
-{
-    connect(getProcess(),
-                    SIGNAL(finished(int, QProcess::ExitStatus)),
-                    SLOT(slotFinished(int, QProcess::ExitStatus))
-                   );
-}
-
-void ConverterWaiting_VerifyCert::StartProcess(bool silent)
-{
-    QStringList Arguments;
-    Arguments.reserve(2);
-    Arguments.push_back("verify_cert");
-    if (silent)
-    {
-        Arguments.push_back("-s");
-    }
-    getProcess()->start("converter", Arguments);
-}
-
-void ConverterWaiting_VerifyCert::slotFinished(int Status, QProcess::ExitStatus)
 {
     m_ProcessStatus = Status;
 }
