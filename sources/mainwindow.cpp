@@ -89,24 +89,28 @@ void MainWindow::makeDoc()
 {
     const int actorsCount = m_ModelsMgr->constRegistryAPI()->getRealActorsCount();
     const int personsCount = m_ModelsMgr->constRegistryAPI()->getRealPersonsCount();
+    const bool needMakeShared = ui->action_make_shared_flag->isChecked();
+    const bool needMakeIndividual = ui->action_make_individual_flag->isChecked();
+    const bool needMakeClean = ui->action_make_clean_flag->isChecked();
 
-    if (!m_OpenedSubbtitle)
-    {
+    if (!needMakeShared && !needMakeIndividual && !needMakeClean) {
+        QMessageBox::critical(this, "Ошибка", "Выберите хотя бы один флаг из меню 'Опции -> Генерация монтажных листов'");
+        return;
+    }
+
+    if (!m_OpenedSubbtitle) {
         QMessageBox::critical(this, "Ошибка", "Не открыт файл с субтитрами");
         return;
     }
-    if (actorsCount <= 0 && personsCount <= 0)
-    {
+    if (actorsCount <= 0 && personsCount <= 0) {
         QMessageBox::critical(this, "Ошибка", "Таблица пуста");
         return;
     }
-    if (actorsCount <= 0)
-    {
+    if (actorsCount <= 0) {
         QMessageBox::critical(this, "Ошибка", "Список актеров пуст");
         return;
     }
-    if (personsCount <= 0)
-    {
+    if (personsCount <= 0) {
         QMessageBox::critical(this, "Ошибка", "Список персонажей пуст");
         return;
     }
@@ -143,11 +147,11 @@ void MainWindow::makeDoc()
                 // Optional parameters
                 if (m_OpenedSubbtitle->MarkupTypeInitialized)
                     Params.push_back({"-m", QString::number(static_cast<int>(m_OpenedSubbtitle->MarkupType))});
-                if (!ui->action_make_shared_flag->isChecked())
+                if (!needMakeShared)
                     Params.push_back({"-s", "true"});
-                if (!ui->action_make_individual_flag->isChecked())
+                if (!needMakeIndividual)
                     Params.push_back({"-i", "true"});
-                if (!ui->action_make_clean_flag->isChecked())
+                if (!needMakeClean)
                     Params.push_back({"-p", "true"});
 
                 w.StartProcess(m_OpenedSubbtitle->FileName, tempDecisionsFilename, tempTableFilename, OutDir, Params);
@@ -606,13 +610,14 @@ void MainWindow::on_action_make_shared_flag_triggered()
 
 void MainWindow::on_action_make_individual_flag_triggered()
 {
-    QSettings().setValue(SettingsRegistry::MAKE_CLEAN_FLAG,
-        ui->action_make_clean_flag->isChecked());
+    QSettings().setValue(SettingsRegistry::MAKE_INDIVIDUAL_FLAG,
+        ui->action_make_individual_flag->isChecked());
 }
 
 void MainWindow::on_action_make_clean_flag_triggered()
 {
-
+	QSettings().setValue(SettingsRegistry::MAKE_CLEAN_FLAG,
+        ui->action_make_clean_flag->isChecked());
 }
 
 void MainWindow::on_toolButton_Insert_clicked()
