@@ -437,28 +437,32 @@ void MainWindow::on_action_open_triggered()
 
         if (!isCanceled)
         {
-            if (!isCRC_Inited)
+            if (0 == execStatus)
             {
-                QMessageBox::critical(this, "Что-то пошло не так..", "Дочерний процесс не послал контрольную сумму входного файла");
-                return ;
-            }
-
-            if (0 == execStatus && 0 == procStatus)
-            {
-                if (m_ModelsMgr->LoadPersons(personsList) > 0)
+                if (0 == procStatus)
                 {
-                    SubbtitleContext* ctx = new SubbtitleContext();
-                    ctx->FileName = subbtitleFilename;
-                    ctx->CtrlData = CRC;
-                    ctx->UsersDecisions = waiting.GetUsersDecisions();
-                    ctx->MarkupTypeInitialized = isMarkupType_Inited;
-                    ctx->MarkupType = mt;
-                    m_OpenedSubbtitle = ctx;
-                    setWindowTitle(subbtitleFilename + " - " + QApplication::applicationName());
+                    if (!isCRC_Inited)
+                    {
+                        QMessageBox::critical(this, "Что-то пошло не так..", "Дочерний процесс не послал контрольную сумму входного файла");
+                        return ;
+                    }
+
+                    if (m_ModelsMgr->LoadPersons(personsList) > 0)
+                    {
+                        SubbtitleContext* ctx = new SubbtitleContext();
+                        ctx->FileName = subbtitleFilename;
+                        ctx->CtrlData = CRC;
+                        ctx->UsersDecisions = waiting.GetUsersDecisions();
+                        ctx->MarkupTypeInitialized = isMarkupType_Inited;
+                        ctx->MarkupType = mt;
+                        m_OpenedSubbtitle = ctx;
+                        setWindowTitle(subbtitleFilename + " - " + QApplication::applicationName());
+                    }
+                    else {
+                        QMessageBox::critical(this, "Ошибка", "Не удалось извлечь ни одного имени персонажа из файла.");
+                    }
                 }
-                else {
-                    QMessageBox::critical(this, "Ошибка", "Не удалось извлечь ни одного имени персонажа из файла.");
-                }
+                // else .. msg box is not needed
             }
             else {
                 QMessageBox::critical(this, "Что-то пошло не так..", "Не удалось сгенерировать список персонажей");
