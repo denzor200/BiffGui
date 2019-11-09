@@ -644,6 +644,9 @@ void MainWindow::on_action_select_all_triggered()
     }
 }
 
+static const QString s_DenzorEmail = "denismikhaylov38@gmail.com";
+static const QString s_CheEmail = "che.rskov@yandex.ru";
+
 void MainWindow::on_action_about_this_triggered()
 {
     const char *qt_version = qVersion();
@@ -653,6 +656,10 @@ void MainWindow::on_action_about_this_triggered()
     info += "В разработке принимали участие:\n";
     info += "\tМихайлов Денис aka denzor - Программирование, UI-дизайн\n";
     info += "\tЧерсков Станислав aka Che - Идейный вдохновитель проекта\n";
+    info += "Контакты для связи:\n";
+    info += "\t" + s_DenzorEmail + "\n";
+    info += "\t" + s_CheEmail + "\n";
+
     QMessageBox::information(this, "О программе Biff Tannen", info);
 }
 
