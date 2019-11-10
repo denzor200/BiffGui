@@ -276,7 +276,7 @@ OpensslWaiting_Genrsa::OpensslWaiting_Genrsa(QWidget *parent) :
 
 void OpensslWaiting_Genrsa::StartProcess()
 {
-    getProcess()->start("openssl\\bin\\openssl.exe genrsa -out client.key 2048");
+    getProcess()->start("openssl\\bin\\openssl.exe genrsa -out client.key 2048 -config openssl\\bin\\cnf\\openssl.cnf");
 }
 
 void OpensslWaiting_Genrsa::slotFinished(int Status, QProcess::ExitStatus)
@@ -303,7 +303,7 @@ void OpensslWaiting_Req::StartProcess(
         const QString &Email,
         const QString& CN)
 {
-    getProcess()->start(QString() + "openssl\\bin\\openssl.exe req -new -key client.key -out \"" + FileName + "\"");
+    getProcess()->start(QString() + "openssl\\bin\\openssl.exe req -new -key client.key -out \"" + FileName + "\"  -config openssl\\bin\\cnf\\openssl.cnf");
     if( getProcess()->waitForStarted() ) {
         getProcess()->write( Country.toUtf8().data() );
         getProcess()->write( "\n" );
