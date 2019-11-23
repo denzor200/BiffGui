@@ -4,10 +4,10 @@
 #include <QHash>
 #include <QDebug>
 
-class ActorNameException : public std::exception
+class ActorNameException : public std::runtime_error
 {
 protected:
-    ActorNameException(const char* what) : std::exception(what)
+    ActorNameException(const char* what) : std::runtime_error(what)
     {
     }
 };

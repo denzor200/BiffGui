@@ -10,18 +10,18 @@
 #include <QPair>
 #include <QDebug>
 
-class MainTableModelRegistry_InvalidPersonID : public std::exception
+class MainTableModelRegistry_InvalidPersonID : public std::runtime_error
 {
 public:
-    MainTableModelRegistry_InvalidPersonID() : std::exception("Invalid actor id")
+    MainTableModelRegistry_InvalidPersonID() : std::runtime_error("Invalid actor id")
     {
     }
 };
 
-class MainTableModelRegistry_InvalidActorID : public std::exception
+class MainTableModelRegistry_InvalidActorID : public std::runtime_error
 {
 public:
-    MainTableModelRegistry_InvalidActorID() : std::exception("Invalid person id")
+    MainTableModelRegistry_InvalidActorID() : std::runtime_error("Invalid person id")
     {
     }
 };

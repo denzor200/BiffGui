@@ -10,19 +10,19 @@ class ConfigStructure
 {
 public:
 
-    class NotAvailable : public std::exception
+    class NotAvailable : public std::runtime_error
     {
     public:
-        NotAvailable() : std::exception("ConfigStructure is not available")
+        NotAvailable() : std::runtime_error("ConfigStructure is not available")
         {
         }
     };
 
-    class NotRegistered : public std::exception
+    class NotRegistered : public std::runtime_error
     {
         char Buffer[256];
     public:
-        NotRegistered(const char* KeyName) : std::exception(MakeErrorString(KeyName))
+        NotRegistered(const char* KeyName) : std::runtime_error(MakeErrorString(KeyName))
         {
         }
     private:
