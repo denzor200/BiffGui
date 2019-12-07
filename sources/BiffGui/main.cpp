@@ -10,7 +10,7 @@ int main(int argc, char *argv[])
 {
     // Перед запуском прогоняем openssl вхолостую
     // Это нужно чтобы выявить косяки с рантайм-библиотеками на более ранней стадии
-    QProcess::startDetached("openssl\\bin\\openssl.exe", {"help"});
+    QProcess::startDetached("openssl\\bin\\openssl", {"help"});
 
     // Creating QApplication and setting params..
     QApplication app(argc, argv);

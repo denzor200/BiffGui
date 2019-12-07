@@ -1,4 +1,5 @@
-﻿#pragma once
+﻿#ifndef ACTOR_NAME_H
+#define ACTOR_NAME_H
 
 #include <QString>
 #include <QHash>
@@ -70,3 +71,5 @@ inline QDebug & operator<< (QDebug & os, const ActorName& Value)
     os << Value.Get();
     return os;
 }
+
+#endif // ACTOR_NAME_H
