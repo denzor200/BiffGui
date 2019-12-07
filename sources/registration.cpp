@@ -8,7 +8,7 @@
 static const char* s_Manager = "https://vk.com/che_rskov";
 static const char* s_ManagerEmail = "che.rskov@yandex.ru";
 
-extern int getSerialNumber(unsigned long* pVSNumber);
+extern int getSerialNumber(uint32_t* pVSNumber);
 
 Registration::Registration(QWidget *parent) :
     QDialog(parent),
@@ -108,7 +108,7 @@ void Registration::on_pushButton_Continue_clicked()
         if (0 == execStatus && 0 == procStatus)
         {
 
-            unsigned long VSNumber = 0;
+            uint32_t VSNumber = 0;
             if (getSerialNumber(&VSNumber) == 0)
             {
                 char CN[128];
