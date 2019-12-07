@@ -120,23 +120,23 @@ void Generating::HandleCommandFromConverter(int argc, char **argv)
             if (argc > 1)
             {
                 char Buffer[MAX_PATH+64] = {0};
-                strcat_s(Buffer, sizeof(Buffer), "----------");
-                strcat_s(Buffer, sizeof(Buffer), argv[1]);
-                //strcat_s(Buffer, sizeof(Buffer), "----------");
+                strcat(Buffer, "----------");
+                strcat(Buffer, argv[1]);
+                //strcat(Buffer, "----------");
                 this->Log(Buffer);
             }
             else {
                 char Buffer[MAX_PATH+64] = {0};
-                strcat_s(Buffer, sizeof(Buffer), "----------");
-                //strcat_s(Buffer, sizeof(Buffer), "----------");
+                strcat(Buffer, "----------");
+                //strcat(Buffer, "----------");
                 this->Log(Buffer);
             }
 
             if (argc > 1)
             {
                 char Buffer[MAX_PATH+64] = {0};
-                strcat_s(Buffer, sizeof(Buffer), "--:--:-- * ");
-                strcat_s(Buffer, sizeof(Buffer), argv[1]);
+                strcat(Buffer, "--:--:-- * ");
+                strcat(Buffer, argv[1]);
                 int DocumentID = ui->listWidget_Stages->count();
                 this->LogStage(Buffer);
                 m_DomentIds[argv[1]] = DocumentID;
@@ -158,16 +158,16 @@ void Generating::HandleCommandFromConverter(int argc, char **argv)
                 auto it = m_DomentIds.find(argv[1]);
                 if (it != m_DomentIds.end())
                 {
+                    static_assert (sizeof(time_t) >= 8, "");
                     char Buffer[MAX_PATH+64] = {0};
-                    struct tm newtime;
-                    __time64_t long_time;
-                    errno_t err;
-                    _time64( &long_time );
-                    err = _localtime64_s( &newtime, &long_time );
-                    if (!err)
+                    struct tm* newtime;
+                    time_t long_time;
+                    time( &long_time );
+                    newtime = localtime( &long_time );
+                    if (newtime)
                     {
-                        sprintf_s(Buffer, sizeof(Buffer), "%02d:%02d:%02d : ", newtime.tm_hour, newtime.tm_min, newtime.tm_sec);
-                        strcat_s(Buffer, sizeof(Buffer), argv[1]);
+                        sprintf(Buffer, "%02d:%02d:%02d : ", newtime->tm_hour, newtime->tm_min, newtime->tm_sec);
+                        strcat(Buffer, argv[1]);
                         auto item = ui->listWidget_Stages->item(it.value());
                         if (item)
                             item->setText(Buffer);

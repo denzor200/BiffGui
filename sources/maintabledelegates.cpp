@@ -3,7 +3,7 @@
 #include <QList>
 
 #include <QComboBox>
-#include "libqxt\gui\qxtcheckcombobox.h"
+#include "libqxt/gui/qxtcheckcombobox.h"
 #include <QLineEdit>
 #include <QStandardItemModel>
 
